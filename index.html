@@ -704,6 +704,7 @@
         <div class="alltime" id="tdAllTime"></div>
         <div class="alltime" id="tdPlayoffs"></div>
         <div class="alltime" id="tdHeadToHead"></div>
+        <div class="alltime" id="tdTransactions"></div>
       </div>
     </div>
   </div>
@@ -1777,6 +1778,87 @@ function renderHeadToHead(ownerId){
     '<table class="season-history"><thead><tr><th>Opponent</th><th>Record</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
 }
 
+// ---------- SEASON TRANSACTIONS (trades + waiver/FA moves) ----------
+const TRANSACTION_FEE = 1; // $1 per trade, $1 per waiver/FA move
+let TRANSACTION_STATS = null;
+
+function loadTransactionStats(){
+  const requests = [];
+  for(let w = 1; w <= 18; w++){
+    requests.push(
+      fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/transactions/" + w)
+        .catch(function(){ return []; })
+    );
+  }
+  Promise.all(requests).then(function(weeks){
+    const stats = {};
+    TEAMS.forEach(function(t){ stats[t.rosterId] = {trades:0, waivers:0}; });
+
+    weeks.forEach(function(txns){
+      if(!Array.isArray(txns)) return;
+      txns.forEach(function(tx){
+        if(tx.status !== "complete") return;
+        const rosterIds = tx.roster_ids || [];
+        if(tx.type === "trade"){
+          rosterIds.forEach(function(rid){
+            if(!stats[rid]) stats[rid] = {trades:0, waivers:0};
+            stats[rid].trades++;
+          });
+        } else if(tx.type === "waiver" || tx.type === "free_agent"){
+          // Only count rosters that actually added a player in this transaction.
+          // A standalone drop (releasing a player with no pickup) has no "adds" and shouldn't be charged.
+          const addedByRoster = {};
+          if(tx.adds){
+            Object.keys(tx.adds).forEach(function(playerId){
+              addedByRoster[tx.adds[playerId]] = true;
+            });
+          }
+          rosterIds.forEach(function(rid){
+            if(!addedByRoster[rid]) return;
+            if(!stats[rid]) stats[rid] = {trades:0, waivers:0};
+            stats[rid].waivers++;
+          });
+        }
+      });
+    });
+
+    TRANSACTION_STATS = stats;
+    const detail = document.getElementById("teamDetail");
+    if(detail && detail.classList.contains("active")){
+      const name = document.getElementById("tdName").textContent;
+      const t = TEAMS.find(function(x){ return x.team === name; });
+      if(t) renderTransactions(t.rosterId);
+    }
+  }).catch(function(){
+    TRANSACTION_STATS = "error";
+  });
+}
+
+function renderTransactions(rosterId){
+  const el = document.getElementById("tdTransactions");
+  if(TRANSACTION_STATS === null){
+    el.innerHTML = '<div class="alltime-title">2026 transaction tax</div>' +
+      '<div class="new-team-note">Loading transaction history from Sleeper&hellip;</div>';
+    return;
+  }
+  if(TRANSACTION_STATS === "error"){
+    el.innerHTML = '<div class="alltime-title">2026 transaction tax</div>' +
+      '<div class="new-team-note">Transaction history unavailable right now.</div>';
+    return;
+  }
+  const s = TRANSACTION_STATS[rosterId] || {trades:0, waivers:0};
+  const total = (s.trades + s.waivers) * TRANSACTION_FEE;
+
+  el.innerHTML =
+    '<div class="alltime-title">2026 transaction tax</div>' +
+    '<p class="panel-sub" style="margin:-4px 0 12px;">$1 per trade, $1 per waiver/free-agent move.</p>' +
+    '<div class="alltime-summary">' +
+      '<div><div class="num">' + s.trades + '</div><div class="lbl">Trades</div></div>' +
+      '<div><div class="num">' + s.waivers + '</div><div class="lbl">Waiver/FA moves</div></div>' +
+      '<div><div class="num">$' + total.toFixed(0) + '</div><div class="lbl">Total owed</div></div>' +
+    '</div>';
+}
+
 function buildAndRenderRecords(results){
   const allGames = [];   // one entry per team per game
   const pairGames = [];  // one entry per matchup
@@ -2009,6 +2091,7 @@ function showTeamDetail(teamName){
   renderAllTime(t.ownerId);
   renderPlayoffHistory(t.ownerId);
   renderHeadToHead(t.ownerId);
+  renderTransactions(t.rosterId);
 }
 
 function renderAllTime(ownerId){
@@ -2642,6 +2725,7 @@ loadLiveData();
 loadDynastyHistory();
 loadHomeData();
 loadRivalryHistory();
+loadTransactionStats();
 </script>
 
 </body>
