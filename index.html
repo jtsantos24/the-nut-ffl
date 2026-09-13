@@ -352,13 +352,13 @@
   .record-card .rsaved{font-size:10px; color:var(--gold); opacity:0; transition:opacity 0.2s; position:absolute; top:12px; right:12px;}
   .record-card .rsaved.show{opacity:1;}
 
-  /* ---------- BONUS WINNER PICKER ---------- */
+  /* ---------- BONUS WINNER (AUTOMATED) ---------- */
   .bonus-row{align-items:center;}
-  .bonus-winner-select{
-    background:var(--turf); border:1px solid var(--turf-line); color:var(--chalk);
-    font-family:'Inter', sans-serif; font-size:12px; padding:6px 8px; border-radius:4px; max-width:170px; flex-shrink:0;
-  }
-  .bonus-winner-select:focus{outline:none; border-color:var(--gold);}
+  .bonus-winner{display:flex; align-items:center; gap:8px; flex-shrink:0; max-width:220px;}
+  .bonus-winner img{width:26px; height:26px; border-radius:5px; object-fit:cover; flex-shrink:0;}
+  .bonus-winner-name{font-size:13px; font-weight:500;}
+  .bonus-winner-detail{font-size:11px; color:var(--chalk-dim);}
+  .bonus-pending{font-size:12px; color:var(--chalk-dim); font-style:italic; flex-shrink:0;}
   .bonus-leaderboard-row{display:flex; align-items:center; gap:10px; padding:6px 0; font-size:13px;}
   .bonus-leaderboard-row .blb-name{flex:1;}
   .bonus-leaderboard-row .blb-amount{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold);}
@@ -415,7 +415,7 @@
     .rec-meta{width:100%;}
 
     .bonus-row{flex-wrap:wrap;}
-    .bonus-winner-select{max-width:none; width:100%; order:3;}
+    .bonus-winner{max-width:none; width:100%; order:3;}
 
     .team-detail-inner{gap:12px;}
     .team-detail-inner img{width:80px; height:80px;}
@@ -532,7 +532,7 @@
   <div class="section" id="section-bonus">
     <div class="panel">
       <h2 class="panel-title">Weekly Bonus Games</h2>
-      <p class="panel-sub">A different $25 side prize every week &mdash; separate from the weekly high-scorer pot. Pick a winner each week and the leaderboard updates for everyone.</p>
+      <p class="panel-sub">A different $25 side prize every week &mdash; separate from the weekly high-scorer pot. Winners are calculated automatically from each week's real matchup data as soon as it's scored.</p>
       <div id="bonusLeaderboard"></div>
     </div>
     <div class="panel">
@@ -736,7 +736,7 @@
     </div>
   </div>
 
-  <div class="footer-note">Standings pulled live from the Sleeper API where possible &middot; falls back to the latest saved snapshot otherwise. Bonus Game winners and Records are saved and visible to anyone with this page.</div>
+  <div class="footer-note">Standings pulled live from the Sleeper API where possible &middot; falls back to the latest saved snapshot otherwise. Records are saved and visible to anyone with this page.</div>
 
 </div>
 
@@ -983,78 +983,164 @@ const CONSECUTIVE_TITLE_GAME_APPEARANCES = [
   {ownerId:"996390324501024768", count:1, span:"2025 only"}
 ];
 
-let bonusWinners = {}; // { weekNumber: teamName }
+let BONUS_RESULTS = null; // computed once matchup + player data are ready
 
-function teamOptionsHtml(selectedTeam){
-  const none = '<option value="">&mdash; pick winner &mdash;</option>';
-  const opts = TEAMS.slice().sort(function(a,b){ return a.team.localeCompare(b.team); }).map(function(t){
-    const sel = t.team === selectedTeam ? " selected" : "";
-    return '<option value="' + t.team.replace(/"/g,'&quot;') + '"' + sel + '>' + t.team + '</option>';
-  }).join("");
-  return none + opts;
+function getStartersWithMeta(m){
+  return (m.starters || []).map(function(pid, i){
+    const pts = (m.players_points && typeof m.players_points[pid] === "number") ? m.players_points[pid] : 0;
+    const pos = (ALL_PLAYERS && ALL_PLAYERS[pid]) ? ALL_PLAYERS[pid].position : null;
+    return {pid: pid, slot: STARTING_SLOTS[i], points: pts, position: pos};
+  });
+}
+function getBenchWithMeta(m){
+  const starterSet = {};
+  (m.starters || []).forEach(function(pid){ starterSet[pid] = true; });
+  const pp = m.players_points || {};
+  return Object.keys(pp).filter(function(pid){ return !starterSet[pid]; }).map(function(pid){
+    const pos = (ALL_PLAYERS && ALL_PLAYERS[pid]) ? ALL_PLAYERS[pid].position : null;
+    return {pid: pid, points: pp[pid], position: pos};
+  });
+}
+
+function bestSinglePlayer(weekData, filterFn, fromBench){
+  let best = null;
+  weekData.forEach(function(m){
+    const pool = fromBench ? getBenchWithMeta(m) : getStartersWithMeta(m);
+    pool.filter(filterFn).forEach(function(p){
+      if(!best || p.points > best.points) best = {rosterId: m.roster_id, points: p.points};
+    });
+  });
+  return best;
+}
+
+function slotSumBest(weekData, slotName){
+  let best = null;
+  weekData.forEach(function(m){
+    const starters = getStartersWithMeta(m);
+    const sum = starters.filter(function(s){ return s.slot === slotName; }).reduce(function(s,x){ return s+x.points; }, 0);
+    if(!best || sum > best.points) best = {rosterId: m.roster_id, points: sum};
+  });
+  return best;
+}
+
+function pairUpWeek(weekData){
+  const byMatchup = {};
+  weekData.forEach(function(m){
+    if(m.matchup_id === undefined || m.matchup_id === null) return;
+    if(!byMatchup[m.matchup_id]) byMatchup[m.matchup_id] = [];
+    byMatchup[m.matchup_id].push(m);
+  });
+  return Object.values(byMatchup).filter(function(p){ return p.length === 2; }).map(function(p){
+    return {a: p[0].roster_id, aPts: p[0].points||0, b: p[1].roster_id, bPts: p[1].points||0};
+  });
+}
+
+const BONUS_COMPUTE = {
+  1: function(wd){ const r = bestSinglePlayer(wd, function(p){ return true; }, true); return r && {rosterId:r.rosterId, detail: r.points.toFixed(1) + " pts from a bench player"}; },
+  2: function(wd){ const pairs = pairUpWeek(wd); let best=null; pairs.forEach(function(p){
+      const loser = p.aPts < p.bPts ? {rid:p.a, pts:p.aPts} : (p.bPts < p.aPts ? {rid:p.b, pts:p.bPts} : null);
+      if(loser && (!best || loser.pts > best.pts)) best = loser;
+    }); return best && {rosterId:best.rid, detail: best.pts.toFixed(1) + " pts in a loss"}; },
+  3: function(wd){ const r = bestSinglePlayer(wd, function(p){ return p.position === "RB"; }, false); return r && {rosterId:r.rosterId, detail: r.points.toFixed(1) + " pts from an active RB"}; },
+  4: function(wd){ const pairs = pairUpWeek(wd); let best=null; pairs.forEach(function(p){
+      const winner = p.aPts > p.bPts ? {rid:p.a, pts:p.aPts} : (p.bPts > p.aPts ? {rid:p.b, pts:p.bPts} : null);
+      if(winner && (!best || winner.pts < best.pts)) best = winner;
+    }); return best && {rosterId:best.rid, detail: best.pts.toFixed(1) + " pts in a win"}; },
+  5: function(wd){ const r = bestSinglePlayer(wd, function(p){ return p.position === "QB"; }, false); return r && {rosterId:r.rosterId, detail: r.points.toFixed(1) + " pts from an active QB"}; },
+  6: function(wd){ const pairs = pairUpWeek(wd); let best=null; pairs.forEach(function(p){
+      const margin = Math.abs(p.aPts-p.bPts); const winner = p.aPts>p.bPts?p.a:p.b;
+      if(!best || margin < best.margin) best = {rid:winner, margin:margin};
+    }); return best && {rosterId:best.rid, detail:"won by " + best.margin.toFixed(1)}; },
+  7: function(wd){ const r = slotSumBest(wd, "FLEX"); return r && {rosterId:r.rosterId, detail: r.points.toFixed(1) + " combined FLEX pts"}; },
+  8: function(wd){ const r = bestSinglePlayer(wd, function(p){ return p.position === "WR"; }, false); return r && {rosterId:r.rosterId, detail: r.points.toFixed(1) + " pts from an active WR"}; },
+  9: function(wd){ const pairs = pairUpWeek(wd); let best=null; pairs.forEach(function(p){
+      const margin = Math.abs(p.aPts-p.bPts); const winner = p.aPts>p.bPts?p.a:p.b;
+      if(!best || margin > best.margin) best = {rid:winner, margin:margin};
+    }); return best && {rosterId:best.rid, detail:"won by " + best.margin.toFixed(1)}; },
+  10: function(wd){ const pairs = pairUpWeek(wd); let best=null; pairs.forEach(function(p){
+      const margin = Math.abs(p.aPts-p.bPts); const loser = p.aPts>p.bPts?p.b:p.a;
+      if(!best || margin < best.margin) best = {rid:loser, margin:margin};
+    }); return best && {rosterId:best.rid, detail:"lost by " + best.margin.toFixed(1)}; },
+  11: function(wd){ const r = slotSumBest(wd, "RB"); return r && {rosterId:r.rosterId, detail: r.points.toFixed(1) + " combined RB1/RB2 pts"}; },
+  12: function(wd){ const r = bestSinglePlayer(wd, function(p){ return ["DL","LB","DB"].indexOf(p.position) !== -1; }, false); return r && {rosterId:r.rosterId, detail: r.points.toFixed(1) + " pts from an active IDP"}; },
+  13: function(wd){ const r = bestSinglePlayer(wd, function(p){ return p.position === "TE"; }, false); return r && {rosterId:r.rosterId, detail: r.points.toFixed(1) + " pts from an active TE"}; },
+  14: function(){
+    let best = null;
+    TEAMS.forEach(function(t){
+      if(!best || (t.ptsAgainst||0) > best.pts) best = {rid: t.rosterId, pts: t.ptsAgainst||0};
+    });
+    return best && {rosterId: best.rid, detail: best.pts.toFixed(1) + " season pts against so far"};
+  }
+};
+
+function computeBonusResults(){
+  if(!ALL_PLAYERS || !Array.isArray(RIVALRY_HISTORY)) return;
+  const results = {};
+  BONUS_GAMES.forEach(function(b){
+    const entry = RIVALRY_HISTORY.find(function(e){ return String(e.season) === "2026" && e.week === b.week; });
+    const weekData = (entry && Array.isArray(entry.data)) ? entry.data : null;
+    const played = weekData && weekData.some(function(m){ return typeof m.points === "number" && m.points > 0; });
+    if(b.week === 14){
+      results[b.week] = BONUS_COMPUTE[14]();
+    } else if(played){
+      try{ results[b.week] = BONUS_COMPUTE[b.week](weekData); }catch(e){ results[b.week] = null; }
+    } else {
+      results[b.week] = null;
+    }
+  });
+  BONUS_RESULTS = results;
+  renderBonusGames();
 }
 
 function renderBonusGames(){
   const list = document.getElementById("bonusList");
   list.innerHTML = BONUS_GAMES.map(function(b){
-    const winner = bonusWinners[b.week] || "";
+    const result = BONUS_RESULTS ? BONUS_RESULTS[b.week] : null;
+    let winnerHtml;
+    if(!ALL_PLAYERS || !Array.isArray(RIVALRY_HISTORY)){
+      winnerHtml = '<span class="bonus-pending">Loading&hellip;</span>';
+    } else if(result){
+      const t = TEAMS.find(function(x){ return x.rosterId === result.rosterId; });
+      winnerHtml = '<div class="bonus-winner"><img src="' + (t?t.avatar:''||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div><div class="bonus-winner-name">' + (t?t.team:'Unknown') + '</div><div class="bonus-winner-detail">' + result.detail + '</div></div></div>';
+    } else {
+      winnerHtml = '<span class="bonus-pending">Pending Week ' + b.week + '</span>';
+    }
     return '<div class="bonus-row">' +
       '<div class="bonus-week">Wk ' + b.week + '</div>' +
       '<div class="bonus-body">' +
         '<div class="bonus-name">' + b.name + '</div>' +
         '<div class="bonus-desc">' + b.desc + '</div>' +
       '</div>' +
-      '<select class="bonus-winner-select" data-week="' + b.week + '">' + teamOptionsHtml(winner) + '</select>' +
+      winnerHtml +
       '<div class="bonus-prize">$25</div>' +
     '</div>';
   }).join("");
-
-  list.querySelectorAll(".bonus-winner-select").forEach(function(sel){
-    sel.addEventListener("change", function(){
-      const week = sel.dataset.week;
-      if(sel.value){
-        bonusWinners[week] = sel.value;
-      } else {
-        delete bonusWinners[week];
-      }
-      saveBonusWinners();
-      renderBonusLeaderboard();
-    });
-  });
 
   renderBonusLeaderboard();
 }
 
 function renderBonusLeaderboard(){
   const el = document.getElementById("bonusLeaderboard");
+  if(!BONUS_RESULTS){
+    el.innerHTML = '<div class="bonus-empty">Calculating results from this season\u2019s matchup data&hellip;</div>';
+    return;
+  }
   const totals = {};
-  Object.values(bonusWinners).forEach(function(team){
-    totals[team] = (totals[team] || 0) + 25;
+  Object.values(BONUS_RESULTS).forEach(function(r){
+    if(!r) return;
+    const t = TEAMS.find(function(x){ return x.rosterId === r.rosterId; });
+    const name = t ? t.team : "Unknown";
+    totals[name] = (totals[name] || 0) + 25;
   });
   const rows = Object.entries(totals).sort(function(a,b){ return b[1] - a[1]; });
   if(rows.length === 0){
-    el.innerHTML = '<div class="bonus-empty">No bonus games recorded yet &mdash; pick a winner below to start the leaderboard.</div>';
+    el.innerHTML = '<div class="bonus-empty">No bonus games decided yet &mdash; check back after Week 1.</div>';
     return;
   }
   el.innerHTML = rows.map(function(r){
     return '<div class="bonus-leaderboard-row"><div class="blb-name">' + r[0] + '</div><div class="blb-amount">$' + r[1] + '</div></div>';
   }).join("");
-}
-
-function saveBonusWinners(){
-  safeStorageSet("bonus_winners_2026", JSON.stringify(bonusWinners), true).catch(function(e){
-    console.error("Could not save bonus winners", e);
-  });
-}
-
-function loadBonusWinners(){
-  safeStorageGet("bonus_winners_2026", true).then(function(res){
-    if(res && res.value) bonusWinners = JSON.parse(res.value);
-  }).catch(function(){
-    bonusWinners = {};
-  }).then(function(){
-    renderBonusGames();
-  });
 }
 
 // Fallback matchups: the real Week 1 schedule, used if the live fetch is ever blocked
@@ -2317,6 +2403,7 @@ function maybeComputePowerRankings(){
     ALL_PLAYERS = res[0];
     TRADED_PICKS = res[1] || [];
     computePowerRankings();
+    computeBonusResults();
   });
 }
 
@@ -2821,7 +2908,7 @@ renderFallbackMatchups();
 renderRivalry();
 renderDraftBoard();
 renderTeams();
-loadBonusWinners();
+renderBonusGames();
 loadLiveData();
 loadDynastyHistory();
 loadHomeData();
