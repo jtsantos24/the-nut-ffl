@@ -323,6 +323,29 @@
   .matchup-score.trailing{color:var(--chalk-dim);}
   .matchup-mid{display:flex; flex-direction:column; align-items:center; gap:2px;}
   .matchup-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-dim);}
+  .matchup-card.is-gotw{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); position:relative;}
+  .gotw-badge{
+    position:absolute; top:-11px; left:16px; background:var(--gold); color:#2A2005;
+    font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
+    padding:3px 10px; border-radius:3px;
+  }
+
+  /* ---------- GAME OF THE WEEK HERO ---------- */
+  .gotw-hero{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .gotw-side{display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; min-width:120px;}
+  .gotw-side.right{align-items:center;}
+  .gotw-side img{width:56px; height:56px; border-radius:8px; object-fit:cover;}
+  .gotw-team-name{font-weight:600; font-size:15px; text-align:center;}
+  .gotw-record{font-size:12px; color:var(--chalk-dim);}
+  .gotw-mid{display:flex; align-items:center; gap:12px; flex-direction:column;}
+  .gotw-mid .gotw-score{font-family:'Teko', sans-serif; font-size:34px; color:var(--gold); display:inline;}
+  .gotw-mid .gotw-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-dim); display:inline; margin:0 8px;}
+  .gotw-total{font-size:11px; color:var(--chalk-dim); margin-top:2px;}
+  .gotw-why{font-size:13px; color:var(--chalk-dim); text-align:center; margin:14px 0 0; font-style:italic;}
+  .gotw-details{margin-top:10px;}
+  .gotw-details summary{cursor:pointer; font-size:12px; color:var(--gold-dark); text-align:center; list-style:none;}
+  .gotw-details summary::-webkit-details-marker{display:none;}
+  .gotw-details summary:hover{color:var(--gold);}
 
   /* ---------- RECAP ---------- */
   .recap-card{
@@ -477,6 +500,10 @@
         <p>So gather your nuts, set your lineups, and may your bench players stay healthy and your studs go off. Good luck to everyone.</p>
         <p>Let's go, NutFriends. Year 4 starts now.</p>
       </div>
+    </div>
+    <div class="panel" id="gotwPanel" style="display:none;">
+      <h2 class="panel-title">Dynasty Game of the Week</h2>
+      <div id="gotwCard"></div>
     </div>
     <div class="panel">
       <h2 class="panel-title" id="matchupsTitle">This Week's Matchups</h2>
@@ -1166,7 +1193,9 @@ function renderMatchups(week, pairsWithScores, usedLive){
     const bScore = m.bPoints !== null ? m.bPoints.toFixed(1) : "-";
     const aLead = m.aPoints !== null && m.bPoints !== null && m.aPoints > m.bPoints;
     const bLead = m.aPoints !== null && m.bPoints !== null && m.bPoints > m.aPoints;
-    return '<div class="matchup-card">' +
+    const isGotw = GOTW_PICK && ((GOTW_PICK.a === m.a && GOTW_PICK.b === m.b) || (GOTW_PICK.a === m.b && GOTW_PICK.b === m.a));
+    return '<div class="matchup-card' + (isGotw ? ' is-gotw' : '') + '">' +
+      (isGotw ? '<div class="gotw-badge">\u2605 Game of the Week</div>' : '') +
       '<div class="matchup-side">' +
         '<img src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
         '<div><div class="matchup-team-name">' + (a.team||'Team '+m.a) + '</div>' +
@@ -1184,6 +1213,8 @@ function renderMatchups(week, pairsWithScores, usedLive){
       '</div>' +
     '</div>';
   }).join("");
+
+  maybeComputeGameOfWeek();
 }
 
 function renderFallbackMatchups(){
@@ -1837,6 +1868,9 @@ function ownerForSeasonRoster(season, rosterId){
 }
 
 let ALL_PAIR_GAMES = null;
+let POWER_SCORES = {};
+let POWER_TRENDS = {};
+let GOTW_PICK = null;
 let HEAD_TO_HEAD = null; // HEAD_TO_HEAD[ownerA][ownerB] = {wins, losses, ties}
 
 function buildHeadToHeadGrid(pairGames){
@@ -1856,6 +1890,7 @@ function buildHeadToHeadGrid(pairGames){
   });
 
   HEAD_TO_HEAD = h2h;
+  maybeComputeGameOfWeek();
   // re-render whichever team detail page is currently open, if any
   const detail = document.getElementById("teamDetail");
   if(detail && detail.classList.contains("active")){
@@ -1984,6 +2019,186 @@ function renderTransactions(rosterId){
       '<div><div class="num">' + s.waivers + '</div><div class="lbl">Waiver/FA moves</div></div>' +
       '<div><div class="num">$' + total.toFixed(0) + '</div><div class="lbl">Total owed</div></div>' +
     '</div>';
+}
+
+// ---------- DYNASTY GAME OF THE WEEK ----------
+function getCurrentStreak(rosterId){
+  if(!Array.isArray(RIVALRY_HISTORY)) return null;
+  const games = [];
+  RIVALRY_HISTORY.forEach(function(entry){
+    if(String(entry.season) !== "2026" || entry.week > 14 || !Array.isArray(entry.data)) return;
+    const byMatchup = {};
+    entry.data.forEach(function(m){
+      if(m.matchup_id === undefined || m.matchup_id === null) return;
+      if(!byMatchup[m.matchup_id]) byMatchup[m.matchup_id] = [];
+      byMatchup[m.matchup_id].push(m);
+    });
+    Object.values(byMatchup).filter(function(p){ return p.length===2; }).forEach(function(p){
+      const mine = p.find(function(x){ return x.roster_id === rosterId; });
+      const theirs = p.find(function(x){ return x.roster_id !== rosterId; });
+      if(!mine || !theirs) return;
+      const pts = mine.points||0, oppPts = theirs.points||0;
+      if(pts===0 && oppPts===0) return;
+      games.push({week: entry.week, win: pts>oppPts, tie: pts===oppPts});
+    });
+  });
+  games.sort(function(a,b){ return a.week-b.week; });
+  if(games.length===0) return null;
+  let len=0, type=null;
+  for(let i=games.length-1; i>=0; i--){
+    const g = games[i];
+    if(g.tie) break;
+    const t = g.win ? "W" : "L";
+    if(type===null) type=t;
+    if(t!==type) break;
+    len++;
+  }
+  return type ? {type:type, length:len} : null;
+}
+
+function computeGameOfWeekScore(pair, week){
+  const a = pair.a, b = pair.b;
+  const teamA = TEAMS.find(function(t){ return t.rosterId===a; }) || {};
+  const teamB = TEAMS.find(function(t){ return t.rosterId===b; }) || {};
+
+  // 1. Power Ranking Matchup (30 pts) - rewards two strong AND comparably-matched teams
+  const powA = POWER_SCORES[a] !== undefined ? POWER_SCORES[a] : 50;
+  const powB = POWER_SCORES[b] !== undefined ? POWER_SCORES[b] : 50;
+  const powAvg = (powA+powB)/2;
+  const powCloseness = 100 - Math.abs(powA-powB);
+  const powerPts = 30 * (0.7*(powAvg/100) + 0.3*(powCloseness/100));
+
+  // 2. Playoff Implications (25 pts) - highest when both teams are on the "bubble", scaled by season progress
+  const oddsA = (PLAYOFF_ODDS && PLAYOFF_ODDS[a] !== undefined) ? PLAYOFF_ODDS[a] : 50;
+  const oddsB = (PLAYOFF_ODDS && PLAYOFF_ODDS[b] !== undefined) ? PLAYOFF_ODDS[b] : 50;
+  const leverageA = 1 - Math.abs(oddsA/100 - 0.5)*2;
+  const leverageB = 1 - Math.abs(oddsB/100 - 0.5)*2;
+  const seasonProgress = Math.min(1, week/14);
+  const standingsGap = Math.abs((teamA.wins||0) - (teamB.wins||0));
+  const raceBonus = standingsGap <= 1 ? 1 : 0.7;
+  const playoffPts = 25 * ((leverageA+leverageB)/2) * (0.35 + 0.65*seasonProgress) * raceBonus;
+
+  // 3. Projected Matchup (15 pts) - uses recent scoring average as a stand-in for a true projection
+  const prAndRecent = computeProductionAndRecent();
+  const recA = prAndRecent.recent[a] !== undefined ? prAndRecent.recent[a] : (prAndRecent.production[a]||100);
+  const recB = prAndRecent.recent[b] !== undefined ? prAndRecent.recent[b] : (prAndRecent.production[b]||100);
+  const predMarginPct = Math.abs(recA-recB) / (((recA+recB)/2) || 1);
+  const closeness = Math.max(0, 1-predMarginPct);
+  const projectedPts = 15 * closeness;
+
+  // 4. Rivalry & League History (15 pts)
+  const isDesignatedRivalry = RIVALRIES.some(function(p){
+    return (p[0]===teamA.ownerId && p[1]===teamB.ownerId) || (p[1]===teamA.ownerId && p[0]===teamB.ownerId);
+  });
+  const h2h = (HEAD_TO_HEAD && HEAD_TO_HEAD[teamA.ownerId] && HEAD_TO_HEAD[teamA.ownerId][teamB.ownerId]) || {wins:0,losses:0,ties:0};
+  const totalMeetings = h2h.wins + h2h.losses + h2h.ties;
+  const h2hCompetitive = totalMeetings > 0 ? (1 - Math.abs(h2h.wins - h2h.losses)/totalMeetings) : 0;
+  const metInChampionship = CHAMPIONSHIP_GAMES.some(function(c){
+    return (c.a===a && c.b===b) || (c.a===b && c.b===a);
+  });
+  let rivalryPts = 0;
+  if(isDesignatedRivalry) rivalryPts += 8;
+  rivalryPts += Math.min(4, h2hCompetitive * 4 * Math.min(1, totalMeetings/3));
+  if(metInChampionship) rivalryPts += 3;
+  rivalryPts = Math.min(15, rivalryPts);
+
+  // 5. Storyline (10 pts) - current streaks + contrasting trajectories
+  const streakA = getCurrentStreak(a), streakB = getCurrentStreak(b);
+  let streakBonus = 0;
+  [streakA, streakB].forEach(function(s){ if(s && s.length >= 3) streakBonus += 3; });
+  streakBonus = Math.min(6, streakBonus);
+  const trendA = POWER_TRENDS[a], trendB = POWER_TRENDS[b];
+  let trendContrast = 0;
+  if(trendA && trendB){
+    if(trendA !== trendB && trendA !== "flat" && trendB !== "flat") trendContrast = 4;
+    else if(trendA !== trendB) trendContrast = 2;
+  }
+  const storylinePts = Math.min(10, streakBonus + trendContrast);
+
+  // 6. Star Power (5 pts) - count elite (top-50 search rank) starters on both sides
+  let eliteCount = 0;
+  [teamA, teamB].forEach(function(t){
+    (t.starters||[]).forEach(function(pid){
+      const p = ALL_PLAYERS ? ALL_PLAYERS[pid] : null;
+      if(p && typeof p.search_rank === "number" && p.search_rank <= 50) eliteCount++;
+    });
+  });
+  const starPts = Math.min(5, eliteCount * 1.25);
+
+  const total = powerPts + playoffPts + projectedPts + rivalryPts + storylinePts + starPts;
+
+  return {
+    a: a, b: b, total: total,
+    cats: {power:powerPts, playoff:playoffPts, projected:projectedPts, rivalry:rivalryPts, storyline:storylinePts, star:starPts},
+    meta: {isDesignatedRivalry: isDesignatedRivalry, streakA: streakA, streakB: streakB, totalMeetings: totalMeetings}
+  };
+}
+
+function maybeComputeGameOfWeek(){
+  if(!LAST_MATCHUPS || !LAST_MATCHUPS.usedLive) return;
+  if(!ALL_PLAYERS || !Array.isArray(RIVALRY_HISTORY) || !PLAYOFF_ODDS || !HEAD_TO_HEAD || Object.keys(POWER_SCORES).length === 0) return;
+
+  const week = LAST_MATCHUPS.week;
+  const scored = LAST_MATCHUPS.pairs.map(function(p){ return computeGameOfWeekScore(p, week); });
+  scored.sort(function(x,y){ return y.total - x.total; });
+
+  safeStorageGet("gotw_last_teams", true).then(function(res){
+    let lastTeams = [];
+    try{ if(res && res.value) lastTeams = JSON.parse(res.value); }catch(e){}
+    let pick = scored[0];
+    // Avoid repeating the same franchise if a comparably-scored alternative exists
+    for(let i=1; i<scored.length; i++){
+      const candidate = scored[i];
+      const gap = pick.total - candidate.total;
+      const pickRepeats = lastTeams.indexOf(pick.a)!==-1 || lastTeams.indexOf(pick.b)!==-1;
+      const candidateRepeats = lastTeams.indexOf(candidate.a)!==-1 || lastTeams.indexOf(candidate.b)!==-1;
+      if(pickRepeats && !candidateRepeats && gap <= 6) pick = candidate;
+    }
+    GOTW_PICK = pick;
+    safeStorageSet("gotw_last_teams", JSON.stringify([pick.a, pick.b]), true).catch(function(){});
+    renderGameOfWeek(pick, week);
+    if(LAST_MATCHUPS) renderMatchups(LAST_MATCHUPS.week, LAST_MATCHUPS.pairs, LAST_MATCHUPS.usedLive);
+  }).catch(function(){
+    GOTW_PICK = scored[0];
+    renderGameOfWeek(scored[0], week);
+  });
+}
+
+function renderGameOfWeek(pick, week){
+  const panel = document.getElementById("gotwPanel");
+  const card = document.getElementById("gotwCard");
+  panel.style.display = "block";
+
+  const ta = TEAMS.find(function(t){ return t.rosterId===pick.a; }) || {};
+  const tb = TEAMS.find(function(t){ return t.rosterId===pick.b; }) || {};
+  const pairData = LAST_MATCHUPS.pairs.find(function(p){ return (p.a===pick.a&&p.b===pick.b)||(p.a===pick.b&&p.b===pick.a); }) || {};
+  const aPts = pairData.a===pick.a ? pairData.aPoints : pairData.bPoints;
+  const bPts = pairData.a===pick.a ? pairData.bPoints : pairData.aPoints;
+
+  const whyBits = [];
+  if(pick.meta.isDesignatedRivalry) whyBits.push("designated rivalry");
+  if(pick.meta.streakA && pick.meta.streakA.length>=3) whyBits.push((ta.team||"Team A") + " is on a " + pick.meta.streakA.length + "-game " + (pick.meta.streakA.type==="W"?"win":"losing") + " streak");
+  if(pick.meta.streakB && pick.meta.streakB.length>=3) whyBits.push((tb.team||"Team B") + " is on a " + pick.meta.streakB.length + "-game " + (pick.meta.streakB.type==="W"?"win":"losing") + " streak");
+  if(pick.cats.power > 20) whyBits.push("two of the league's top-ranked teams");
+  if(pick.cats.playoff > 18) whyBits.push("major playoff implications");
+  const whyText = whyBits.length ? whyBits.join(", ") : "the best overall blend of strength and stakes this week";
+
+  const catLabels = {power:["Power Ranking Matchup",30], playoff:["Playoff Implications",25], projected:["Projected Matchup",15], rivalry:["Rivalry & History",15], storyline:["Storyline",10], star:["Star Power",5]};
+  const breakdown = Object.keys(catLabels).map(function(k){
+    const max = catLabels[k][1], val = pick.cats[k];
+    return '<div class="power-cat-row"><div class="power-cat-label">' + catLabels[k][0] + ' (' + max + ')</div>' +
+      '<div class="power-cat-bar-wrap"><div class="power-cat-bar" style="width:' + Math.min(100,(val/max*100)).toFixed(0) + '%"></div></div>' +
+      '<div class="power-cat-val">' + val.toFixed(1) + '</div></div>';
+  }).join("");
+
+  card.innerHTML =
+    '<div class="gotw-hero">' +
+      '<div class="gotw-side"><img src="' + (ta.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/><div class="gotw-team-name">' + (ta.team||'') + '</div><div class="gotw-record">' + (ta.wins||0)+'-'+(ta.losses||0) + '</div></div>' +
+      '<div class="gotw-mid"><div class="gotw-score">' + (aPts!=null?aPts.toFixed(1):'-') + '</div><div class="gotw-vs">VS</div><div class="gotw-score">' + (bPts!=null?bPts.toFixed(1):'-') + '</div><div class="gotw-total">Score: ' + pick.total.toFixed(1) + '/100</div></div>' +
+      '<div class="gotw-side right"><img src="' + (tb.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/><div class="gotw-team-name">' + (tb.team||'') + '</div><div class="gotw-record">' + (tb.wins||0)+'-'+(tb.losses||0) + '</div></div>' +
+    '</div>' +
+    '<p class="gotw-why">Selected for ' + whyText + '.</p>' +
+    '<details class="gotw-details"><summary>See the full scoring breakdown</summary><div class="power-breakdown" style="padding:12px 4px 0;">' + breakdown + '</div></details>';
 }
 
 function buildAndRenderRecords(results){
@@ -2694,6 +2909,11 @@ function computePowerRankings(){
       pfRank: pfRank[t.rosterId], maxPfRank: maxPfRank[t.rosterId]
     };
   }).sort(function(a,b){ return b.score - a.score; });
+
+  POWER_SCORES = {};
+  POWER_TRENDS = {};
+  finalScores.forEach(function(f){ POWER_SCORES[f.team.rosterId] = f.score; POWER_TRENDS[f.team.rosterId] = f.trend; });
+  maybeComputeGameOfWeek();
 
   const asOfWeek = prAndRecent.asOfWeek;
   const order = finalScores.map(function(f){ return f.team.rosterId; });
