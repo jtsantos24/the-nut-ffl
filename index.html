@@ -126,6 +126,15 @@
   .team-cell-mgr{color:var(--chalk-dim); font-size:12px;}
   .rank-num{font-family:'Teko', sans-serif; font-size:20px; color:var(--gold); width:24px; display:inline-block;}
   .status-banner{background:rgba(183,168,136,0.12); border:1px solid var(--gold-dark); border-radius:4px; padding:10px 14px; font-size:13px; color:var(--chalk-dim); margin-bottom:16px;}
+  .playoff-cutoff-row td{padding:0; border-bottom:none;}
+  .playoff-cutoff-line{
+    display:flex; align-items:center; gap:10px; padding:6px 8px; margin:2px 0;
+    border-top:2px dashed var(--gold); border-bottom:2px dashed var(--gold);
+    background:rgba(183,168,136,0.10);
+  }
+  .playoff-cutoff-line span{
+    font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--gold); font-weight:600;
+  }
 
   /* ---------- RIVALRY ---------- */
   .rivalry-grid{display:grid; grid-template-columns:1fr; gap:14px;}
@@ -493,7 +502,7 @@
     <div class="panel">
       <h2 class="panel-title">Standings</h2>
       <div class="status-banner" id="standingsStatus">Loading live standings from Sleeper&hellip;</div>
-      <table class="standings">
+      <div class="power-table-scroll"><table class="standings">
         <thead>
           <tr>
             <th></th>
@@ -502,10 +511,13 @@
             <th class="sortable" data-field="losses">L</th>
             <th class="sortable" data-field="ties">T</th>
             <th class="sortable" data-field="fpts">PF</th>
+            <th class="sortable" data-field="ptsAgainst">PA</th>
+            <th class="sortable" data-field="playoffPct">Playoff %</th>
           </tr>
         </thead>
         <tbody id="standingsBody"></tbody>
-      </table>
+      </table></div>
+      <p class="const-note" style="margin-top:10px;">Playoff % is a live 1,500-run simulation of the remaining schedule using each team's season-average scoring as a strength estimate &mdash; a heuristic, not a guarantee.</p>
     </div>
   </div>
 
@@ -732,18 +744,18 @@
 const LEAGUE_ID = "1333691133745704960";
 
 const FALLBACK_TEAMS = [
-  {rosterId:1,  ownerId:"995923308459745280", team:"JSN Your Face 😏", manager:"BillsMafia1480", avatar:"https://sleepercdn.com/uploads/019f7ba12d512901421f384a5606aa5e", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:2,  ownerId:"604190850481713152", team:"Breece & Desist", manager:"Awesomeus", avatar:"https://sleepercdn.com/avatars/555009c05e8a6c72635a166c3c36894b", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:3,  ownerId:"996183312672669696", team:"Points Against Champion", manager:"PAHTNAH", avatar:"https://sleepercdn.com/uploads/467c96f4e100e4bd89be88276dbf0cec.jpg", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:4,  ownerId:"931163037363515392", team:"Prestige Worldwide", manager:"cincy_kid", avatar:"https://sleepercdn.com/uploads/c8e6f2c3bc03f6ffadb28c4461cf85d7.jpg", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:5,  ownerId:"996196287416528896", team:"Lickety Splitz Squad", manager:"twillie391", avatar:"https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:6,  ownerId:"996196931028389888", team:"The OG Champ", manager:"JeffPeterson20", avatar:"https://sleepercdn.com/uploads/c7eef8bbb107e72d6bfc814062997354.jpg", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:7,  ownerId:"959226991016816640", team:"Love Hurts 🦿😬", manager:"KShrewsberry", avatar:"https://sleepercdn.com/uploads/d1814d5f1fd5d6828aaa0d7b935a1433.jpg", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:8,  ownerId:"996256741807603712", team:"White Center Rats", manager:"Savro24", avatar:"https://sleepercdn.com/uploads/416adaa0ed8b729e1ab7b2287d76c087.jpg", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:9,  ownerId:"996390324501024768", team:"The Many-Faced Squad", manager:"CamWells16", avatar:"https://sleepercdn.com/avatars/01adb9b8da194a67264f35625a4da119", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:10, ownerId:"999558477183913984", team:"Gus Swayze's Squad", manager:"AlanCarignan", avatar:"https://sleepercdn.com/uploads/0d7ac3b248f0e5c1635caf8b557eb46b.jpg", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:11, ownerId:"996494307496542208", team:"Price is wrong Bitch!", manager:"Smittytribe27", avatar:"https://sleepercdn.com/avatars/9a3d3353cb3bf83e1f98e0a5a61acf40", wins:0, losses:0, ties:0, fpts:0},
-  {rosterId:12, ownerId:"996503416859709440", team:"Boom Goes The Dynamite", manager:"brandishrewsberry", avatar:"https://sleepercdn.com/uploads/bf3e42dfbfdd21ac884b0e920774269e", wins:0, losses:0, ties:0, fpts:0}
+  {rosterId:1,  ownerId:"995923308459745280", team:"JSN Your Face 😏", manager:"BillsMafia1480", avatar:"https://sleepercdn.com/uploads/019f7ba12d512901421f384a5606aa5e", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:2,  ownerId:"604190850481713152", team:"Breece & Desist", manager:"Awesomeus", avatar:"https://sleepercdn.com/avatars/555009c05e8a6c72635a166c3c36894b", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:3,  ownerId:"996183312672669696", team:"Points Against Champion", manager:"PAHTNAH", avatar:"https://sleepercdn.com/uploads/467c96f4e100e4bd89be88276dbf0cec.jpg", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:4,  ownerId:"931163037363515392", team:"Prestige Worldwide", manager:"cincy_kid", avatar:"https://sleepercdn.com/uploads/c8e6f2c3bc03f6ffadb28c4461cf85d7.jpg", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:5,  ownerId:"996196287416528896", team:"Lickety Splitz Squad", manager:"twillie391", avatar:"https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:6,  ownerId:"996196931028389888", team:"The OG Champ", manager:"JeffPeterson20", avatar:"https://sleepercdn.com/uploads/c7eef8bbb107e72d6bfc814062997354.jpg", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:7,  ownerId:"959226991016816640", team:"Love Hurts 🦿😬", manager:"KShrewsberry", avatar:"https://sleepercdn.com/uploads/d1814d5f1fd5d6828aaa0d7b935a1433.jpg", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:8,  ownerId:"996256741807603712", team:"White Center Rats", manager:"Savro24", avatar:"https://sleepercdn.com/uploads/416adaa0ed8b729e1ab7b2287d76c087.jpg", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:9,  ownerId:"996390324501024768", team:"The Many-Faced Squad", manager:"CamWells16", avatar:"https://sleepercdn.com/avatars/01adb9b8da194a67264f35625a4da119", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:10, ownerId:"999558477183913984", team:"Gus Swayze's Squad", manager:"AlanCarignan", avatar:"https://sleepercdn.com/uploads/0d7ac3b248f0e5c1635caf8b557eb46b.jpg", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:11, ownerId:"996494307496542208", team:"Price is wrong Bitch!", manager:"Smittytribe27", avatar:"https://sleepercdn.com/avatars/9a3d3353cb3bf83e1f98e0a5a61acf40", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0},
+  {rosterId:12, ownerId:"996503416859709440", team:"Boom Goes The Dynamite", manager:"brandishrewsberry", avatar:"https://sleepercdn.com/uploads/bf3e42dfbfdd21ac884b0e920774269e", wins:0, losses:0, ties:0, fpts:0, ptsAgainst:0}
 ];
 
 const RIVALRIES = [
@@ -1558,6 +1570,8 @@ function findRival(ownerId){
 let standingsSort = {field:"wins", dir:"desc"};
 let standingsUsedLive = false;
 
+let PLAYOFF_ODDS = null; // rosterId -> percentage, filled in once simulated
+
 function renderStandings(usedLive){
   if(typeof usedLive === "boolean") standingsUsedLive = usedLive;
   const statusEl = document.getElementById("standingsStatus");
@@ -1565,9 +1579,15 @@ function renderStandings(usedLive){
     ? "Live from Sleeper. All teams sit at 0-0 until Week 1 finishes scoring."
     : "Showing the latest saved snapshot (live Sleeper fetch was blocked by the browser). All teams sit at 0-0 until Week 1 finishes scoring.";
 
+  const withOdds = TEAMS.map(function(t){
+    const copy = Object.assign({}, t);
+    copy.playoffPct = (PLAYOFF_ODDS && PLAYOFF_ODDS[t.rosterId] !== undefined) ? PLAYOFF_ODDS[t.rosterId] : -1;
+    return copy;
+  });
+
   const field = standingsSort.field;
   const dir = standingsSort.dir === "asc" ? 1 : -1;
-  const sorted = TEAMS.slice().sort(function(a,b){
+  const sorted = withOdds.sort(function(a,b){
     let cmp;
     if(field === "team"){
       cmp = a.team.localeCompare(b.team);
@@ -1584,7 +1604,7 @@ function renderStandings(usedLive){
 
   const body = document.getElementById("standingsBody");
   body.innerHTML = sorted.map(function(t,i){
-    return '<tr>' +
+    const row = '<tr>' +
       '<td><span class="rank-num">' + (i+1) + '</span></td>' +
       '<td><div class="team-cell">' +
         '<img class="team-avatar" src="' + t.avatar + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
@@ -1594,7 +1614,13 @@ function renderStandings(usedLive){
       '<td>' + t.losses + '</td>' +
       '<td>' + t.ties + '</td>' +
       '<td>' + t.fpts.toFixed(1) + '</td>' +
+      '<td>' + (t.ptsAgainst||0).toFixed(1) + '</td>' +
+      '<td>' + (t.playoffPct >= 0 ? t.playoffPct.toFixed(0) + '%' : '\u2013') + '</td>' +
     '</tr>';
+    // Playoff cutoff line: only meaningful when looking at overall standings order (i.e. sorted by wins desc)
+    const showCutoff = (i === 5) && field === "wins" && dir === -1;
+    const cutoffRow = showCutoff ? '<tr class="playoff-cutoff-row"><td colspan="8"><div class="playoff-cutoff-line"><span>Playoff cutoff (top 6)</span></div></td></tr>' : "";
+    return row + cutoffRow;
   }).join("");
 }
 
@@ -2246,6 +2272,7 @@ function loadLiveData(){
         losses: s.losses || 0,
         ties: s.ties || 0,
         fpts: (s.fpts || 0) + ((s.fpts_decimal || 0) / 100),
+        ptsAgainst: (s.fpts_against || 0) + ((s.fpts_against_decimal || 0) / 100),
         starters: r.starters || [],
         players: r.players || []
       };
@@ -2280,6 +2307,9 @@ function maybeComputePowerRankings(){
   if(Array.isArray(RIVALRY_HISTORY)) POWER_MATCHUPS_READY = true;
   if(!POWER_TEAMS_READY || !POWER_MATCHUPS_READY) return;
 
+  computePlayoffOdds();
+  renderStandings();
+
   Promise.all([
     ALL_PLAYERS ? Promise.resolve(ALL_PLAYERS) : fetchJSON("https://api.sleeper.app/v1/players/nfl").catch(function(){ return null; }),
     TRADED_PICKS ? Promise.resolve(TRADED_PICKS) : fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/traded_picks").catch(function(){ return []; })
@@ -2288,6 +2318,62 @@ function maybeComputePowerRankings(){
     TRADED_PICKS = res[1] || [];
     computePowerRankings();
   });
+}
+
+// Monte Carlo playoff-odds simulation using the real remaining schedule (Sleeper pre-populates
+// pairings for unplayed weeks) and each team's season-average points as a strength proxy.
+function computePlayoffOdds(){
+  const scheduleByWeek = {};
+  RIVALRY_HISTORY.forEach(function(entry){
+    if(String(entry.season) !== "2026" || entry.week > 14 || !Array.isArray(entry.data)) return;
+    const byMatchup = {};
+    entry.data.forEach(function(m){
+      if(m.matchup_id === undefined || m.matchup_id === null) return;
+      if(!byMatchup[m.matchup_id]) byMatchup[m.matchup_id] = [];
+      byMatchup[m.matchup_id].push(m);
+    });
+    const pairs = Object.values(byMatchup).filter(function(p){ return p.length === 2; });
+    if(pairs.length === 0) return;
+    scheduleByWeek[entry.week] = pairs.map(function(p){
+      return {a: p[0].roster_id, b: p[1].roster_id, aPts: p[0].points||0, bPts: p[1].points||0};
+    });
+  });
+
+  const futureWeeks = Object.keys(scheduleByWeek).map(Number).filter(function(w){
+    return scheduleByWeek[w].every(function(p){ return p.aPts === 0 && p.bPts === 0; });
+  });
+
+  const prAndRecent = computeProductionAndRecent();
+  const strength = {};
+  TEAMS.forEach(function(t){ strength[t.rosterId] = prAndRecent.production[t.rosterId] || null; });
+  const known = Object.values(strength).filter(function(v){ return v !== null; });
+  const leagueAvg = known.length ? (known.reduce(function(s,x){ return s+x; },0) / known.length) : 100;
+  TEAMS.forEach(function(t){ if(strength[t.rosterId] === null) strength[t.rosterId] = leagueAvg; });
+
+  const baseWins = {};
+  TEAMS.forEach(function(t){ baseWins[t.rosterId] = t.wins; });
+
+  const ITER = 1500, K = 25;
+  const playoffCount = {};
+  TEAMS.forEach(function(t){ playoffCount[t.rosterId] = 0; });
+
+  for(let iter=0; iter<ITER; iter++){
+    const wins = Object.assign({}, baseWins);
+    futureWeeks.forEach(function(w){
+      scheduleByWeek[w].forEach(function(pair){
+        const probA = 1 / (1 + Math.pow(10, (strength[pair.b]-strength[pair.a]) / K));
+        if(Math.random() < probA) wins[pair.a]++; else wins[pair.b]++;
+      });
+    });
+    const order = TEAMS.map(function(t){
+      return {rid: t.rosterId, w: wins[t.rosterId], tiebreak: Math.random()};
+    }).sort(function(a,b){ return (b.w - a.w) || (b.tiebreak - a.tiebreak); });
+    order.slice(0,6).forEach(function(o){ playoffCount[o.rid]++; });
+  }
+
+  const odds = {};
+  TEAMS.forEach(function(t){ odds[t.rosterId] = (playoffCount[t.rosterId] / ITER) * 100; });
+  PLAYOFF_ODDS = odds;
 }
 
 function minMaxNormalize(valuesObj, invert){
