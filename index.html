@@ -237,22 +237,33 @@
   .h2h-opp img{width:22px; height:22px; border-radius:4px; object-fit:cover;}
 
   /* ---------- POWER RANKINGS ---------- */
-  .power-row{border-bottom:1px solid var(--turf-line); padding:10px 0; cursor:pointer;}
-  .power-row:last-child{border-bottom:none;}
-  .power-row-main{display:flex; align-items:center; gap:12px;}
-  .power-rank{font-family:'Teko', sans-serif; font-size:22px; color:var(--gold-dark); width:26px; flex-shrink:0;}
-  .power-move{font-size:11px; width:34px; flex-shrink:0; text-align:center;}
+  .power-table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  .power-table{width:100%; border-collapse:collapse; font-size:13px;}
+  .power-table th{
+    text-align:left; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; color:var(--chalk-dim);
+    padding:8px 10px; border-bottom:1px solid var(--turf-line); white-space:nowrap;
+  }
+  .power-table td{padding:8px 10px; border-bottom:1px solid var(--turf-line); white-space:nowrap; vertical-align:middle;}
+  .power-row{cursor:pointer;}
+  .power-row:hover td{background:rgba(183,168,136,0.05);}
+  .power-rank{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold-dark);}
+  .power-move{font-size:10px;}
   .power-move.up{color:#7FA87A;}
   .power-move.down{color:var(--red);}
   .power-move.flat{color:var(--chalk-dim);}
-  .power-team{flex:1; display:flex; align-items:center; gap:10px; min-width:0;}
-  .power-team img{width:28px; height:28px; border-radius:5px; object-fit:cover; flex-shrink:0;}
-  .power-team-name{font-weight:500; font-size:14px;}
-  .power-score{font-family:'Teko', sans-serif; font-size:24px; color:var(--gold); width:50px; text-align:right; flex-shrink:0;}
-  .power-chevron{color:var(--chalk-dim); font-size:11px; width:14px; text-align:center; transition:transform 0.15s;}
+  .power-team{display:flex; align-items:center; gap:8px; min-width:170px;}
+  .power-team img{width:24px; height:24px; border-radius:5px; object-fit:cover; flex-shrink:0;}
+  .power-team-name{font-weight:500;}
+  .power-score{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold);}
+  .power-chevron{color:var(--chalk-dim); font-size:10px; margin-left:auto; transition:transform 0.15s;}
   .power-row.expanded .power-chevron{transform:rotate(180deg);}
-  .power-breakdown{display:none; padding:12px 0 4px 62px;}
-  .power-row.expanded .power-breakdown{display:block;}
+  .trend-arrow{font-size:18px; font-weight:700;}
+  .trend-up{color:#7FA87A;}
+  .trend-flat{color:var(--chalk-dim);}
+  .trend-down{color:var(--red);}
+  .power-breakdown-row{display:none;}
+  .power-breakdown-row.open{display:table-row;}
+  .power-breakdown{padding:12px 4px;}
   .power-cat-row{display:flex; align-items:center; gap:10px; font-size:12px; padding:4px 0;}
   .power-cat-label{width:150px; color:var(--chalk-dim); flex-shrink:0;}
   .power-cat-bar-wrap{flex:1; background:var(--turf-darker); border-radius:3px; height:6px; overflow:hidden;}
@@ -458,7 +469,7 @@
       <p class="panel-sub" id="powerStatus">Crunching production, roster strength, dynasty value, draft capital, recent form, and record&hellip;</p>
       <div id="powerGrid"></div>
       <p class="const-note" id="powerMethodNote" style="margin-top:12px; display:none;">
-        Click a team to see its category breakdown. Roster Strength and Dynasty Value are estimated from Sleeper's player database (search rank and age); Draft Capital reflects owned future 1st/2nd-round rookie picks. These are heuristics, not an official Sleeper metric.
+        Click a team to see its category breakdown. Roster Strength and Dynasty Value are estimated from Sleeper's player database (search rank and age); Draft Capital reflects owned future 1st/2nd-round rookie picks. PF Rank is rank by actual season scoring average; Max PF Rank ranks teams by an <em>approximate</em> optimal-lineup average (best possible starters each week) &mdash; a big gap between the two often means points are being left on the bench. Trend blends recent scoring momentum, roster youth, and draft capital into Rising/Steady/Falling. These are heuristics, not an official Sleeper metric.
       </p>
     </div>
   </div>
@@ -2226,6 +2237,79 @@ function computeProductionAndRecent(){
   return {production: production, recent: recent, asOfWeek: maxWeek};
 }
 
+// Approximate "optimal lineup" points per week: fill exact-position slots with the
+// highest scorer at that position, then fill FLEX/SUPER_FLEX/IDP_FLEX from what's left.
+// This is a greedy approximation (fixed slots first, flex slots after), not a guaranteed
+// mathematical optimum, but it's the standard approach and gets very close in practice.
+const STARTING_SLOTS = ["QB","RB","RB","WR","WR","TE","FLEX","FLEX","SUPER_FLEX","DL","DL","LB","LB","DB","DB","IDP_FLEX"];
+const FLEX_ELIGIBLE = {FLEX:["WR","RB","TE"], SUPER_FLEX:["QB","WR","RB","TE"], IDP_FLEX:["DL","LB","DB"]};
+
+function computeOptimalLineupPoints(playersPoints){
+  if(!ALL_PLAYERS || !playersPoints) return null;
+  const pool = Object.keys(playersPoints).map(function(pid){
+    const p = ALL_PLAYERS[pid];
+    return {pid: pid, points: playersPoints[pid] || 0, position: p ? p.position : null};
+  }).filter(function(x){ return x.position; });
+
+  const used = {};
+  let total = 0;
+
+  const fixedSlots = STARTING_SLOTS.filter(function(s){ return !FLEX_ELIGIBLE[s]; });
+  fixedSlots.forEach(function(slotPos){
+    let best = null;
+    pool.forEach(function(x){
+      if(used[x.pid]) return;
+      if(x.position !== slotPos) return;
+      if(!best || x.points > best.points) best = x;
+    });
+    if(best){ used[best.pid] = true; total += best.points; }
+  });
+
+  const flexSlots = STARTING_SLOTS.filter(function(s){ return FLEX_ELIGIBLE[s]; });
+  flexSlots.forEach(function(slotName){
+    const eligible = FLEX_ELIGIBLE[slotName];
+    let best = null;
+    pool.forEach(function(x){
+      if(used[x.pid]) return;
+      if(eligible.indexOf(x.position) === -1) return;
+      if(!best || x.points > best.points) best = x;
+    });
+    if(best){ used[best.pid] = true; total += best.points; }
+  });
+
+  return total;
+}
+
+function computeMaxPF(){
+  const weeklyMaxByRoster = {};
+  RIVALRY_HISTORY.forEach(function(entry){
+    if(String(entry.season) !== "2026" || !Array.isArray(entry.data)) return;
+    entry.data.forEach(function(m){
+      if(typeof m.points !== "number" || m.points === 0) return;
+      const opt = computeOptimalLineupPoints(m.players_points);
+      if(opt === null) return;
+      if(!weeklyMaxByRoster[m.roster_id]) weeklyMaxByRoster[m.roster_id] = [];
+      weeklyMaxByRoster[m.roster_id].push(opt);
+    });
+  });
+  const maxPF = {};
+  Object.keys(weeklyMaxByRoster).forEach(function(rid){
+    const list = weeklyMaxByRoster[rid];
+    maxPF[rid] = list.reduce(function(s,x){ return s+x; }, 0) / list.length;
+  });
+  return maxPF;
+}
+
+function rankFromRaw(valuesObj, higherIsBetter){
+  const entries = TEAMS.map(function(t){ return {rosterId: t.rosterId, val: valuesObj[t.rosterId]}; });
+  const withVal = entries.filter(function(e){ return e.val !== null && e.val !== undefined; });
+  withVal.sort(function(a,b){ return higherIsBetter ? (b.val - a.val) : (a.val - b.val); });
+  const ranks = {};
+  withVal.forEach(function(e, i){ ranks[e.rosterId] = i + 1; });
+  entries.forEach(function(e){ if(ranks[e.rosterId] === undefined) ranks[e.rosterId] = null; });
+  return ranks;
+}
+
 function computeRosterAndDynasty(){
   const rosterRaw = {}, dynastyRaw = {}, eliteYoungCount = {};
   TEAMS.forEach(function(t){
@@ -2289,6 +2373,7 @@ function computePowerRankings(){
   const prAndRecent = computeProductionAndRecent();
   const rosterAndDynasty = computeRosterAndDynasty();
   const draftCapitalRaw = computeDraftCapital();
+  const maxPFRaw = computeMaxPF();
 
   const recordRaw = {};
   TEAMS.forEach(function(t){
@@ -2309,6 +2394,9 @@ function computePowerRankings(){
     dynastyNorm[t.rosterId] = Math.min(100, dynastyNorm[t.rosterId] + bonus);
   });
 
+  const pfRank = rankFromRaw(prAndRecent.production, true);
+  const maxPfRank = rankFromRaw(maxPFRaw, true);
+
   const finalScores = TEAMS.map(function(t){
     const cats = {
       production: prodNorm[t.rosterId],
@@ -2321,7 +2409,19 @@ function computePowerRankings(){
     const score = cats.production*POWER_WEIGHTS.production + cats.roster*POWER_WEIGHTS.roster +
       cats.dynasty*POWER_WEIGHTS.dynasty + cats.draft*POWER_WEIGHTS.draft +
       cats.recent*POWER_WEIGHTS.recent + cats.record*POWER_WEIGHTS.record;
-    return {team: t, score: score, cats: cats};
+
+    // Trajectory: blends recent-vs-season scoring trend, roster youth, and future draft capital.
+    // Rising = getting younger/hotter/stockpiling picks. Falling = the opposite. Everyone else is Steady.
+    const trendDelta = recentNorm[t.rosterId] - prodNorm[t.rosterId];
+    const youthSignal = dynastyNorm[t.rosterId] - 50;
+    const picksSignal = draftNorm[t.rosterId] - 50;
+    const trajectoryScore = 0.5*trendDelta + 0.3*youthSignal + 0.2*picksSignal;
+    const trend = trajectoryScore > 8 ? "up" : (trajectoryScore < -8 ? "down" : "flat");
+
+    return {
+      team: t, score: score, cats: cats, trend: trend,
+      pfRank: pfRank[t.rosterId], maxPfRank: maxPfRank[t.rosterId]
+    };
   }).sort(function(a,b){ return b.score - a.score; });
 
   const asOfWeek = prAndRecent.asOfWeek;
@@ -2359,8 +2459,14 @@ function renderPowerRankings(finalScores, movement){
     production:["Current Production","30%"], roster:["Roster Strength","25%"], dynasty:["Dynasty Value","20%"],
     draft:["Draft Capital","10%"], recent:["Recent Performance","10%"], record:["Record","5%"]
   };
+  const trendHtml = {
+    up: '<span class="trend-arrow trend-up">\u2191</span>',
+    flat: '<span class="trend-arrow trend-flat">\u2192</span>',
+    down: '<span class="trend-arrow trend-down">\u2193</span>'
+  };
+  const trendLabel = {up:"Rising", flat:"Steady", down:"Falling"};
 
-  grid.innerHTML = finalScores.map(function(f, i){
+  const rows = finalScores.map(function(f, i){
     const t = f.team;
     const mv = movement[t.rosterId];
     const mvHtml = mv === null || mv === undefined ? '<span class="power-move flat">NEW</span>'
@@ -2377,21 +2483,35 @@ function renderPowerRankings(finalScores, movement){
       '</div>';
     }).join("");
 
-    return '<div class="power-row" data-idx="' + i + '">' +
-      '<div class="power-row-main">' +
-        '<div class="power-rank">' + (i+1) + '</div>' +
-        mvHtml +
-        '<div class="power-team"><img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/><span class="power-team-name">' + t.team + '</span></div>' +
-        '<div class="power-score">' + f.score.toFixed(1) + '</div>' +
-        '<div class="power-chevron">&#9660;</div>' +
-      '</div>' +
-      '<div class="power-breakdown">' + breakdownRows + '</div>' +
-    '</div>';
+    const rec = t.wins + "-" + t.losses + (t.ties ? ("-"+t.ties) : "");
+
+    return '<tr class="power-row" data-idx="' + i + '">' +
+        '<td class="power-rank">' + (i+1) + '<div>' + mvHtml + '</div></td>' +
+        '<td><div class="power-team"><img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/><span class="power-team-name">' + t.team + '</span><span class="power-chevron">&#9660;</span></div></td>' +
+        '<td class="power-score">' + f.score.toFixed(1) + '</td>' +
+        '<td>' + rec + '</td>' +
+        '<td>' + (f.pfRank || "\u2013") + '</td>' +
+        '<td>' + (f.maxPfRank || "\u2013") + '</td>' +
+        '<td>' + f.cats.roster.toFixed(0) + '</td>' +
+        '<td>' + f.cats.draft.toFixed(0) + '</td>' +
+        '<td>' + trendHtml[f.trend] + '</td>' +
+      '</tr>' +
+      '<tr class="power-breakdown-row"><td colspan="9"><div class="power-breakdown">' +
+        '<div class="power-cat-row"><div class="power-cat-label">Trajectory</div><div style="flex:1; font-size:12px; color:var(--chalk-dim);">' + trendLabel[f.trend] + ' \u2014 blends recent scoring trend, roster youth, and future draft capital.</div></div>' +
+        breakdownRows +
+      '</div></td></tr>';
   }).join("");
 
+  grid.innerHTML =
+    '<div class="power-table-scroll"><table class="power-table">' +
+      '<thead><tr><th>Rank</th><th>Team</th><th>Score</th><th>Record</th><th>PF Rank</th><th>Max PF Rank</th><th>Roster</th><th>Picks</th><th>Trend</th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table></div>';
+
   grid.querySelectorAll(".power-row").forEach(function(row){
-    row.querySelector(".power-row-main").addEventListener("click", function(){
+    row.addEventListener("click", function(){
       row.classList.toggle("expanded");
+      row.nextElementSibling.classList.toggle("open");
     });
   });
 }
