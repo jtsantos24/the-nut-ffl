@@ -1,0 +1,2480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The NUT Fantasy Football League</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --turf:#2B2B29;
+    --turf-dark:#1E1E1D;
+    --turf-darker:#141413;
+    --turf-line:#3D3D3A;
+    --chalk:#F2F1EC;
+    --chalk-dim:#ACAAA3;
+    --gold:#B7A888;
+    --gold-dark:#7E735C;
+    --red:#A2695C;
+    --red-dark:#5A3E36;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--turf-darker);
+    color:var(--chalk);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  img{max-width:100%;}
+  a{color:inherit;}
+  h1,h2,h3{font-family:'Teko', sans-serif; font-weight:600; margin:0;}
+
+  /* ---------- NAV ---------- */
+  .topnav{
+    position:sticky; top:0; z-index:50;
+    background:var(--turf-dark);
+    border-bottom:3px solid var(--gold);
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px; gap:10px;
+  }
+  .brand{font-family:'Teko', sans-serif; font-size:22px; font-weight:700; color:var(--chalk); letter-spacing:0.3px; white-space:nowrap; flex-shrink:0;}
+  .navlinks{display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex:1; min-width:0;}
+  .navlinks::-webkit-scrollbar{display:none;}
+  .navlinks button{
+    background:transparent; border:1px solid transparent; color:var(--chalk-dim);
+    font-family:'Inter', sans-serif; font-size:13px; font-weight:500; padding:8px 14px;
+    border-radius:4px; cursor:pointer; white-space:nowrap; flex-shrink:0;
+  }
+  .navlinks button:hover{color:var(--chalk); border-color:var(--turf-line);}
+  .navlinks button.active{color:var(--gold-dark); background:var(--chalk); border-color:var(--chalk);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:
+      radial-gradient(ellipse at top left, rgba(183,168,136,0.12), transparent 55%),
+      var(--turf);
+    border-bottom:1px solid var(--turf-line);
+    padding:28px 16px 24px;
+  }
+  .hero-inner{max-width:1040px; margin:0 auto;}
+  .hero h1{font-size:36px; color:var(--chalk); line-height:1;}
+  .hero p{color:var(--chalk-dim); font-size:14px; margin-top:6px; max-width:520px;}
+  .contact-strip{display:flex; align-items:center; gap:16px; margin-top:18px; flex-wrap:wrap;}
+  .contact-label{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim);}
+  .contact-strip a{
+    color:var(--gold); font-size:14px; font-weight:500; text-decoration:none;
+    border-bottom:1px solid var(--gold-dark); padding-bottom:1px;
+  }
+  .contact-strip a:hover{color:var(--chalk); border-color:var(--chalk-dim);}
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:1040px; margin:0 auto; padding:20px 16px 60px;}
+  .section{display:none;}
+  .section.active{display:block;}
+  .panel{background:var(--turf); border:1px solid var(--turf-line); border-radius:6px; padding:22px 24px; margin-bottom:20px;}
+  .panel-title{font-size:24px; margin-bottom:14px; color:var(--chalk);}
+  .panel-sub{color:var(--chalk-dim); font-size:13px; margin:-8px 0 16px;}
+
+  /* ---------- STANDINGS ---------- */
+  table.standings{width:100%; border-collapse:collapse; font-size:14px;}
+  table.standings th{text-align:left; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim); padding:8px; border-bottom:1px solid var(--turf-line);}
+  table.standings td{padding:9px 8px; border-bottom:1px solid var(--turf-line); vertical-align:middle;}
+  table.standings tr:last-child td{border-bottom:none;}
+  .team-cell{display:flex; align-items:center; gap:10px;}
+  .team-avatar{width:30px; height:30px; border-radius:4px; object-fit:cover; background:var(--turf-dark); flex-shrink:0;}
+  .team-cell-name{font-weight:500;}
+  .team-cell-mgr{color:var(--chalk-dim); font-size:12px;}
+  .rank-num{font-family:'Teko', sans-serif; font-size:20px; color:var(--gold); width:24px; display:inline-block;}
+  .status-banner{background:rgba(183,168,136,0.12); border:1px solid var(--gold-dark); border-radius:4px; padding:10px 14px; font-size:13px; color:var(--chalk-dim); margin-bottom:16px;}
+
+  /* ---------- RIVALRY ---------- */
+  .rivalry-grid{display:grid; grid-template-columns:1fr; gap:14px;}
+  .rivalry-card{
+    background:var(--turf-dark); border:1px solid var(--red-dark); border-radius:6px;
+    padding:16px 18px;
+  }
+  .rivalry-top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+  .rivalry-side{display:flex; align-items:center; gap:10px; flex:1; min-width:180px;}
+  .rivalry-side img{width:38px; height:38px; border-radius:6px; object-fit:cover;}
+  .rivalry-vs{font-family:'Teko', sans-serif; font-size:22px; color:var(--red); padding:0 4px;}
+  .rivalry-weeks{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim); text-align:center; min-width:110px;}
+  .rivalry-weeks span{display:block; color:var(--gold); font-family:'Teko',sans-serif; font-size:16px; letter-spacing:0;}
+  .rivalry-history{margin-top:12px; padding-top:12px; border-top:1px solid var(--turf-line); display:flex; flex-wrap:wrap; gap:6px 14px; align-items:baseline;}
+  .rivalry-history .rh-series{font-size:13px; color:var(--gold); font-weight:500;}
+  .rivalry-history .rh-last{font-size:12px; color:var(--chalk-dim);}
+  .rivalry-history .rh-note{font-size:12px; color:var(--chalk-dim); font-style:italic;}
+
+  /* ---------- CHAMPIONS / RECORDS ---------- */
+  .empty-trophy{text-align:center; padding:34px 10px; color:var(--chalk-dim);}
+  .empty-trophy .icon{font-size:40px; opacity:0.5; margin-bottom:10px;}
+  .records-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .record-card{background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px; padding:14px 16px;}
+  .record-card .rlabel{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim);}
+  .record-card .rvalue{font-family:'Teko', sans-serif; font-size:22px; color:var(--gold); margin-top:4px;}
+
+  .rec-row{display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--turf-line); font-size:13px; flex-wrap:wrap;}
+  .rec-row:last-child{border-bottom:none;}
+  .rec-rank{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold-dark); width:20px; flex-shrink:0;}
+  .rec-main{flex:1; min-width:200px;}
+  .rec-score{color:var(--gold); font-weight:500;}
+  .rec-meta{color:var(--chalk-dim); font-size:11px; white-space:nowrap;}
+  .rec-avatar-wrap{display:inline-flex; align-items:center; gap:6px;}
+  .rec-avatar-wrap img{width:20px; height:20px; border-radius:3px; object-fit:cover; vertical-align:middle;}
+  .rec-empty{color:var(--chalk-dim); font-size:13px; font-style:italic; padding:6px 0;}
+
+  /* ---------- HISTORY ---------- */
+  .history-row{display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--turf-line);}
+  .history-row:last-child{border-bottom:none;}
+  .history-season{font-family:'Teko', sans-serif; font-size:26px; color:var(--gold-dark); background:rgba(183,168,136,0.14); border:1px solid var(--gold-dark); border-radius:4px; padding:2px 12px; min-width:64px; text-align:center;}
+  .history-champ img{width:32px; height:32px; border-radius:4px; object-fit:cover; margin-right:8px; vertical-align:middle;}
+  .history-champ .cname{font-weight:500;}
+  .history-champ .cmgr{color:var(--chalk-dim); font-size:12px;}
+  .history-runnerup{color:var(--chalk-dim); font-size:12px; margin-left:auto; text-align:right;}
+
+  /* ---------- DRAFT ---------- */
+  .draft-status{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  .draft-status .badge{background:rgba(183,168,136,0.18); color:var(--gold); border:1px solid var(--gold-dark); border-radius:4px; padding:6px 12px; font-size:12px; font-weight:500;}
+
+  /* ---------- CONSTITUTION ---------- */
+  /* ---------- CONSTITUTION ---------- */
+  .const-article{border-bottom:1px solid var(--turf-line); padding:4px 0;}
+  .const-article:last-child{border-bottom:none;}
+  .const-article summary{
+    cursor:pointer; list-style:none; padding:12px 4px; font-family:'Teko', sans-serif; font-size:19px;
+    color:var(--chalk); display:flex; align-items:center; justify-content:space-between;
+  }
+  .const-article summary::-webkit-details-marker{display:none;}
+  .const-article summary::after{content:'\25BC'; font-size:11px; color:var(--chalk-dim); transition:transform 0.15s;}
+  .const-article[open] summary::after{transform:rotate(180deg);}
+  .const-article summary:hover{color:var(--gold);}
+  .const-body{padding:2px 4px 16px; font-size:14px; line-height:1.6; color:var(--chalk);}
+  .const-body p{margin:0 0 10px;}
+  .const-body p:last-child{margin-bottom:0;}
+  .const-note{color:var(--chalk-dim); font-size:12px; font-style:italic;}
+  .const-olist, .const-ulist{margin:0; padding-left:20px;}
+  .const-olist li, .const-ulist li{margin-bottom:8px;}
+  .officers-table, .payout-table, .draft-order-table{
+    width:100%; border-collapse:collapse; font-size:13px; margin:10px 0;
+  }
+  .officers-table td, .payout-table td, .payout-table th, .draft-order-table td, .draft-order-table th{
+    padding:7px 10px; border-bottom:1px solid var(--turf-line); text-align:left;
+  }
+  .draft-order-table th{color:var(--chalk-dim); font-size:11px; text-transform:uppercase; letter-spacing:1px;}
+  .payout-table td:nth-child(2){color:var(--gold); font-family:'Teko', sans-serif; font-size:16px;}
+
+  /* ---------- TEAMS ---------- */
+  .teams-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:14px;}
+  .team-card{
+    background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px; padding:16px;
+    cursor:pointer; transition:border-color 0.15s;
+  }
+  .team-card:hover{border-color:var(--gold);}
+  .team-card img{width:100%; aspect-ratio:1; object-fit:cover; border-radius:6px; margin-bottom:10px; background:var(--turf);}
+  .team-card .tname{font-size:15px; font-weight:500;}
+  .team-card .tmgr{font-size:12px; color:var(--chalk-dim); margin-top:2px;}
+
+  .team-detail{display:none; margin-top:18px;}
+  .team-detail.active{display:block;}
+  .team-detail-inner{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap;}
+  .team-detail-inner img{width:110px; height:110px; border-radius:8px; object-fit:cover;}
+  .td-back{background:transparent; border:1px solid var(--turf-line); color:var(--chalk-dim); font-size:12px; padding:6px 12px; border-radius:4px; cursor:pointer; margin-bottom:14px;}
+  .td-back:hover{color:var(--chalk); border-color:var(--gold);}
+  .td-name{font-size:26px; color:var(--chalk);}
+  .td-mgr{color:var(--chalk-dim); font-size:14px; margin-top:2px;}
+  .td-rival{margin-top:10px; font-size:13px; color:var(--chalk-dim);}
+  .td-rival span{color:var(--red);}
+
+  /* ---------- ALL-TIME RECORD ---------- */
+  .alltime{margin-top:22px; padding-top:18px; border-top:1px solid var(--turf-line); width:100%;}
+  .alltime-title{font-size:18px; color:var(--chalk); margin-bottom:10px;}
+  .alltime-summary{display:flex; gap:24px; flex-wrap:wrap; margin-bottom:14px;}
+  .alltime-summary .num{font-family:'Teko', sans-serif; font-size:28px; color:var(--gold); line-height:1;}
+  .alltime-summary .lbl{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim); margin-top:2px;}
+  .titles-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .title-badge{background:rgba(183,168,136,0.18); color:var(--gold); border:1px solid var(--gold-dark); border-radius:4px; padding:4px 10px; font-size:12px; font-weight:500;}
+  .runnerup-badge{background:rgba(172,170,163,0.1); color:var(--chalk-dim); border:1px solid var(--turf-line); border-radius:4px; padding:4px 10px; font-size:12px;}
+  table.season-history{width:100%; border-collapse:collapse; font-size:13px;}
+  table.season-history th{text-align:left; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim); padding:6px 8px; border-bottom:1px solid var(--turf-line);}
+  table.season-history td{padding:6px 8px; border-bottom:1px solid var(--turf-line);}
+  table.season-history tr:last-child td{border-bottom:none;}
+  .new-team-note{color:var(--chalk-dim); font-size:13px; font-style:italic;}
+  .h2h-opp{display:flex; align-items:center; gap:8px;}
+  .h2h-opp img{width:22px; height:22px; border-radius:4px; object-fit:cover;}
+
+  /* ---------- POWER RANKINGS ---------- */
+  .power-row{border-bottom:1px solid var(--turf-line); padding:10px 0; cursor:pointer;}
+  .power-row:last-child{border-bottom:none;}
+  .power-row-main{display:flex; align-items:center; gap:12px;}
+  .power-rank{font-family:'Teko', sans-serif; font-size:22px; color:var(--gold-dark); width:26px; flex-shrink:0;}
+  .power-move{font-size:11px; width:34px; flex-shrink:0; text-align:center;}
+  .power-move.up{color:#7FA87A;}
+  .power-move.down{color:var(--red);}
+  .power-move.flat{color:var(--chalk-dim);}
+  .power-team{flex:1; display:flex; align-items:center; gap:10px; min-width:0;}
+  .power-team img{width:28px; height:28px; border-radius:5px; object-fit:cover; flex-shrink:0;}
+  .power-team-name{font-weight:500; font-size:14px;}
+  .power-score{font-family:'Teko', sans-serif; font-size:24px; color:var(--gold); width:50px; text-align:right; flex-shrink:0;}
+  .power-chevron{color:var(--chalk-dim); font-size:11px; width:14px; text-align:center; transition:transform 0.15s;}
+  .power-row.expanded .power-chevron{transform:rotate(180deg);}
+  .power-breakdown{display:none; padding:12px 0 4px 62px;}
+  .power-row.expanded .power-breakdown{display:block;}
+  .power-cat-row{display:flex; align-items:center; gap:10px; font-size:12px; padding:4px 0;}
+  .power-cat-label{width:150px; color:var(--chalk-dim); flex-shrink:0;}
+  .power-cat-bar-wrap{flex:1; background:var(--turf-darker); border-radius:3px; height:6px; overflow:hidden;}
+  .power-cat-bar{height:100%; background:var(--gold);}
+  .power-cat-val{width:34px; text-align:right; color:var(--chalk-dim); flex-shrink:0;}
+
+  /* ---------- BONUS GAMES ---------- */
+  .bonus-row{display:flex; align-items:flex-start; gap:14px; padding:14px 0; border-bottom:1px solid var(--turf-line);}
+  .bonus-row:last-child{border-bottom:none;}
+  .bonus-week{font-family:'Teko', sans-serif; font-size:22px; color:var(--gold-dark); background:rgba(183,168,136,0.14); border:1px solid var(--gold-dark); border-radius:4px; padding:2px 12px; min-width:80px; text-align:center; flex-shrink:0;}
+  .bonus-body{flex:1;}
+  .bonus-name{font-weight:500; font-size:14px;}
+  .bonus-desc{color:var(--chalk-dim); font-size:13px; margin-top:2px;}
+  .bonus-prize{font-family:'Teko', sans-serif; font-size:20px; color:var(--gold); flex-shrink:0; align-self:center;}
+
+  /* ---------- DRAFT BOARD ---------- */
+  .draft-round{margin-top:22px;}
+  .draft-round:first-child{margin-top:0;}
+  .draft-round-title{font-size:16px; color:var(--gold-dark); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--turf-line);}
+  .draft-pick-row{display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--turf-line); font-size:13px;}
+  .draft-pick-row:last-child{border-bottom:none;}
+  .draft-pick-no{font-family:'Teko', sans-serif; font-size:18px; color:var(--chalk-dim); width:32px; flex-shrink:0;}
+  .draft-team{display:flex; align-items:center; gap:8px; width:220px; flex-shrink:0;}
+  .draft-team img{width:24px; height:24px; border-radius:4px; object-fit:cover;}
+  .draft-team-name{font-size:12px; color:var(--chalk-dim);}
+  .draft-player{flex:1;}
+  .draft-player-name{font-weight:500;}
+  .draft-pos{display:inline-block; font-size:11px; color:var(--gold-dark); background:rgba(183,168,136,0.14); border:1px solid var(--gold-dark); border-radius:3px; padding:1px 6px; margin-right:8px;}
+  .draft-nfl{color:var(--chalk-dim); font-size:12px;}
+
+  /* ---------- MATCHUPS ---------- */
+  .matchup-card{
+    background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px;
+    padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .matchup-side{display:flex; align-items:center; gap:10px; flex:1; min-width:180px;}
+  .matchup-side.right{justify-content:flex-end; text-align:right;}
+  .matchup-side img{width:36px; height:36px; border-radius:6px; object-fit:cover; flex-shrink:0;}
+  .matchup-team-name{font-size:14px; font-weight:500;}
+  .matchup-team-record{font-size:11px; color:var(--chalk-dim);}
+  .matchup-score{font-family:'Teko', sans-serif; font-size:30px; color:var(--gold); min-width:70px; text-align:center;}
+  .matchup-score.leading{color:var(--gold);}
+  .matchup-score.trailing{color:var(--chalk-dim);}
+  .matchup-mid{display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .matchup-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-dim);}
+
+  /* ---------- RECAP ---------- */
+  .recap-card{
+    background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px;
+    padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  }
+  .recap-card .matchup-side.loser{opacity:0.55;}
+  .recap-card .matchup-side.loser img{filter:grayscale(40%);}
+  .recap-winner-name{color:var(--gold);}
+  .recap-mid{display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .recap-final-tag{font-size:10px; letter-spacing:1px; color:var(--chalk-dim); text-transform:uppercase;}
+  .recap-margin{font-size:11px; color:var(--chalk-dim); margin-top:2px;}
+
+  /* ---------- SORTABLE STANDINGS ---------- */
+  th.sortable{cursor:pointer; user-select:none;}
+  th.sortable:hover{color:var(--chalk);}
+  th.sortable .arrow{margin-left:3px; opacity:0.5;}
+  th.sortable.sorted .arrow{opacity:1; color:var(--gold);}
+
+  /* ---------- EDITABLE RECORDS ---------- */
+  .record-card{position:relative;}
+  .record-card .rvalue-input{
+    width:100%; background:transparent; border:none; border-bottom:1px dashed var(--turf-line);
+    font-family:'Teko', sans-serif; font-size:22px; color:var(--gold); padding:2px 0; margin-top:4px;
+  }
+  .record-card .rvalue-input:focus{outline:none; border-bottom-color:var(--gold);}
+  .record-card .rsaved{font-size:10px; color:var(--gold); opacity:0; transition:opacity 0.2s; position:absolute; top:12px; right:12px;}
+  .record-card .rsaved.show{opacity:1;}
+
+  /* ---------- BONUS WINNER PICKER ---------- */
+  .bonus-row{align-items:center;}
+  .bonus-winner-select{
+    background:var(--turf); border:1px solid var(--turf-line); color:var(--chalk);
+    font-family:'Inter', sans-serif; font-size:12px; padding:6px 8px; border-radius:4px; max-width:170px; flex-shrink:0;
+  }
+  .bonus-winner-select:focus{outline:none; border-color:var(--gold);}
+  .bonus-leaderboard-row{display:flex; align-items:center; gap:10px; padding:6px 0; font-size:13px;}
+  .bonus-leaderboard-row .blb-name{flex:1;}
+  .bonus-leaderboard-row .blb-amount{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold);}
+  .bonus-empty{color:var(--chalk-dim); font-size:13px; font-style:italic;}
+
+  /* ---------- DRAFT SEARCH / COLLAPSE ---------- */
+  .draft-search{
+    width:100%; background:var(--turf-dark); border:1px solid var(--turf-line); color:var(--chalk);
+    font-family:'Inter', sans-serif; font-size:13px; padding:9px 12px; border-radius:4px; margin-top:14px;
+  }
+  .draft-search:focus{outline:none; border-color:var(--gold);}
+  .draft-round-title{cursor:pointer; display:flex; align-items:center; justify-content:space-between;}
+  .draft-round-title .chevron{transition:transform 0.15s; color:var(--chalk-dim); font-size:14px;}
+  .draft-round.collapsed .chevron{transform:rotate(-90deg);}
+  .draft-round.collapsed .draft-pick-row{display:none;}
+  .draft-round-count{color:var(--chalk-dim); font-size:11px; text-transform:none; letter-spacing:0;}
+
+  /* ---------- DRAFT YEAR TABS ---------- */
+  .draft-year-tabs{display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap;}
+  .draft-year-tabs button{
+    background:var(--turf-dark); border:1px solid var(--turf-line); color:var(--chalk-dim);
+    font-family:'Teko', sans-serif; font-size:16px; padding:6px 16px; border-radius:4px; cursor:pointer;
+  }
+  .draft-year-tabs button:hover{color:var(--chalk); border-color:var(--gold-dark);}
+  .draft-year-tabs button.active{background:var(--gold); color:#2A2005; border-color:var(--gold);}
+  .draft-truncated-note{color:var(--chalk-dim); font-size:12px; font-style:italic; margin-top:10px;}
+
+  .footer-note{font-size:12px; color:var(--chalk-dim); text-align:center; margin-top:10px;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:640px){
+    .brand{font-size:18px;}
+    .hero h1{font-size:28px;}
+    .hero p{font-size:13px;}
+    .contact-strip{gap:12px;}
+    .panel{padding:16px 14px;}
+    .panel-title{font-size:20px;}
+
+    .records-grid{grid-template-columns:1fr;}
+    .teams-grid{grid-template-columns:repeat(2, 1fr);}
+
+    .draft-team{width:90px;}
+    .draft-team-name{display:none;}
+    .draft-player-name{display:block;}
+
+    .rivalry-top-row{gap:8px;}
+    .rivalry-side{min-width:0;}
+    .rivalry-weeks{min-width:0; width:100%; order:3;}
+
+    .matchup-side{min-width:0;}
+    .matchup-score{font-size:24px; min-width:50px;}
+
+    .rec-main{min-width:0; width:100%;}
+    .rec-meta{width:100%;}
+
+    .bonus-row{flex-wrap:wrap;}
+    .bonus-winner-select{max-width:none; width:100%; order:3;}
+
+    .team-detail-inner{gap:12px;}
+    .team-detail-inner img{width:80px; height:80px;}
+    .td-name{font-size:22px;}
+
+    table.standings th, table.standings td{padding:7px 4px; font-size:12px;}
+    .team-cell-mgr{display:none;}
+
+    .officers-table td, .payout-table td, .payout-table th, .draft-order-table td, .draft-order-table th{
+      padding:6px 4px; font-size:12px;
+    }
+  }
+
+  @media (max-width:400px){
+    .teams-grid{grid-template-columns:1fr 1fr;}
+    .hero h1{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <div class="brand">🏈 The NUT Fantasy Football League</div>
+  <div class="navlinks" id="navlinks">
+    <button data-section="home" class="active">Home</button>
+    <button data-section="standings">Standings</button>
+    <button data-section="rivalry">Rivalry Week</button>
+    <button data-section="bonus">Bonus Games</button>
+    <button data-section="champions">Champions &amp; Records</button>
+    <button data-section="draft">The Draft</button>
+    <button data-section="constitution">Constitution</button>
+    <button data-section="teams">Teams</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1>2026 Season</h1>
+    <div class="contact-strip">
+      <span class="contact-label">Contact us</span>
+      <a href="https://www.facebook.com/profile.php?id=61580410562046" target="_blank" rel="noopener">Facebook</a>
+      <a href="https://www.instagram.com/nutandfriendsffl/" target="_blank" rel="noopener">Instagram</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="section active" id="section-home">
+    <div class="panel">
+      <h2 class="panel-title" id="matchupsTitle">This Week's Matchups</h2>
+      <div class="status-banner" id="matchupsStatus">Loading live matchups from Sleeper&hellip;</div>
+      <div id="matchupsGrid"></div>
+    </div>
+    <div class="panel">
+      <h2 class="panel-title" id="recapTitle">Weekly Recap</h2>
+      <div class="status-banner" id="recapStatus">Loading last week's results&hellip;</div>
+      <div id="recapGrid"></div>
+    </div>
+    <div class="panel">
+      <h2 class="panel-title">Power Rankings</h2>
+      <p class="panel-sub" id="powerStatus">Crunching production, roster strength, dynasty value, draft capital, recent form, and record&hellip;</p>
+      <div id="powerGrid"></div>
+      <p class="const-note" id="powerMethodNote" style="margin-top:12px; display:none;">
+        Click a team to see its category breakdown. Roster Strength and Dynasty Value are estimated from Sleeper's player database (search rank and age); Draft Capital reflects owned future 1st/2nd-round rookie picks. These are heuristics, not an official Sleeper metric.
+      </p>
+    </div>
+  </div>
+
+  <div class="section" id="section-standings">
+    <div class="panel">
+      <h2 class="panel-title">Standings</h2>
+      <div class="status-banner" id="standingsStatus">Loading live standings from Sleeper&hellip;</div>
+      <table class="standings">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="sortable" data-field="team">Team</th>
+            <th class="sortable" data-field="wins">W</th>
+            <th class="sortable" data-field="losses">L</th>
+            <th class="sortable" data-field="ties">T</th>
+            <th class="sortable" data-field="fpts">PF</th>
+          </tr>
+        </thead>
+        <tbody id="standingsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section" id="section-rivalry">
+    <div class="panel">
+      <h2 class="panel-title">Rivalry Week</h2>
+      <p class="panel-sub">Six grudge matches, played twice a season &mdash; once in the regular rotation, once in the dedicated Rivalry Week.</p>
+      <div class="rivalry-grid" id="rivalryGrid"></div>
+    </div>
+  </div>
+
+  <div class="section" id="section-bonus">
+    <div class="panel">
+      <h2 class="panel-title">Weekly Bonus Games</h2>
+      <p class="panel-sub">A different $25 side prize every week &mdash; separate from the weekly high-scorer pot. Pick a winner each week and the leaderboard updates for everyone.</p>
+      <div id="bonusLeaderboard"></div>
+    </div>
+    <div class="panel">
+      <div id="bonusList"></div>
+    </div>
+  </div>
+
+  <div class="section" id="section-champions">
+    <div class="panel">
+      <h2 class="panel-title">Champions</h2>
+      <div class="empty-trophy">
+        <div class="icon">🏆</div>
+        <div>No champion crowned yet this season &mdash; the trophy case opens after the title game. Check Season History below for past winners.</div>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="panel-title">Season History</h2>
+      <p class="panel-sub" id="historySub">Loading past dynasty seasons from Sleeper&hellip;</p>
+      <div id="historyList"></div>
+    </div>
+    <div class="panel">
+      <h2 class="panel-title">Records</h2>
+      <p class="panel-sub" id="recordsStatus">Loading records from every game since 2023&hellip;</p>
+      <div id="recordsAccordion"></div>
+    </div>
+  </div>
+
+  <div class="section" id="section-draft">
+    <div class="panel">
+      <h2 class="panel-title">The Draft</h2>
+      <div class="draft-year-tabs" id="draftYearTabs">
+        <button data-year="2026" class="active">2026</button>
+        <button data-year="2025">2025</button>
+        <button data-year="2024">2024</button>
+        <button data-year="2023">2023</button>
+      </div>
+      <div class="draft-status" id="draftStatus">
+        <span class="badge">4 rounds &middot; 48 picks</span>
+        <span style="color:var(--chalk-dim); font-size:13px;">Snake draft, completed ahead of Week 1.</span>
+      </div>
+      <input type="text" id="draftSearch" class="draft-search" placeholder="Search by player, position, team, or NFL club&hellip;" />
+      <div id="draftBoard" style="margin-top:18px;"></div>
+    </div>
+  </div>
+
+  <div class="section" id="section-constitution">
+    <div class="panel">
+      <h2 class="panel-title">The NUT Fantasy Football Constitution</h2>
+      <p class="panel-sub">Click any article to expand it.</p>
+
+      <details class="const-article" open>
+        <summary>Article I &mdash; League Officers</summary>
+        <div class="const-body">
+          <p>League officers are available if you have any questions or need assistance. If your question is about a feature of the hosting platform itself, please use their support resources first. For league-specific issues, contact the commissioner first, then a co-commissioner. If your issue is time-sensitive (e.g. a roster move and you have no internet access) and no officer is reachable, post on the league message board so the request is timestamped and can be honored retroactively.</p>
+          <table class="officers-table">
+            <tr><td>League Commissioner</td><td>Josef Santos</td><td>(425) 419-8012 (text preferred)<br>tnutffl@gmail.com</td></tr>
+            <tr><td>Co-commissioner</td><td>Leland Mann</td><td>(253) 304-8221 (text preferred)</td></tr>
+          </table>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article II &mdash; League Entry &amp; Other Fees</summary>
+        <div class="const-body">
+          <p><strong>Entry fee: $140 total per team</strong> &mdash; $100 toward the end-of-year payout, $20 toward the championship trophy, and $20 toward weekly prizes (14 weeks &times; ~$2.86/week).</p>
+          <p>The last-placed team in the Loser bracket pays the trophy engraving fee and must fly a "loser flag" (to be determined) at their home for the full offseason. This exists to keep every manager engaged for the whole season.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article III &mdash; Prize Payout Structure</summary>
+        <div class="const-body">
+          <p>Cash prizes go to the top 3 finishers in the Championship bracket, plus a weekly cash prize for the highest score of the week during the regular season.</p>
+          <table class="payout-table">
+            <tr><td>1st place</td><td>$780.00</td><td>65%</td></tr>
+            <tr><td>2nd place</td><td>$300.00</td><td>25%</td></tr>
+            <tr><td>3rd place</td><td>$120.00</td><td>10%</td></tr>
+            <tr><td>Weekly prize (&times;14 weeks)</td><td>$25.00/wk</td><td>$350 total</td></tr>
+          </table>
+          <p class="const-note">Amounts above are the target payouts pending full fee collection; the listed percentages apply if entry fees aren't fully collected.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article IV &mdash; Late Payments</summary>
+        <div class="const-body">
+          <p>Any weekly prize won by a team that hasn't paid its entry fee is forfeited and rolled into the Champion's payout. Teams unpaid by the league deadline are expelled immediately &mdash; no grace period. The commissioner manages the vacated team until a new owner is found and approved by the league.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article V &mdash; Playoff Configuration</summary>
+        <div class="const-body">
+          <p>6-team Championship playoff, seeded by record then total points. The Championship bracket runs Weeks 15&ndash;16. A parallel 6-team Loser bracket runs through Week 17, and its final standings set next year's top 6 draft positions.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article VI &mdash; Draft Order Determination</summary>
+        <div class="const-body">
+          <p>Next year's draft order is set by this year's playoff results:</p>
+          <table class="draft-order-table">
+            <tr><th>Loser bracket finish</th><th>Draft slot</th></tr>
+            <tr><td>1st</td><td>1</td></tr><tr><td>2nd</td><td>2</td></tr><tr><td>3rd</td><td>3</td></tr>
+            <tr><td>4th</td><td>4</td></tr><tr><td>5th</td><td>5</td></tr><tr><td>6th</td><td>6</td></tr>
+          </table>
+          <table class="draft-order-table">
+            <tr><th>Championship bracket finish</th><th>Draft slot</th></tr>
+            <tr><td>Champion</td><td>12</td></tr><tr><td>2nd</td><td>11</td></tr><tr><td>3rd</td><td>10</td></tr>
+            <tr><td>4th</td><td>9</td></tr><tr><td>5th</td><td>8</td></tr><tr><td>6th</td><td>7</td></tr>
+          </table>
+          <p>New teams slot into the 12th pick, adjusting existing owners accordingly.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article VII &mdash; Trades</summary>
+        <div class="const-body">
+          <ol class="const-olist">
+            <li>Transaction fees: $1 per waiver/free-agent move, $2 per trade &mdash; goes to the league bank for draft-day food and drinks.</li>
+            <li>Trades can be made between any managers within the hosting platform's rules.</li>
+            <li>Once all parties accept, a trade can't be reversed due to injury, suspension, or other bad luck. It can only be voided if both parties agree before it's officially granted.</li>
+            <li>Every other manager gets 24 hours to vote to veto a completed trade, but must give the commissioner a valid reason.</li>
+            <li>Valid veto reasons: (a) the players traded aren't of comparable value given position and team needs, or (b) the trade doesn't improve both teams.</li>
+            <li>If 60%+ of valid votes oppose the trade, it's voided. Managers involved in the trade don't vote.</li>
+            <li>Traded players can't be traded back for 3 game weeks (no short-term loans).</li>
+            <li>Trade deadline: TBA.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article VIII &mdash; New Rule Creation</summary>
+        <div class="const-body">
+          <p>Disputes not covered by this constitution are discussed by the league, then put to a commissioner-run poll. The result applies immediately and gets appended to the constitution. Polls are decided by plurality (commissioner breaks ties) and typically run 3 days, shorter if game day is close.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article IX &mdash; Roster Oversights</summary>
+        <div class="const-body">
+          <p>If a roster slot is empty (bye week or oversight) and an eligible bench player is available, that player must be started. If two eligible players qualify, start whichever has the higher projected points for that week.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article X &mdash; League Format</summary>
+        <div class="const-body">
+          <ul class="const-ulist">
+            <li>12 teams across two divisions: <strong>NUT Federation</strong> and <strong>Water SAC Alliance</strong>.</li>
+            <li>27-man rosters: 14 starters (1 QB, 2 RB, 3 WR, 1 TE, 1 FLEX (W/R/T), 1 FLEX (Q/W/R/T), 2 DL, 1 LB, 2 DB), 10 bench, 3 taxi, 5 IR (IR slot requires actual IR designation, not just "injured").</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Article XI &mdash; The Draft</summary>
+        <div class="const-body">
+          <p>Draft date/time: TBA. The commissioner arranges draft-day logistics on the hosting platform. It's each manager's responsibility to attend or set up an autodraft. Snake draft order: 1&ndash;12, then 12&ndash;1, repeating for 28 rounds. Each pick has a 1.5-minute clock; if time expires, a player is auto-selected and the pick passes. Free agency opens immediately after the draft. Draft order is decided by an activity set by the commissioner beforehand.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Rules &amp; Ethics</summary>
+        <div class="const-body">
+          <p>Any rule violation may cost you your entry fee and prize eligibility &mdash; no refunds. Keep it competitive but fun.</p>
+          <p><strong>1. No collusion.</strong> Banter is encouraged, but play it straight. Collusion includes: loaning players, intentionally starting a weakened lineup, or giving a player away in an obviously one-sided trade (especially once you're out of contention). The commissioner rules on collusion accusations.</p>
+          <p><strong>2. Inactivity.</strong> After 3 inactive game weeks, a commissioner will reach out; a 1-week grace period follows, then removal from the league. Inactivity means fielding a lineup with injured/unavailable players when better options exist on your bench &mdash; unless your only healthy options are simply weaker. A replacement manager is voted in unanimously by the other owners, and the removed manager forfeits prize money and entry fee. If you'll be away for multiple weeks, give the commissioners a heads up.</p>
+          <p><strong>3. Group chat.</strong> No rules &mdash; all-out trash talk is encouraged.</p>
+        </div>
+      </details>
+
+      <details class="const-article">
+        <summary>Amendments</summary>
+        <div class="const-body">
+          <p>Future amendments are handled in the offseason, at a time when all owners can meet to discuss changes.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="section" id="section-teams">
+    <div class="panel">
+      <h2 class="panel-title">Teams</h2>
+      <div class="teams-grid" id="teamsGrid"></div>
+      <div class="team-detail" id="teamDetail">
+        <button class="td-back" id="teamDetailBack">&larr; Back to all teams</button>
+        <div class="team-detail-inner">
+          <img id="tdImg" src="" alt="" />
+          <div>
+            <div class="td-name" id="tdName"></div>
+            <div class="td-mgr" id="tdMgr"></div>
+            <div class="td-rival" id="tdRival"></div>
+          </div>
+        </div>
+        <div class="alltime" id="tdAllTime"></div>
+        <div class="alltime" id="tdPlayoffs"></div>
+        <div class="alltime" id="tdHeadToHead"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">Standings pulled live from the Sleeper API where possible &middot; falls back to the latest saved snapshot otherwise. Bonus Game winners and Records are saved and visible to anyone with this page.</div>
+
+</div>
+
+<script>
+const LEAGUE_ID = "1333691133745704960";
+
+const FALLBACK_TEAMS = [
+  {rosterId:1,  ownerId:"995923308459745280", team:"JSN Your Face 😏", manager:"BillsMafia1480", avatar:"https://sleepercdn.com/uploads/019f7ba12d512901421f384a5606aa5e", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:2,  ownerId:"604190850481713152", team:"Breece & Desist", manager:"Awesomeus", avatar:"https://sleepercdn.com/avatars/555009c05e8a6c72635a166c3c36894b", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:3,  ownerId:"996183312672669696", team:"Points Against Champion", manager:"PAHTNAH", avatar:"https://sleepercdn.com/uploads/467c96f4e100e4bd89be88276dbf0cec.jpg", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:4,  ownerId:"931163037363515392", team:"Prestige Worldwide", manager:"cincy_kid", avatar:"https://sleepercdn.com/uploads/c8e6f2c3bc03f6ffadb28c4461cf85d7.jpg", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:5,  ownerId:"996196287416528896", team:"Lickety Splitz Squad", manager:"twillie391", avatar:"https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:6,  ownerId:"996196931028389888", team:"The OG Champ", manager:"JeffPeterson20", avatar:"https://sleepercdn.com/uploads/c7eef8bbb107e72d6bfc814062997354.jpg", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:7,  ownerId:"959226991016816640", team:"Love Hurts 🦿😬", manager:"KShrewsberry", avatar:"https://sleepercdn.com/uploads/d1814d5f1fd5d6828aaa0d7b935a1433.jpg", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:8,  ownerId:"996256741807603712", team:"White Center Rats", manager:"Savro24", avatar:"https://sleepercdn.com/uploads/416adaa0ed8b729e1ab7b2287d76c087.jpg", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:9,  ownerId:"996390324501024768", team:"The Many-Faced Squad", manager:"CamWells16", avatar:"https://sleepercdn.com/avatars/01adb9b8da194a67264f35625a4da119", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:10, ownerId:"999558477183913984", team:"Gus Swayze's Squad", manager:"AlanCarignan", avatar:"https://sleepercdn.com/uploads/0d7ac3b248f0e5c1635caf8b557eb46b.jpg", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:11, ownerId:"996494307496542208", team:"Price is wrong Bitch!", manager:"Smittytribe27", avatar:"https://sleepercdn.com/avatars/9a3d3353cb3bf83e1f98e0a5a61acf40", wins:0, losses:0, ties:0, fpts:0},
+  {rosterId:12, ownerId:"996503416859709440", team:"Boom Goes The Dynamite", manager:"brandishrewsberry", avatar:"https://sleepercdn.com/uploads/bf3e42dfbfdd21ac884b0e920774269e", wins:0, losses:0, ties:0, fpts:0}
+];
+
+const RIVALRIES = [
+  ["995923308459745280", "996494307496542208"], // JSN Your Face vs Price is wrong Bitch!
+  ["959226991016816640", "996503416859709440"], // Love Hurts vs Boom Goes The Dynamite
+  ["996256741807603712", "996196287416528896"], // White Center Rats vs Lickety Splitz Squad
+  ["931163037363515392", "996390324501024768"], // Prestige Worldwide vs The Many-Faced Squad
+  ["996183312672669696", "996196931028389888"], // Points Against Champion vs The OG Champ
+  ["604190850481713152", "999558477183913984"]  // Breece & Desist vs Gus Swayze's Squad
+];
+
+// Career records built from each team's completed 2023-2025 seasons on Sleeper.
+// Keyed by owner_id so a record follows the person, not the roster slot.
+// Playoff results built from each season's winners bracket (2023-2025). 6-team playoff each year.
+// finish: "Champion" | "Runner-up" | "3rd" | "4th" | "5th" | "6th" | null (missed playoffs)
+const PLAYOFF_STATS = {
+  "995923308459745280": { seasons: [ // BillsMafia1480 - JSN Your Face
+    {season:"2023", made:true, finish:"4th", wins:0, losses:2},
+    {season:"2024", made:false, finish:null, wins:0, losses:0},
+    {season:"2025", made:false, finish:null, wins:0, losses:0}
+  ]},
+  "931163037363515392": { seasons: [ // cincy_kid - Prestige Worldwide
+    {season:"2023", made:false, finish:null, wins:0, losses:0},
+    {season:"2024", made:true, finish:"6th", wins:0, losses:2},
+    {season:"2025", made:true, finish:"5th", wins:1, losses:1}
+  ]},
+  "959226991016816640": { seasons: [ // KShrewsberry - Love Hurts
+    {season:"2023", made:false, finish:null, wins:0, losses:0},
+    {season:"2024", made:true, finish:"4th", wins:1, losses:2},
+    {season:"2025", made:true, finish:"3rd", wins:2, losses:1}
+  ]},
+  "996183312672669696": { seasons: [ // PAHTNAH - Points Against Champion
+    {season:"2023", made:false, finish:null, wins:0, losses:0},
+    {season:"2024", made:false, finish:null, wins:0, losses:0},
+    {season:"2025", made:false, finish:null, wins:0, losses:0}
+  ]},
+  "996196287416528896": { seasons: [ // twillie391 - Lickety Splitz Squad
+    {season:"2023", made:true, finish:"5th", wins:1, losses:1},
+    {season:"2024", made:true, finish:"Champion", wins:2, losses:0},
+    {season:"2025", made:true, finish:"Runner-up", wins:1, losses:1}
+  ]},
+  "996196931028389888": { seasons: [ // JeffPeterson20 - The OG Champ
+    {season:"2023", made:true, finish:"Champion", wins:3, losses:0},
+    {season:"2024", made:false, finish:null, wins:0, losses:0},
+    {season:"2025", made:false, finish:null, wins:0, losses:0}
+  ]},
+  "996256741807603712": { seasons: [ // Savro24 - White Center Rats
+    {season:"2023", made:true, finish:"6th", wins:0, losses:2},
+    {season:"2024", made:true, finish:"3rd", wins:2, losses:1},
+    {season:"2025", made:true, finish:"6th", wins:0, losses:2}
+  ]},
+  "996390324501024768": { seasons: [ // CamWells16 - The Many-Faced Squad
+    {season:"2023", made:false, finish:null, wins:0, losses:0},
+    {season:"2024", made:true, finish:"5th", wins:1, losses:1},
+    {season:"2025", made:true, finish:"Champion", wins:2, losses:0}
+  ]},
+  "996494307496542208": { seasons: [ // Smittytribe27 - Price is wrong Bitch!
+    {season:"2023", made:false, finish:null, wins:0, losses:0},
+    {season:"2024", made:false, finish:null, wins:0, losses:0},
+    {season:"2025", made:false, finish:null, wins:0, losses:0}
+  ]},
+  "996503416859709440": { seasons: [ // brandishrewsberry - Boom Goes The Dynamite
+    {season:"2023", made:true, finish:"3rd", wins:1, losses:1},
+    {season:"2024", made:true, finish:"Runner-up", wins:1, losses:1},
+    {season:"2025", made:true, finish:"4th", wins:1, losses:2}
+  ]},
+  "999558477183913984": { seasons: [ // AlanCarignan - Gus Swayze's Squad
+    {season:"2023", made:true, finish:"Runner-up", wins:2, losses:1},
+    {season:"2024", made:false, finish:null, wins:0, losses:0},
+    {season:"2025", made:false, finish:null, wins:0, losses:0}
+  ]},
+  "604190850481713152": { seasons: [] } // Awesomeus - new to the league in 2026
+};
+
+const CAREER_STATS = {
+  "995923308459745280": { seasons: [ // BillsMafia1480 - JSN Your Face
+    {season:"2023", wins:10, losses:4, fpts:2441.5},
+    {season:"2024", wins:4, losses:10, fpts:2342.2},
+    {season:"2025", wins:4, losses:10, fpts:2546.9}
+  ], titles:[], runnerUps:[] },
+  "931163037363515392": { seasons: [ // cincy_kid - Prestige Worldwide
+    {season:"2023", wins:5, losses:9, fpts:2142.9},
+    {season:"2024", wins:9, losses:5, fpts:2757.4},
+    {season:"2025", wins:10, losses:4, fpts:2873.0}
+  ], titles:[], runnerUps:[] },
+  "959226991016816640": { seasons: [ // KShrewsberry - Love Hurts
+    {season:"2023", wins:4, losses:10, fpts:2332.9},
+    {season:"2024", wins:8, losses:6, fpts:2780.1},
+    {season:"2025", wins:10, losses:4, fpts:2721.3}
+  ], titles:[], runnerUps:[] },
+  "996183312672669696": { seasons: [ // PAHTNAH - Points Against Champion
+    {season:"2023", wins:4, losses:10, fpts:1965.9},
+    {season:"2024", wins:3, losses:11, fpts:2544.5},
+    {season:"2025", wins:4, losses:10, fpts:2195.0}
+  ], titles:[], runnerUps:[] },
+  "996196287416528896": { seasons: [ // twillie391 - Lickety Splitz Squad
+    {season:"2023", wins:8, losses:6, fpts:2482.4},
+    {season:"2024", wins:10, losses:4, fpts:2926.6},
+    {season:"2025", wins:10, losses:4, fpts:2801.2}
+  ], titles:["2024"], runnerUps:["2025"] },
+  "996196931028389888": { seasons: [ // JeffPeterson20 - The OG Champ
+    {season:"2023", wins:8, losses:6, fpts:2185.4},
+    {season:"2024", wins:4, losses:10, fpts:2320.5},
+    {season:"2025", wins:7, losses:7, fpts:2448.0}
+  ], titles:["2023"], runnerUps:[] },
+  "996256741807603712": { seasons: [ // Savro24 - White Center Rats
+    {season:"2023", wins:9, losses:5, fpts:2390.0},
+    {season:"2024", wins:9, losses:5, fpts:2877.5},
+    {season:"2025", wins:8, losses:6, fpts:2396.7}
+  ], titles:[], runnerUps:[] },
+  "996390324501024768": { seasons: [ // CamWells16 - The Many-Faced Squad
+    {season:"2023", wins:7, losses:7, fpts:2331.6},
+    {season:"2024", wins:8, losses:6, fpts:2583.9},
+    {season:"2025", wins:11, losses:3, fpts:2933.4}
+  ], titles:["2025"], runnerUps:[] },
+  "996494307496542208": { seasons: [ // Smittytribe27 - Price is wrong Bitch!
+    {season:"2023", wins:5, losses:9, fpts:2231.0},
+    {season:"2024", wins:5, losses:9, fpts:2605.3},
+    {season:"2025", wins:6, losses:8, fpts:2595.2}
+  ], titles:[], runnerUps:[] },
+  "996503416859709440": { seasons: [ // brandishrewsberry - Boom Goes The Dynamite
+    {season:"2023", wins:9, losses:5, fpts:2526.6},
+    {season:"2024", wins:11, losses:3, fpts:3037.6},
+    {season:"2025", wins:7, losses:7, fpts:2498.8}
+  ], titles:[], runnerUps:["2024"] },
+  "999558477183913984": { seasons: [ // AlanCarignan - Gus Swayze's Squad
+    {season:"2023", wins:8, losses:6, fpts:2385.8},
+    {season:"2024", wins:8, losses:6, fpts:2681.1},
+    {season:"2025", wins:5, losses:9, fpts:2385.0}
+  ], titles:[], runnerUps:["2023"] },
+  "604190850481713152": { seasons: [], titles:[], runnerUps:[] } // Awesomeus - new to the league in 2026
+};
+
+const FALLBACK_HISTORY = [
+  {
+    leagueId: "1180316624798797824",
+    season: "2025",
+    previousLeagueId: "1053587508728012800",
+    champion: {
+      team: "The Many-Faced Squad",
+      manager: "CamWells16",
+      avatar: "https://sleepercdn.com/avatars/01adb9b8da194a67264f35625a4da119"
+    },
+    runnerUp: {
+      team: "Lickety Splitz Squad",
+      manager: "twillie391",
+      avatar: "https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg"
+    }
+  },
+  {
+    leagueId: "1053587508728012800",
+    season: "2024",
+    previousLeagueId: "996112028718841856",
+    champion: {
+      team: "Lickety Splitz Squad",
+      manager: "twillie391",
+      avatar: "https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg"
+    },
+    runnerUp: {
+      team: "Boom Goes The Dynamite",
+      manager: "brandishrewsberry",
+      avatar: "https://sleepercdn.com/uploads/bf3e42dfbfdd21ac884b0e920774269e"
+    }
+  },
+  {
+    leagueId: "996112028718841856",
+    season: "2023",
+    previousLeagueId: null,
+    champion: {
+      team: "SneakerHeadz",
+      manager: "JeffPeterson20",
+      avatar: "https://sleepercdn.com/uploads/c9b2f0ee052e567d0fe22b5e4a24636e.jpg"
+    },
+    runnerUp: {
+      team: "Bonney Lake Wookies",
+      manager: "AlanCarignan",
+      avatar: "https://sleepercdn.com/uploads/1eadadacb5e16318fd821c79ca9bbd52.jpg"
+    }
+  }
+];
+
+const BONUS_GAMES = [
+  {week:1,  name:"Bench Warmer",     desc:"Most points by a player on your bench."},
+  {week:2,  name:"Match Up Blue",    desc:"Highest team score in a loss."},
+  {week:3,  name:"Beast Mode",       desc:"Most points by an active RB."},
+  {week:4,  name:"Lucky Duck",       desc:"Lowest team score in a win."},
+  {week:5,  name:"The Sheriff",      desc:"Most points by an active QB."},
+  {week:6,  name:"Photo Finish",     desc:"Narrowest margin of victory."},
+  {week:7,  name:"The Flex",         desc:"Most total points in your FLEX position."},
+  {week:8,  name:"Nice Hands",       desc:"Most points by an active WR."},
+  {week:9,  name:"Blowout",          desc:"Largest margin of victory."},
+  {week:10, name:"Bad Beat",         desc:"Narrowest margin of defeat."},
+  {week:11, name:"One-Two Punch",    desc:"Highest combined total of your RB1 and RB2 positions."},
+  {week:12, name:"Pick Six",         desc:"Most points by an active IDP."},
+  {week:13, name:"Tighty Whites",    desc:"Most points by an active TE."},
+  {week:14, name:"Points Against Champ", desc:"Team with the highest season total points against."}
+];
+
+// Season-level streaks, derived from each year's playoff bracket (2023-2025).
+// These don't need a live fetch since they're derived from full season results already parsed for PLAYOFF_STATS.
+const PLAYOFF_WIN_STREAKS = [
+  {ownerId:"996196931028389888", games:3, span:"2023 playoffs (went 3-0 to win it all)"},
+  {ownerId:"999558477183913984", games:2, span:"2023 playoffs (won first two rounds)"},
+  {ownerId:"996196287416528896", games:2, span:"2024 playoffs (Championship run)"},
+  {ownerId:"996390324501024768", games:2, span:"2025 playoffs (Championship run)"},
+  {ownerId:"996256741807603712", games:1, span:"2024 playoffs (one of several tied at 1)"}
+];
+const MISSED_PLAYOFF_STREAKS = [
+  {ownerId:"996183312672669696", seasons:3, span:"2023-2025, still active"},
+  {ownerId:"996494307496542208", seasons:3, span:"2023-2025, still active"},
+  {ownerId:"995923308459745280", seasons:2, span:"2024-2025, still active"},
+  {ownerId:"996196931028389888", seasons:2, span:"2024-2025, still active"},
+  {ownerId:"999558477183913984", seasons:2, span:"2024-2025, still active"}
+];
+const CONSECUTIVE_CHAMPIONSHIPS = [
+  {ownerId:"996196931028389888", count:1, span:"2023 only \u2014 no team has repeated as champion yet"},
+  {ownerId:"996196287416528896", count:1, span:"2024 only"},
+  {ownerId:"996390324501024768", count:1, span:"2025 only"}
+];
+const CONSECUTIVE_TITLE_GAME_APPEARANCES = [
+  {ownerId:"996196287416528896", count:2, span:"2024-2025 (won in 2024, runner-up in 2025)"},
+  {ownerId:"996196931028389888", count:1, span:"2023 only"},
+  {ownerId:"999558477183913984", count:1, span:"2023 only"},
+  {ownerId:"996503416859709440", count:1, span:"2024 only"},
+  {ownerId:"996390324501024768", count:1, span:"2025 only"}
+];
+
+let bonusWinners = {}; // { weekNumber: teamName }
+
+function teamOptionsHtml(selectedTeam){
+  const none = '<option value="">&mdash; pick winner &mdash;</option>';
+  const opts = TEAMS.slice().sort(function(a,b){ return a.team.localeCompare(b.team); }).map(function(t){
+    const sel = t.team === selectedTeam ? " selected" : "";
+    return '<option value="' + t.team.replace(/"/g,'&quot;') + '"' + sel + '>' + t.team + '</option>';
+  }).join("");
+  return none + opts;
+}
+
+function renderBonusGames(){
+  const list = document.getElementById("bonusList");
+  list.innerHTML = BONUS_GAMES.map(function(b){
+    const winner = bonusWinners[b.week] || "";
+    return '<div class="bonus-row">' +
+      '<div class="bonus-week">Wk ' + b.week + '</div>' +
+      '<div class="bonus-body">' +
+        '<div class="bonus-name">' + b.name + '</div>' +
+        '<div class="bonus-desc">' + b.desc + '</div>' +
+      '</div>' +
+      '<select class="bonus-winner-select" data-week="' + b.week + '">' + teamOptionsHtml(winner) + '</select>' +
+      '<div class="bonus-prize">$25</div>' +
+    '</div>';
+  }).join("");
+
+  list.querySelectorAll(".bonus-winner-select").forEach(function(sel){
+    sel.addEventListener("change", function(){
+      const week = sel.dataset.week;
+      if(sel.value){
+        bonusWinners[week] = sel.value;
+      } else {
+        delete bonusWinners[week];
+      }
+      saveBonusWinners();
+      renderBonusLeaderboard();
+    });
+  });
+
+  renderBonusLeaderboard();
+}
+
+function renderBonusLeaderboard(){
+  const el = document.getElementById("bonusLeaderboard");
+  const totals = {};
+  Object.values(bonusWinners).forEach(function(team){
+    totals[team] = (totals[team] || 0) + 25;
+  });
+  const rows = Object.entries(totals).sort(function(a,b){ return b[1] - a[1]; });
+  if(rows.length === 0){
+    el.innerHTML = '<div class="bonus-empty">No bonus games recorded yet &mdash; pick a winner below to start the leaderboard.</div>';
+    return;
+  }
+  el.innerHTML = rows.map(function(r){
+    return '<div class="bonus-leaderboard-row"><div class="blb-name">' + r[0] + '</div><div class="blb-amount">$' + r[1] + '</div></div>';
+  }).join("");
+}
+
+function saveBonusWinners(){
+  safeStorageSet("bonus_winners_2026", JSON.stringify(bonusWinners), true).catch(function(e){
+    console.error("Could not save bonus winners", e);
+  });
+}
+
+function loadBonusWinners(){
+  safeStorageGet("bonus_winners_2026", true).then(function(res){
+    if(res && res.value) bonusWinners = JSON.parse(res.value);
+  }).catch(function(){
+    bonusWinners = {};
+  }).then(function(){
+    renderBonusGames();
+  });
+}
+
+// Fallback matchups: the real Week 1 schedule, used if the live fetch is ever blocked
+const FALLBACK_MATCHUPS = {
+  week: 1,
+  pairs: [[1,4],[5,7],[3,10],[8,12],[6,11],[2,9]]
+};
+
+let LAST_MATCHUPS = null;
+
+function renderMatchups(week, pairsWithScores, usedLive){
+  LAST_MATCHUPS = {week: week, pairs: pairsWithScores, usedLive: usedLive};
+  document.getElementById("matchupsTitle").textContent = "Week " + week + " Matchups";
+  document.getElementById("matchupsStatus").textContent = usedLive
+    ? "Live from Sleeper."
+    : "Showing the Week 1 schedule (live Sleeper fetch was blocked by the browser).";
+
+  const grid = document.getElementById("matchupsGrid");
+  grid.innerHTML = pairsWithScores.map(function(m){
+    const a = TEAMS.find(function(t){ return t.rosterId === m.a; }) || {};
+    const b = TEAMS.find(function(t){ return t.rosterId === m.b; }) || {};
+    const aScore = m.aPoints !== null ? m.aPoints.toFixed(1) : "-";
+    const bScore = m.bPoints !== null ? m.bPoints.toFixed(1) : "-";
+    const aLead = m.aPoints !== null && m.bPoints !== null && m.aPoints > m.bPoints;
+    const bLead = m.aPoints !== null && m.bPoints !== null && m.bPoints > m.aPoints;
+    return '<div class="matchup-card">' +
+      '<div class="matchup-side">' +
+        '<img src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div><div class="matchup-team-name">' + (a.team||'Team '+m.a) + '</div>' +
+        '<div class="matchup-team-record">' + (a.wins||0) + '-' + (a.losses||0) + '</div></div>' +
+      '</div>' +
+      '<div class="matchup-mid">' +
+        '<div class="matchup-score ' + (aLead ? 'leading' : (bLead ? 'trailing' : '')) + '">' + aScore + '</div>' +
+        '<div class="matchup-vs">VS</div>' +
+        '<div class="matchup-score ' + (bLead ? 'leading' : (aLead ? 'trailing' : '')) + '">' + bScore + '</div>' +
+      '</div>' +
+      '<div class="matchup-side right">' +
+        '<div><div class="matchup-team-name">' + (b.team||'Team '+m.b) + '</div>' +
+        '<div class="matchup-team-record">' + (b.wins||0) + '-' + (b.losses||0) + '</div></div>' +
+        '<img src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function renderFallbackMatchups(){
+  const pairs = FALLBACK_MATCHUPS.pairs.map(function(p){
+    return {a:p[0], b:p[1], aPoints:null, bPoints:null};
+  });
+  renderMatchups(FALLBACK_MATCHUPS.week, pairs, false);
+}
+
+function renderRecap(week, pairs, usedLive){
+  document.getElementById("recapTitle").textContent = week > 0 ? ("Week " + week + " Recap") : "Weekly Recap";
+
+  const grid = document.getElementById("recapGrid");
+  const statusEl = document.getElementById("recapStatus");
+
+  if(week <= 0){
+    statusEl.textContent = "No completed weeks yet &mdash; check back after Week 1 wraps up.";
+    grid.innerHTML = "";
+    return;
+  }
+  if(pairs.length === 0){
+    statusEl.textContent = usedLive
+      ? "Week " + week + " hasn't finished scoring yet."
+      : "Recap unavailable right now (live fetch was blocked by the browser).";
+    grid.innerHTML = "";
+    return;
+  }
+
+  statusEl.textContent = "Final scores from Sleeper.";
+  grid.innerHTML = pairs.map(function(m){
+    const a = TEAMS.find(function(t){ return t.rosterId === m.a; }) || {};
+    const b = TEAMS.find(function(t){ return t.rosterId === m.b; }) || {};
+    const aPts = m.aPoints || 0, bPts = m.bPoints || 0;
+    const aWin = aPts > bPts, bWin = bPts > aPts;
+    const margin = Math.abs(aPts - bPts).toFixed(1);
+    return '<div class="recap-card">' +
+      '<div class="matchup-side' + (bWin ? ' loser' : '') + '">' +
+        '<img src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div><div class="matchup-team-name' + (aWin ? ' recap-winner-name' : '') + '">' + (a.team||'Team '+m.a) + '</div>' +
+        '<div class="matchup-team-record">' + aPts.toFixed(1) + ' pts</div></div>' +
+      '</div>' +
+      '<div class="recap-mid">' +
+        '<div class="recap-final-tag">Final</div>' +
+        '<div class="matchup-vs">' + aPts.toFixed(1) + ' &ndash; ' + bPts.toFixed(1) + '</div>' +
+        '<div class="recap-margin">' + (margin === "0.0" ? "Tie" : "by " + margin) + '</div>' +
+      '</div>' +
+      '<div class="matchup-side right' + (aWin ? ' loser' : '') + '">' +
+        '<div><div class="matchup-team-name' + (bWin ? ' recap-winner-name' : '') + '">' + (b.team||'Team '+m.b) + '</div>' +
+        '<div class="matchup-team-record">' + bPts.toFixed(1) + ' pts</div></div>' +
+        '<img src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function fetchMatchupPairs(week){
+  return fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/matchups/" + week).then(function(matchups){
+    if(!Array.isArray(matchups) || matchups.length === 0) return [];
+    const byMatchupId = {};
+    matchups.forEach(function(m){
+      if(!byMatchupId[m.matchup_id]) byMatchupId[m.matchup_id] = [];
+      byMatchupId[m.matchup_id].push(m);
+    });
+    return Object.values(byMatchupId)
+      .filter(function(g){ return g.length === 2; })
+      .map(function(g){
+        return {
+          a: g[0].roster_id, aPoints: (typeof g[0].points === "number") ? g[0].points : null,
+          b: g[1].roster_id, bPoints: (typeof g[1].points === "number") ? g[1].points : null
+        };
+      });
+  });
+}
+
+let LAST_RECAP = null;
+
+function loadHomeData(){
+  fetchJSON("https://api.sleeper.app/v1/state/nfl").then(function(state){
+    const week = Math.max(1, state.week || 1);
+
+    fetchMatchupPairs(week).then(function(pairs){
+      if(pairs.length === 0) throw new Error("no matchups yet");
+      renderMatchups(week, pairs, true);
+    }).catch(function(){
+      renderFallbackMatchups();
+    });
+
+    const priorWeek = week - 1;
+    if(priorWeek < 1){
+      LAST_RECAP = {week: 0, pairs: []};
+      renderRecap(0, [], true);
+    } else {
+      fetchMatchupPairs(priorWeek).then(function(pairs){
+        LAST_RECAP = {week: priorWeek, pairs: pairs};
+        renderRecap(priorWeek, pairs, true);
+      }).catch(function(){
+        LAST_RECAP = {week: priorWeek, pairs: []};
+        renderRecap(priorWeek, [], false);
+      });
+    }
+  }).catch(function(){
+    renderFallbackMatchups();
+    LAST_RECAP = {week: 0, pairs: []};
+    renderRecap(0, [], false);
+  });
+}
+
+// Per-season team identity, since team names/managers on some rosters changed year to year
+const TEAM_MAP_2023 = {
+  1:{team:"RammerJammer", manager:"BillsMafia1480", avatar:"https://sleepercdn.com/uploads/019f7ba12d512901421f384a5606aa5e"},
+  2:{team:"That's What Cheesehead", manager:"BReyes", avatar:"https://sleepercdn.com/uploads/67e4e71862e21f6ca0ca41951208e835.jpg"},
+  3:{team:"BowDown2UW", manager:"PAHTNAH", avatar:"https://sleepercdn.com/uploads/724d4c3871d0f9f37109165dfb54e342.jpg"},
+  4:{team:"Prestige Worldwide", manager:"cincy_kid", avatar:"https://sleepercdn.com/uploads/b52ec7153e952f3a3436b470caf54e67.jpg"},
+  5:{team:"Lickety Splitz Squad", manager:"twillie391", avatar:"https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg"},
+  6:{team:"SneakerHeadz", manager:"JeffPeterson20", avatar:"https://sleepercdn.com/uploads/c9b2f0ee052e567d0fe22b5e4a24636e.jpg"},
+  7:{team:"Be Right Back", manager:"KShrewsberry", avatar:"https://sleepercdn.com/avatars/74bcc29f6228ed44341cdefa0bb76ecf"},
+  8:{team:"Hurts so Good", manager:"Savro24", avatar:"https://sleepercdn.com/uploads/99aac6bca2cbb15575a9158f54f87de0.jpg"},
+  9:{team:"No Punt Intended", manager:"CamWells16", avatar:"https://sleepercdn.com/avatars/01adb9b8da194a67264f35625a4da119"},
+  10:{team:"Bonney Lake Wookies", manager:"AlanCarignan", avatar:"https://sleepercdn.com/uploads/1eadadacb5e16318fd821c79ca9bbd52.jpg"},
+  11:{team:"Smittytribe27", manager:"Smittytribe27", avatar:"https://sleepercdn.com/avatars/9a3d3353cb3bf83e1f98e0a5a61acf40"},
+  12:{team:"Boom Goes The Dynamite", manager:"brandishrewsberry", avatar:"https://sleepercdn.com/uploads/bf3e42dfbfdd21ac884b0e920774269e"}
+};
+const TEAM_MAP_2024 = {
+  1:{team:"Hit and Ruggs", manager:"BillsMafia1480", avatar:"https://sleepercdn.com/uploads/019f7ba12d512901421f384a5606aa5e"},
+  2:{team:"Aaron's Ayahuasca Dream", manager:"BReyes", avatar:"https://sleepercdn.com/uploads/e22c34c7cfec48980bb3fde64b746b16.jpg"},
+  3:{team:"2025ISMYYEAR", manager:"PAHTNAH", avatar:"https://sleepercdn.com/uploads/189c1adfcdd33959515c507d2fbd480f.jpg"},
+  4:{team:"Prestige Worldwide", manager:"cincy_kid", avatar:"https://sleepercdn.com/uploads/b52ec7153e952f3a3436b470caf54e67.jpg"},
+  5:{team:"Lickety Splitz Squad", manager:"twillie391", avatar:"https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg"},
+  6:{team:"SneakerHeadz", manager:"JeffPeterson20", avatar:"https://sleepercdn.com/uploads/c7eef8bbb107e72d6bfc814062997354.jpg"},
+  7:{team:"Love Hurts \uD83E\uDDBF\uD83D\uDE2C", manager:"KShrewsberry", avatar:"https://sleepercdn.com/avatars/74bcc29f6228ed44341cdefa0bb76ecf"},
+  8:{team:"White Center Rats", manager:"Savro24", avatar:"https://sleepercdn.com/uploads/416adaa0ed8b729e1ab7b2287d76c087.jpg"},
+  9:{team:"The Many-Faced Squad", manager:"CamWells16", avatar:"https://sleepercdn.com/avatars/01adb9b8da194a67264f35625a4da119"},
+  10:{team:"Obi-Wan Mahomie", manager:"AlanCarignan", avatar:"https://sleepercdn.com/uploads/e882bf5e6e565b7d672acb6990bcdc2a.jpg"},
+  11:{team:"Toilet Bowl Champs! 2024", manager:"Smittytribe27", avatar:"https://sleepercdn.com/avatars/9a3d3353cb3bf83e1f98e0a5a61acf40"},
+  12:{team:"Boom Goes The Dynamite", manager:"brandishrewsberry", avatar:"https://sleepercdn.com/uploads/bf3e42dfbfdd21ac884b0e920774269e"}
+};
+const TEAM_MAP_2025 = {
+  1:{team:"Rice Krispie Treats", manager:"BillsMafia1480", avatar:"https://sleepercdn.com/uploads/019f7ba12d512901421f384a5606aa5e"},
+  2:{team:"Premature EJeantylation", manager:"BReyes", avatar:"https://sleepercdn.com/uploads/73f16254973c36091392fb80c1b2855a.jpg"},
+  3:{team:"2027 is my year!", manager:"PAHTNAH", avatar:"https://sleepercdn.com/uploads/f5d0b24b97f5ce592043a226012a8e53.jpg"},
+  4:{team:"Prestige Worldwide", manager:"cincy_kid", avatar:"https://sleepercdn.com/uploads/57d7bdd717082882313f70c8e74d1cd3.jpg"},
+  5:{team:"Lickety Splitz Squad", manager:"twillie391", avatar:"https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg"},
+  6:{team:"The OG Champ", manager:"JeffPeterson20", avatar:"https://sleepercdn.com/uploads/c7eef8bbb107e72d6bfc814062997354.jpg"},
+  7:{team:"Love Hurts \uD83E\uDDBF\uD83D\uDE2C", manager:"KShrewsberry", avatar:"https://sleepercdn.com/uploads/d1814d5f1fd5d6828aaa0d7b935a1433.jpg"},
+  8:{team:"White Center Rats", manager:"Savro24", avatar:"https://sleepercdn.com/uploads/416adaa0ed8b729e1ab7b2287d76c087.jpg"},
+  9:{team:"The Many-Faced Squad", manager:"CamWells16", avatar:"https://sleepercdn.com/avatars/01adb9b8da194a67264f35625a4da119"},
+  10:{team:"Gimp Squad", manager:"AlanCarignan", avatar:"https://sleepercdn.com/uploads/d1d98aead8829205b7a5b9d2670d5147.jpg"},
+  11:{team:"Baby Back Gibbs", manager:"Smittytribe27", avatar:"https://sleepercdn.com/avatars/9a3d3353cb3bf83e1f98e0a5a61acf40"},
+  12:{team:"Boom Goes The Dynamite", manager:"brandishrewsberry", avatar:"https://sleepercdn.com/uploads/bf3e42dfbfdd21ac884b0e920774269e"}
+};
+
+// 2023 was a 38-round (456-pick) startup draft. Showing rounds 1-4 here to match the other boards.
+const DRAFT_PICKS_2023 = [
+  {pick:1, round:1, rosterId:10, name:"Patrick Mahomes", pos:"QB", nfl:"KC"},
+  {pick:2, round:1, rosterId:5, name:"Josh Allen", pos:"QB", nfl:"BUF"},
+  {pick:3, round:1, rosterId:11, name:"Ja'Marr Chase", pos:"WR", nfl:"CIN"},
+  {pick:4, round:1, rosterId:3, name:"Justin Jefferson", pos:"WR", nfl:"MIN"},
+  {pick:5, round:1, rosterId:6, name:"Christian McCaffrey", pos:"RB", nfl:"SF"},
+  {pick:6, round:1, rosterId:8, name:"Jalen Hurts", pos:"QB", nfl:"PHI"},
+  {pick:7, round:1, rosterId:7, name:"Bijan Robinson", pos:"RB", nfl:"ATL"},
+  {pick:8, round:1, rosterId:9, name:"Joe Burrow", pos:"QB", nfl:"CIN"},
+  {pick:9, round:1, rosterId:12, name:"Lamar Jackson", pos:"QB", nfl:"BAL"},
+  {pick:10, round:1, rosterId:2, name:"A.J. Brown", pos:"WR", nfl:"PHI"},
+  {pick:11, round:1, rosterId:7, name:"CeeDee Lamb", pos:"WR", nfl:"DAL"},
+  {pick:12, round:1, rosterId:10, name:"Travis Kelce", pos:"TE", nfl:"KC"},
+  {pick:13, round:2, rosterId:5, name:"Justin Herbert", pos:"QB", nfl:"LAC"},
+  {pick:14, round:2, rosterId:2, name:"Stefon Diggs", pos:"WR", nfl:"BUF"},
+  {pick:15, round:2, rosterId:2, name:"Austin Ekeler", pos:"RB", nfl:"LAC"},
+  {pick:16, round:2, rosterId:1, name:"Justin Fields", pos:"QB", nfl:"CHI"},
+  {pick:17, round:2, rosterId:9, name:"Garrett Wilson", pos:"WR", nfl:"NYJ"},
+  {pick:18, round:2, rosterId:11, name:"Micah Parsons", pos:"LB", nfl:"DAL"},
+  {pick:19, round:2, rosterId:8, name:"Amon-Ra St. Brown", pos:"WR", nfl:"DET"},
+  {pick:20, round:2, rosterId:5, name:"Jaylen Waddle", pos:"WR", nfl:"MIA"},
+  {pick:21, round:2, rosterId:3, name:"Nick Chubb", pos:"RB", nfl:"CLE"},
+  {pick:22, round:2, rosterId:4, name:"Trevor Lawrence", pos:"QB", nfl:"JAX"},
+  {pick:23, round:2, rosterId:1, name:"Jahmyr Gibbs", pos:"RB", nfl:"DET"},
+  {pick:24, round:2, rosterId:12, name:"Tyreek Hill", pos:"WR", nfl:"MIA"},
+  {pick:25, round:3, rosterId:12, name:"Saquon Barkley", pos:"RB", nfl:"NYG"},
+  {pick:26, round:3, rosterId:12, name:"Josh Jacobs", pos:"RB", nfl:"LV"},
+  {pick:27, round:3, rosterId:4, name:"Tee Higgins", pos:"WR", nfl:"CIN"},
+  {pick:28, round:3, rosterId:3, name:"Travis Etienne", pos:"RB", nfl:"JAX"},
+  {pick:29, round:3, rosterId:6, name:"Cooper Kupp", pos:"WR", nfl:"LAR"},
+  {pick:30, round:3, rosterId:8, name:"Kenneth Walker", pos:"RB", nfl:"SEA"},
+  {pick:31, round:3, rosterId:4, name:"DeVonta Smith", pos:"WR", nfl:"PHI"},
+  {pick:32, round:3, rosterId:9, name:"Breece Hall", pos:"RB", nfl:"NYJ"},
+  {pick:33, round:3, rosterId:10, name:"Derrick Henry", pos:"RB", nfl:"TEN"},
+  {pick:34, round:3, rosterId:2, name:"Tony Pollard", pos:"RB", nfl:"DAL"},
+  {pick:35, round:3, rosterId:7, name:"Rhamondre Stevenson", pos:"RB", nfl:"NE"},
+  {pick:36, round:3, rosterId:1, name:"Najee Harris", pos:"RB", nfl:"PIT"},
+  {pick:37, round:4, rosterId:6, name:"Davante Adams", pos:"WR", nfl:"LV"},
+  {pick:38, round:4, rosterId:4, name:"Chris Olave", pos:"WR", nfl:"NO"},
+  {pick:39, round:4, rosterId:9, name:"DK Metcalf", pos:"WR", nfl:"SEA"},
+  {pick:40, round:4, rosterId:10, name:"Deebo Samuel", pos:"WR", nfl:"SF"},
+  {pick:41, round:4, rosterId:9, name:"Anthony Richardson", pos:"QB", nfl:"IND"},
+  {pick:42, round:4, rosterId:11, name:"Tua Tagovailoa", pos:"QB", nfl:"MIA"},
+  {pick:43, round:4, rosterId:8, name:"Calvin Ridley", pos:"WR", nfl:"JAX"},
+  {pick:44, round:4, rosterId:6, name:"Dameon Pierce", pos:"RB", nfl:"HOU"},
+  {pick:45, round:4, rosterId:3, name:"Bryce Young", pos:"QB", nfl:"CAR"},
+  {pick:46, round:4, rosterId:4, name:"Nick Bolton", pos:"LB", nfl:"KC"},
+  {pick:47, round:4, rosterId:1, name:"Foyesade Oluokun", pos:"LB", nfl:"JAX"},
+  {pick:48, round:4, rosterId:12, name:"Drake London", pos:"WR", nfl:"ATL"}
+];
+
+const DRAFT_PICKS_2024 = [
+  {pick:1, round:1, rosterId:8, name:"Marvin Harrison Jr.", pos:"WR", nfl:"ARI"},
+  {pick:2, round:1, rosterId:3, name:"Caleb Williams", pos:"QB", nfl:"CHI"},
+  {pick:3, round:1, rosterId:3, name:"Rome Odunze", pos:"WR", nfl:"CHI"},
+  {pick:4, round:1, rosterId:11, name:"Malik Nabers", pos:"WR", nfl:"NYG"},
+  {pick:5, round:1, rosterId:8, name:"Jayden Daniels", pos:"QB", nfl:"WAS"},
+  {pick:6, round:1, rosterId:1, name:"Brock Bowers", pos:"TE", nfl:"LV"},
+  {pick:7, round:1, rosterId:7, name:"J.J. McCarthy", pos:"QB", nfl:"MIN"},
+  {pick:8, round:1, rosterId:1, name:"Xavier Worthy", pos:"WR", nfl:"KC"},
+  {pick:9, round:1, rosterId:11, name:"Drake Maye", pos:"QB", nfl:"NE"},
+  {pick:10, round:1, rosterId:12, name:"Bo Nix", pos:"QB", nfl:"DEN"},
+  {pick:11, round:1, rosterId:1, name:"Michael Penix", pos:"QB", nfl:"ATL"},
+  {pick:12, round:1, rosterId:6, name:"Brian Thomas", pos:"WR", nfl:"JAX"},
+  {pick:13, round:2, rosterId:2, name:"Ricky Pearsall", pos:"WR", nfl:"SF"},
+  {pick:14, round:2, rosterId:3, name:"Ladd McConkey", pos:"WR", nfl:"LAC"},
+  {pick:15, round:2, rosterId:6, name:"Adonai Mitchell", pos:"WR", nfl:"IND"},
+  {pick:16, round:2, rosterId:11, name:"Jonathon Brooks", pos:"RB", nfl:"CAR"},
+  {pick:17, round:2, rosterId:9, name:"Keon Coleman", pos:"WR", nfl:"BUF"},
+  {pick:18, round:2, rosterId:6, name:"Trey Benson", pos:"RB", nfl:"ARI"},
+  {pick:19, round:2, rosterId:8, name:"MarShawn Lloyd", pos:"RB", nfl:"GB"},
+  {pick:20, round:2, rosterId:10, name:"Xavier Legette", pos:"WR", nfl:"CAR"},
+  {pick:21, round:2, rosterId:5, name:"Laiatu Latu", pos:"DL", nfl:"IND"},
+  {pick:22, round:2, rosterId:12, name:"Jaylen Wright", pos:"RB", nfl:"MIA"},
+  {pick:23, round:2, rosterId:1, name:"Dallas Turner", pos:"LB", nfl:"MIN"},
+  {pick:24, round:2, rosterId:11, name:"Edgerrin Cooper", pos:"LB", nfl:"GB"},
+  {pick:25, round:3, rosterId:10, name:"Blake Corum", pos:"RB", nfl:"LAR"},
+  {pick:26, round:3, rosterId:10, name:"Roman Wilson", pos:"WR", nfl:"PIT"},
+  {pick:27, round:3, rosterId:12, name:"Malachi Corley", pos:"WR", nfl:"NYJ"},
+  {pick:28, round:3, rosterId:11, name:"Jalen McMillan", pos:"WR", nfl:"TB"},
+  {pick:29, round:3, rosterId:9, name:"Junior Colson", pos:"LB", nfl:"LAC"},
+  {pick:30, round:3, rosterId:6, name:"Jared Verse", pos:"DL", nfl:"LAR"},
+  {pick:31, round:3, rosterId:11, name:"Ja'Tavion Sanders", pos:"TE", nfl:"CAR"},
+  {pick:32, round:3, rosterId:5, name:"Ja'Lynn Polk", pos:"WR", nfl:"NE"},
+  {pick:33, round:3, rosterId:7, name:"Byron Murphy", pos:"DL", nfl:"SEA"},
+  {pick:34, round:3, rosterId:12, name:"Bucky Irving", pos:"RB", nfl:"TB"},
+  {pick:35, round:3, rosterId:7, name:"Troy Franklin", pos:"WR", nfl:"DEN"},
+  {pick:36, round:3, rosterId:6, name:"Tyler Nubin", pos:"DB", nfl:"NYG"},
+  {pick:37, round:4, rosterId:4, name:"Will Shipley", pos:"RB", nfl:"PHI"},
+  {pick:38, round:4, rosterId:7, name:"Ben Sinnott", pos:"TE", nfl:"WAS"},
+  {pick:39, round:4, rosterId:3, name:"Devontez Walker", pos:"WR", nfl:"BAL"},
+  {pick:40, round:4, rosterId:11, name:"Ray Davis", pos:"RB", nfl:"BUF"},
+  {pick:41, round:4, rosterId:9, name:"Braelon Allen", pos:"RB", nfl:"NYJ"},
+  {pick:42, round:4, rosterId:8, name:"Audric Estime", pos:"RB", nfl:"DEN"},
+  {pick:43, round:4, rosterId:8, name:"Chop Robinson", pos:"DL", nfl:"MIA"},
+  {pick:44, round:4, rosterId:5, name:"Kimani Vidal", pos:"RB", nfl:"LAC"},
+  {pick:45, round:4, rosterId:1, name:"Quinyon Mitchell", pos:"DB", nfl:"PHI"},
+  {pick:46, round:4, rosterId:12, name:"Darius Robinson", pos:"DL", nfl:"ARI"},
+  {pick:47, round:4, rosterId:10, name:"Javon Bullard", pos:"DB", nfl:"GB"},
+  {pick:48, round:4, rosterId:6, name:"Michael Pratt", pos:"QB", nfl:"GB"}
+];
+
+const DRAFT_PICKS_2025 = [
+  {pick:1, round:1, rosterId:2, name:"Ashton Jeanty", pos:"RB", nfl:"LV"},
+  {pick:2, round:1, rosterId:4, name:"Omarion Hampton", pos:"RB", nfl:"LAC"},
+  {pick:3, round:1, rosterId:6, name:"Travis Hunter", pos:"WR", nfl:"JAX"},
+  {pick:4, round:1, rosterId:11, name:"TreVeyon Henderson", pos:"RB", nfl:"NE"},
+  {pick:5, round:1, rosterId:4, name:"Quinshon Judkins", pos:"RB", nfl:"CLE"},
+  {pick:6, round:1, rosterId:10, name:"Cameron Ward", pos:"QB", nfl:"TEN"},
+  {pick:7, round:1, rosterId:6, name:"Tetairoa McMillan", pos:"WR", nfl:"CAR"},
+  {pick:8, round:1, rosterId:3, name:"Luther Burden", pos:"WR", nfl:"CHI"},
+  {pick:9, round:1, rosterId:7, name:"Colston Loveland", pos:"TE", nfl:"CHI"},
+  {pick:10, round:1, rosterId:11, name:"Jalen Milroe", pos:"QB", nfl:"SEA"},
+  {pick:11, round:1, rosterId:12, name:"Emeka Egbuka", pos:"WR", nfl:"TB"},
+  {pick:12, round:1, rosterId:6, name:"Tyler Warren", pos:"TE", nfl:"IND"},
+  {pick:13, round:2, rosterId:10, name:"Kaleb Johnson", pos:"RB", nfl:"PIT"},
+  {pick:14, round:2, rosterId:6, name:"Abdul Carter", pos:"DL", nfl:"NYG"},
+  {pick:15, round:2, rosterId:6, name:"RJ Harvey", pos:"RB", nfl:"DEN"},
+  {pick:16, round:2, rosterId:3, name:"Quinn Ewers", pos:"QB", nfl:"MIA"},
+  {pick:17, round:2, rosterId:1, name:"Jaxson Dart", pos:"QB", nfl:"NYG"},
+  {pick:18, round:2, rosterId:1, name:"Jalon Walker", pos:"DL", nfl:"ATL"},
+  {pick:19, round:2, rosterId:5, name:"Cam Skattebo", pos:"RB", nfl:"NYG"},
+  {pick:20, round:2, rosterId:5, name:"Bhayshul Tuten", pos:"RB", nfl:"JAX"},
+  {pick:21, round:2, rosterId:3, name:"Devin Neal", pos:"RB", nfl:"NO"},
+  {pick:22, round:2, rosterId:3, name:"Tre Harris", pos:"WR", nfl:"LAC"},
+  {pick:23, round:2, rosterId:10, name:"Matthew Golden", pos:"WR", nfl:"GB"},
+  {pick:24, round:2, rosterId:2, name:"Will Howard", pos:"QB", nfl:"PIT"},
+  {pick:25, round:3, rosterId:5, name:"Jayden Higgins", pos:"WR", nfl:"HOU"},
+  {pick:26, round:3, rosterId:3, name:"Ollie Gordon", pos:"RB", nfl:"MIA"},
+  {pick:27, round:3, rosterId:6, name:"Elic Ayomanor", pos:"WR", nfl:"TEN"},
+  {pick:28, round:3, rosterId:10, name:"Harold Fannin", pos:"TE", nfl:"CLE"},
+  {pick:29, round:3, rosterId:1, name:"Dylan Sampson", pos:"RB", nfl:"CLE"},
+  {pick:30, round:3, rosterId:1, name:"Malaki Starks", pos:"DB", nfl:"BAL"},
+  {pick:31, round:3, rosterId:6, name:"Shedeur Sanders", pos:"QB", nfl:"CLE"},
+  {pick:32, round:3, rosterId:1, name:"Jihaad Campbell", pos:"LB", nfl:"PHI"},
+  {pick:33, round:3, rosterId:2, name:"Pat Bryant", pos:"WR", nfl:"DEN"},
+  {pick:34, round:3, rosterId:12, name:"Jordan James", pos:"RB", nfl:"SF"},
+  {pick:35, round:3, rosterId:12, name:"Oronde Gadsden", pos:"TE", nfl:"LAC"},
+  {pick:36, round:3, rosterId:10, name:"Jaydon Blue", pos:"RB", nfl:"DAL"},
+  {pick:37, round:4, rosterId:11, name:"Jalen Royals", pos:"WR", nfl:"KC"},
+  {pick:38, round:4, rosterId:3, name:"Nick Emmanwori", pos:"DB", nfl:"SEA"},
+  {pick:39, round:4, rosterId:9, name:"Tory Horton", pos:"WR", nfl:"SEA"},
+  {pick:40, round:4, rosterId:10, name:"Jack Bech", pos:"WR", nfl:"LV"},
+  {pick:41, round:4, rosterId:11, name:"Mason Taylor", pos:"TE", nfl:"NYJ"},
+  {pick:42, round:4, rosterId:1, name:"James Pearce", pos:"DL", nfl:"ATL"},
+  {pick:43, round:4, rosterId:1, name:"Mason Graham", pos:"DL", nfl:"CLE"},
+  {pick:44, round:4, rosterId:9, name:"Carson Schwesinger", pos:"LB", nfl:"CLE"},
+  {pick:45, round:4, rosterId:2, name:"Nick Nash", pos:"WR", nfl:"ATL"},
+  {pick:46, round:4, rosterId:3, name:"Mitchell Evans", pos:"TE", nfl:"CAR"},
+  {pick:47, round:4, rosterId:12, name:"Kyle McCord", pos:"QB", nfl:"PHI"},
+  {pick:48, round:4, rosterId:5, name:"Kyle Williams", pos:"WR", nfl:"NE"}
+];
+
+const DRAFTS_BY_YEAR = {
+  "2023": {picks: DRAFT_PICKS_2023, teamMap: TEAM_MAP_2023, rounds: 4, totalRoundsNote: "Startup draft ran 38 rounds total \u2014 showing rounds 1\u20134"},
+  "2024": {picks: DRAFT_PICKS_2024, teamMap: TEAM_MAP_2024, rounds: 4, totalRoundsNote: null},
+  "2025": {picks: DRAFT_PICKS_2025, teamMap: TEAM_MAP_2025, rounds: 4, totalRoundsNote: null}
+};
+let currentDraftYear = "2026";
+
+const DRAFT_PICKS = [
+  {pick:1, round:1, rosterId:3, name:"Jeremiyah Love", pos:"RB", nfl:"ARI"},
+  {pick:2, round:1, rosterId:6, name:"Fernando Mendoza", pos:"QB", nfl:"LV"},
+  {pick:3, round:1, rosterId:10, name:"Carnell Tate", pos:"WR", nfl:"TEN"},
+  {pick:4, round:1, rosterId:6, name:"Jordyn Tyson", pos:"WR", nfl:"NO"},
+  {pick:5, round:1, rosterId:12, name:"Makai Lemon", pos:"WR", nfl:"PHI"},
+  {pick:6, round:1, rosterId:11, name:"Jadarian Price", pos:"RB", nfl:"SEA"},
+  {pick:7, round:1, rosterId:8, name:"KC Concepcion", pos:"WR", nfl:"CLE"},
+  {pick:8, round:1, rosterId:3, name:"Arvell Reese", pos:"LB", nfl:"NYG"},
+  {pick:9, round:1, rosterId:12, name:"Emmett Johnson", pos:"RB", nfl:"KC"},
+  {pick:10, round:1, rosterId:2, name:"Omar Cooper", pos:"WR", nfl:"NYJ"},
+  {pick:11, round:1, rosterId:5, name:"Sonny Styles", pos:"LB", nfl:"WAS"},
+  {pick:12, round:1, rosterId:3, name:"Mike Washington", pos:"RB", nfl:"LV"},
+  {pick:13, round:2, rosterId:2, name:"Antonio Williams", pos:"WR", nfl:"WAS"},
+  {pick:14, round:2, rosterId:6, name:"Rueben Bain", pos:"DL", nfl:"TB"},
+  {pick:15, round:2, rosterId:10, name:"Kenyon Sadiq", pos:"TE", nfl:"NYJ"},
+  {pick:16, round:2, rosterId:7, name:"Ty Simpson", pos:"QB", nfl:"LAR"},
+  {pick:17, round:2, rosterId:11, name:"David Bailey", pos:"LB", nfl:"NYJ"},
+  {pick:18, round:2, rosterId:8, name:"Jonah Coleman", pos:"RB", nfl:"DEN"},
+  {pick:19, round:2, rosterId:6, name:"Caleb Downs", pos:"DB", nfl:"DAL"},
+  {pick:20, round:2, rosterId:2, name:"Denzel Boston", pos:"WR", nfl:"CLE"},
+  {pick:21, round:2, rosterId:12, name:"Eli Stowers", pos:"TE", nfl:"PHI"},
+  {pick:22, round:2, rosterId:10, name:"Anthony Hill", pos:"LB", nfl:"TEN"},
+  {pick:23, round:2, rosterId:7, name:"CJ Allen", pos:"LB", nfl:"IND"},
+  {pick:24, round:2, rosterId:7, name:"Mansoor Delane", pos:"DB", nfl:"KC"},
+  {pick:25, round:3, rosterId:8, name:"Dillon Thieneman", pos:"DB", nfl:"CHI"},
+  {pick:26, round:3, rosterId:6, name:"Nicholas Singleton", pos:"RB", nfl:"TEN"},
+  {pick:27, round:3, rosterId:10, name:"Cashius Howell", pos:"DL", nfl:"CIN"},
+  {pick:28, round:3, rosterId:2, name:"Keldric Faulk", pos:"DL", nfl:"TEN"},
+  {pick:29, round:3, rosterId:3, name:"Kaytron Allen", pos:"RB", nfl:"WAS"},
+  {pick:30, round:3, rosterId:1, name:"Zachariah Branch", pos:"WR", nfl:"ATL"},
+  {pick:31, round:3, rosterId:8, name:"Akheem Mesidor", pos:"DL", nfl:"LAC"},
+  {pick:32, round:3, rosterId:2, name:"Josiah Trotter", pos:"LB", nfl:"TB"},
+  {pick:33, round:3, rosterId:12, name:"Emmanuel McNeil-Warren", pos:"DB", nfl:"CLE"},
+  {pick:34, round:3, rosterId:3, name:"Ja'Kobi Lane", pos:"WR", nfl:"BAL"},
+  {pick:35, round:3, rosterId:10, name:"A.J. Haulcy", pos:"DB", nfl:"IND"},
+  {pick:36, round:3, rosterId:9, name:"Jermod McCoy", pos:"DB", nfl:"LV"},
+  {pick:37, round:4, rosterId:3, name:"Germie Bernard", pos:"WR", nfl:"PIT"},
+  {pick:38, round:4, rosterId:6, name:"Carson Beck", pos:"QB", nfl:"ARI"},
+  {pick:39, round:4, rosterId:10, name:"Chris Bell", pos:"WR", nfl:"MIA"},
+  {pick:40, round:4, rosterId:2, name:"Avieon Terrell", pos:"DB", nfl:"ATL"},
+  {pick:41, round:4, rosterId:11, name:"De'Zhaun Stribling", pos:"WR", nfl:"SF"},
+  {pick:42, round:4, rosterId:1, name:"Demond Claiborne", pos:"RB", nfl:"MIN"},
+  {pick:43, round:4, rosterId:3, name:"Jake Golday", pos:"LB", nfl:"MIN"},
+  {pick:44, round:4, rosterId:2, name:"Cade Klubnik", pos:"QB", nfl:"NYJ"},
+  {pick:45, round:4, rosterId:12, name:"Garrett Nussmeier", pos:"QB", nfl:"KC"},
+  {pick:46, round:4, rosterId:7, name:"Malachi Fields", pos:"WR", nfl:"NYG"},
+  {pick:47, round:4, rosterId:5, name:"Ted Hurst", pos:"WR", nfl:"TB"},
+  {pick:48, round:4, rosterId:9, name:"Elijah Sarratt", pos:"WR", nfl:"BAL"}
+];
+
+let draftCollapsed = {};
+
+function renderDraftBoard(){
+  const board = document.getElementById("draftBoard");
+  const query = (document.getElementById("draftSearch").value || "").trim().toLowerCase();
+
+  let picks, teamLookup, numRounds, note;
+  if(currentDraftYear === "2026"){
+    picks = DRAFT_PICKS;
+    teamLookup = function(rosterId){ return TEAMS.find(function(x){ return x.rosterId === rosterId; }) || {}; };
+    numRounds = 4;
+    note = null;
+    document.getElementById("draftStatus").innerHTML =
+      '<span class="badge">4 rounds &middot; 48 picks</span><span style="color:var(--chalk-dim); font-size:13px;">Snake draft, completed ahead of Week 1.</span>';
+  } else {
+    const d = DRAFTS_BY_YEAR[currentDraftYear];
+    picks = d.picks;
+    teamLookup = function(rosterId){ return d.teamMap[rosterId] || {}; };
+    numRounds = d.rounds;
+    note = d.totalRoundsNote;
+    document.getElementById("draftStatus").innerHTML =
+      '<span class="badge">' + d.rounds + ' round' + (d.rounds===1?'':'s') + ' shown &middot; ' + picks.length + ' picks</span>' +
+      '<span style="color:var(--chalk-dim); font-size:13px;">' + currentDraftYear + ' draft.</span>';
+  }
+
+  const rounds = [];
+  for(let r=1; r<=numRounds; r++) rounds.push(r);
+
+  board.innerHTML = rounds.map(function(roundNum){
+    const roundPicks = picks.filter(function(p){
+      if(p.round !== roundNum) return false;
+      if(!query) return true;
+      const t = teamLookup(p.rosterId);
+      const haystack = (p.name + " " + p.pos + " " + p.nfl + " " + (t.team||"") + " " + (t.manager||"")).toLowerCase();
+      return haystack.indexOf(query) !== -1;
+    });
+    if(roundPicks.length === 0) return "";
+
+    const rows = roundPicks.map(function(p){
+      const t = teamLookup(p.rosterId);
+      return '<div class="draft-pick-row">' +
+        '<div class="draft-pick-no">' + p.pick + '</div>' +
+        '<div class="draft-team">' +
+          '<img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+          '<div class="draft-team-name">' + (t.team||'Team ' + p.rosterId) + '</div>' +
+        '</div>' +
+        '<div class="draft-player">' +
+          '<span class="draft-pos">' + p.pos + '</span>' +
+          '<span class="draft-player-name">' + p.name + '</span> ' +
+          '<span class="draft-nfl">' + p.nfl + '</span>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+
+    const collapseKey = currentDraftYear + "-" + roundNum;
+    const isCollapsed = !!draftCollapsed[collapseKey] && !query;
+    return '<div class="draft-round' + (isCollapsed ? ' collapsed' : '') + '" data-round="' + roundNum + '">' +
+      '<div class="draft-round-title">' +
+        '<span>Round ' + roundNum + ' <span class="draft-round-count">(' + roundPicks.length + (query ? ' match' + (roundPicks.length===1?'':'es') : ' picks') + ')</span></span>' +
+        '<span class="chevron">&#9660;</span>' +
+      '</div>' + rows +
+    '</div>';
+  }).join("") || '<p class="empty-hint">No picks match that search.</p>';
+
+  if(note){
+    board.innerHTML += '<div class="draft-truncated-note">' + note + '</div>';
+  }
+
+  board.querySelectorAll(".draft-round-title").forEach(function(title){
+    title.addEventListener("click", function(){
+      const roundEl = title.closest(".draft-round");
+      const roundNum = roundEl.dataset.round;
+      const collapseKey = currentDraftYear + "-" + roundNum;
+      draftCollapsed[collapseKey] = !draftCollapsed[collapseKey];
+      renderDraftBoard();
+    });
+  });
+}
+
+document.getElementById("draftSearch").addEventListener("input", renderDraftBoard);
+
+document.querySelectorAll("#draftYearTabs button").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    document.querySelectorAll("#draftYearTabs button").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active");
+    currentDraftYear = btn.dataset.year;
+    document.getElementById("draftSearch").value = "";
+    renderDraftBoard();
+  });
+});
+
+let TEAMS = FALLBACK_TEAMS;
+
+function findRival(ownerId){
+  for(const pair of RIVALRIES){
+    let rivalOwnerId = null;
+    if(pair[0] === ownerId) rivalOwnerId = pair[1];
+    else if(pair[1] === ownerId) rivalOwnerId = pair[0];
+    if(rivalOwnerId){
+      const t = TEAMS.find(function(x){ return x.ownerId === rivalOwnerId; });
+      return t ? t.team : null;
+    }
+  }
+  return null;
+}
+
+let standingsSort = {field:"wins", dir:"desc"};
+let standingsUsedLive = false;
+
+function renderStandings(usedLive){
+  if(typeof usedLive === "boolean") standingsUsedLive = usedLive;
+  const statusEl = document.getElementById("standingsStatus");
+  statusEl.textContent = standingsUsedLive
+    ? "Live from Sleeper. All teams sit at 0-0 until Week 1 finishes scoring."
+    : "Showing the latest saved snapshot (live Sleeper fetch was blocked by the browser). All teams sit at 0-0 until Week 1 finishes scoring.";
+
+  const field = standingsSort.field;
+  const dir = standingsSort.dir === "asc" ? 1 : -1;
+  const sorted = TEAMS.slice().sort(function(a,b){
+    let cmp;
+    if(field === "team"){
+      cmp = a.team.localeCompare(b.team);
+    } else {
+      cmp = a[field] - b[field];
+    }
+    if(cmp !== 0) return cmp * dir;
+    return (b.wins - a.wins) || (b.fpts - a.fpts) || a.team.localeCompare(b.team);
+  });
+
+  document.querySelectorAll("th.sortable").forEach(function(th){
+    th.classList.toggle("sorted", th.dataset.field === field);
+  });
+
+  const body = document.getElementById("standingsBody");
+  body.innerHTML = sorted.map(function(t,i){
+    return '<tr>' +
+      '<td><span class="rank-num">' + (i+1) + '</span></td>' +
+      '<td><div class="team-cell">' +
+        '<img class="team-avatar" src="' + t.avatar + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div><div class="team-cell-name">' + t.team + '</div><div class="team-cell-mgr">' + t.manager + '</div></div>' +
+      '</div></td>' +
+      '<td>' + t.wins + '</td>' +
+      '<td>' + t.losses + '</td>' +
+      '<td>' + t.ties + '</td>' +
+      '<td>' + t.fpts.toFixed(1) + '</td>' +
+    '</tr>';
+  }).join("");
+}
+
+document.querySelectorAll("th.sortable").forEach(function(th){
+  th.innerHTML = th.textContent + ' <span class="arrow">&#9660;</span>';
+  th.addEventListener("click", function(){
+    const field = th.dataset.field;
+    if(standingsSort.field === field){
+      standingsSort.dir = standingsSort.dir === "asc" ? "desc" : "asc";
+    } else {
+      standingsSort = {field: field, dir: field === "team" ? "asc" : "desc"};
+    }
+    renderStandings();
+  });
+});
+
+let RIVALRY_HISTORY = null; // filled in once fetched
+
+function renderRivalry(){
+  const grid = document.getElementById("rivalryGrid");
+  grid.innerHTML = RIVALRIES.map(function(pair){
+    const ownerA = pair[0], ownerB = pair[1];
+    const ta = TEAMS.find(function(t){ return t.ownerId === ownerA; }) || {};
+    const tb = TEAMS.find(function(t){ return t.ownerId === ownerB; }) || {};
+    const a = ta.team || "Unknown team", b = tb.team || "Unknown team";
+    const historyHtml = renderRivalryHistoryLine(ta, tb);
+    return '<div class="rivalry-card">' +
+      '<div class="rivalry-top-row">' +
+        '<div class="rivalry-side">' +
+          '<img src="' + (ta.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+          '<div>' + a + '</div>' +
+        '</div>' +
+        '<div class="rivalry-vs">VS</div>' +
+        '<div class="rivalry-side" style="justify-content:flex-end; text-align:right;">' +
+          '<div>' + b + '</div>' +
+          '<img src="' + (tb.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '</div>' +
+        '<div class="rivalry-weeks">Meets in<span>Wk 5 &amp; Wk 10</span></div>' +
+      '</div>' +
+      historyHtml +
+    '</div>';
+  }).join("");
+}
+
+function renderRivalryHistoryLine(ta, tb){
+  if(ta.rosterId === undefined || tb.rosterId === undefined) return "";
+
+  // The Breece & Desist slot changed managers heading into this season, so there's no real history for that person yet
+  if(ta.ownerId === "604190850481713152" || tb.ownerId === "604190850481713152"){
+    return '<div class="rivalry-history"><span class="rh-note">New rivalry &mdash; first meeting is this season.</span></div>';
+  }
+
+  if(RIVALRY_HISTORY === null){
+    return '<div class="rivalry-history"><span class="rh-note">Loading head-to-head history&hellip;</span></div>';
+  }
+  if(RIVALRY_HISTORY === "error"){
+    return '<div class="rivalry-history"><span class="rh-note">Head-to-head history unavailable right now.</span></div>';
+  }
+
+  const meetings = findMeetings(RIVALRY_HISTORY, ta.rosterId, tb.rosterId);
+  if(meetings.length === 0){
+    return '<div class="rivalry-history"><span class="rh-note">No meetings on record yet.</span></div>';
+  }
+
+  let winsA = 0, winsB = 0, ties = 0;
+  meetings.forEach(function(m){
+    if(m.ptsA > m.ptsB) winsA++;
+    else if(m.ptsB > m.ptsA) winsB++;
+    else ties++;
+  });
+  const seriesLabel = winsA === winsB
+    ? "Series tied " + winsA + "-" + winsB + (ties ? ("-" + ties + " T") : "")
+    : (winsA > winsB ? ta.team : tb.team) + " leads " + Math.max(winsA,winsB) + "-" + Math.min(winsA,winsB) + (ties ? ("-" + ties + " T") : "");
+
+  const last = meetings.slice().sort(function(x,y){
+    return (y.season - x.season) || (y.week - x.week);
+  })[0];
+  const lastWinner = last.ptsA > last.ptsB ? ta.team : (last.ptsB > last.ptsA ? tb.team : "Tie");
+  const lastLine = "Last meeting: " + last.season + " Wk " + last.week + " &mdash; " +
+    ta.team + " " + last.ptsA.toFixed(1) + ", " + tb.team + " " + last.ptsB.toFixed(1) +
+    (lastWinner === "Tie" ? "" : " (" + lastWinner + " won)");
+
+  return '<div class="rivalry-history">' +
+    '<span class="rh-series">' + seriesLabel + '</span>' +
+    '<span class="rh-last">' + lastLine + '</span>' +
+  '</div>';
+}
+
+function findMeetings(allWeeksData, rosterA, rosterB){
+  const meetings = [];
+  allWeeksData.forEach(function(entry){
+    if(!Array.isArray(entry.data)) return;
+    if(entry.week > 14) return; // rivalry series counts regular-season meetings only
+    const a = entry.data.find(function(m){ return m.roster_id === rosterA; });
+    const b = entry.data.find(function(m){ return m.roster_id === rosterB; });
+    if(a && b && a.matchup_id !== undefined && a.matchup_id !== null && a.matchup_id === b.matchup_id){
+      const ptsA = typeof a.points === "number" ? a.points : 0;
+      const ptsB = typeof b.points === "number" ? b.points : 0;
+      if(ptsA === 0 && ptsB === 0) return; // week hasn't been played yet
+      meetings.push({season: parseInt(entry.season), week: entry.week, ptsA: ptsA, ptsB: ptsB});
+    }
+  });
+  return meetings;
+}
+
+// The two finalists' roster_ids in each season's championship game (from the winners bracket)
+const CHAMPIONSHIP_GAMES = [
+  {season:2023, a:6, b:10},
+  {season:2024, a:5, b:12},
+  {season:2025, a:9, b:5}
+];
+
+function teamForSeason(season, rosterId){
+  if(season === 2026) return TEAMS.find(function(t){ return t.rosterId === rosterId; }) || {team:"Team "+rosterId};
+  const map = season === 2023 ? TEAM_MAP_2023 : season === 2024 ? TEAM_MAP_2024 : TEAM_MAP_2025;
+  return map[rosterId] || {team:"Team "+rosterId};
+}
+
+// roster_id -> owner_id is stable across every season except roster 2, whose owner changed for 2026
+const STATIC_ROSTER_OWNER = {
+  1:"995923308459745280", 2:"800854389685354496", 3:"996183312672669696", 4:"931163037363515392",
+  5:"996196287416528896", 6:"996196931028389888", 7:"959226991016816640", 8:"996256741807603712",
+  9:"996390324501024768", 10:"999558477183913984", 11:"996494307496542208", 12:"996503416859709440"
+};
+function ownerForSeasonRoster(season, rosterId){
+  if(season === 2026 && rosterId === 2) return "604190850481713152"; // Awesomeus took over this slot in 2026
+  return STATIC_ROSTER_OWNER[rosterId];
+}
+
+let ALL_PAIR_GAMES = null;
+let HEAD_TO_HEAD = null; // HEAD_TO_HEAD[ownerA][ownerB] = {wins, losses, ties}
+
+function buildHeadToHeadGrid(pairGames){
+  const h2h = {};
+  function ensure(o){ if(!h2h[o]) h2h[o] = {}; }
+  function ensurePair(a,b){ ensure(a); if(!h2h[a][b]) h2h[a][b] = {wins:0, losses:0, ties:0}; }
+
+  pairGames.forEach(function(g){
+    const ownerA = ownerForSeasonRoster(g.season, g.rosterA);
+    const ownerB = ownerForSeasonRoster(g.season, g.rosterB);
+    if(!ownerA || !ownerB) return;
+    ensurePair(ownerA, ownerB);
+    ensurePair(ownerB, ownerA);
+    if(g.ptsA > g.ptsB){ h2h[ownerA][ownerB].wins++; h2h[ownerB][ownerA].losses++; }
+    else if(g.ptsB > g.ptsA){ h2h[ownerB][ownerA].wins++; h2h[ownerA][ownerB].losses++; }
+    else { h2h[ownerA][ownerB].ties++; h2h[ownerB][ownerA].ties++; }
+  });
+
+  HEAD_TO_HEAD = h2h;
+  // re-render whichever team detail page is currently open, if any
+  const detail = document.getElementById("teamDetail");
+  if(detail && detail.classList.contains("active")){
+    const name = document.getElementById("tdName").textContent;
+    const t = TEAMS.find(function(x){ return x.team === name; });
+    if(t) renderHeadToHead(t.ownerId);
+  }
+}
+
+function renderHeadToHead(ownerId){
+  const el = document.getElementById("tdHeadToHead");
+  if(!HEAD_TO_HEAD){
+    el.innerHTML = '<div class="alltime-title">Career record vs opponents</div>' +
+      '<div class="new-team-note">Loading matchup history from Sleeper&hellip;</div>';
+    return;
+  }
+  const record = HEAD_TO_HEAD[ownerId];
+  const opponents = TEAMS.filter(function(t){ return t.ownerId !== ownerId; });
+
+  const rows = opponents.map(function(t){
+    const r = (record && record[t.ownerId]) ? record[t.ownerId] : {wins:0, losses:0, ties:0};
+    const games = r.wins + r.losses + r.ties;
+    return {t:t, r:r, games:games};
+  }).sort(function(a,b){ return b.games - a.games; });
+
+  const anyGames = rows.some(function(row){ return row.games > 0; });
+
+  if(!anyGames){
+    el.innerHTML = '<div class="alltime-title">Career record vs opponents</div>' +
+      '<div class="new-team-note">No matchups on record yet for this manager.</div>';
+    return;
+  }
+
+  const rowsHtml = rows.map(function(row){
+    const recordLabel = row.games > 0
+      ? row.r.wins + "-" + row.r.losses + (row.r.ties ? ("-" + row.r.ties) : "")
+      : "&mdash;";
+    return '<tr>' +
+      '<td><div class="h2h-opp"><img src="' + (row.t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' + row.t.team + '</div></td>' +
+      '<td>' + recordLabel + '</td>' +
+    '</tr>';
+  }).join("");
+
+  el.innerHTML =
+    '<div class="alltime-title">Career record vs opponents</div>' +
+    '<p class="panel-sub" style="margin:-4px 0 12px;">Includes playoff matchups, 2023&ndash;present.</p>' +
+    '<table class="season-history"><thead><tr><th>Opponent</th><th>Record</th></tr></thead><tbody>' + rowsHtml + '</tbody></table>';
+}
+
+function buildAndRenderRecords(results){
+  const allGames = [];   // one entry per team per game
+  const pairGames = [];  // one entry per matchup
+
+  results.forEach(function(entry){
+    if(!Array.isArray(entry.data)) return;
+    const season = parseInt(entry.season), week = entry.week;
+    const byMatchup = {};
+    entry.data.forEach(function(m){
+      if(m.matchup_id === undefined || m.matchup_id === null) return;
+      if(!byMatchup[m.matchup_id]) byMatchup[m.matchup_id] = [];
+      byMatchup[m.matchup_id].push(m);
+    });
+    Object.values(byMatchup).forEach(function(pair){
+      if(pair.length !== 2) return;
+      const p1 = typeof pair[0].points === "number" ? pair[0].points : 0;
+      const p2 = typeof pair[1].points === "number" ? pair[1].points : 0;
+      if(p1 === 0 && p2 === 0) return; // unplayed week
+      const isPlayoff = week >= 15;
+      pairGames.push({season:season, week:week, rosterA:pair[0].roster_id, ptsA:p1, rosterB:pair[1].roster_id, ptsB:p2, isPlayoff:isPlayoff});
+      allGames.push({season:season, week:week, rosterId:pair[0].roster_id, points:p1, oppRosterId:pair[1].roster_id, oppPoints:p2, isWin:p1>p2, isTie:p1===p2, isPlayoff:isPlayoff});
+      allGames.push({season:season, week:week, rosterId:pair[1].roster_id, points:p2, oppRosterId:pair[0].roster_id, oppPoints:p1, isWin:p2>p1, isTie:p1===p2, isPlayoff:isPlayoff});
+    });
+  });
+
+  if(allGames.length === 0){
+    document.getElementById("recordsStatus").textContent = "No games on record yet.";
+    return;
+  }
+  document.getElementById("recordsStatus").textContent = "Every game since 2023, updated live from Sleeper.";
+
+  ALL_PAIR_GAMES = pairGames;
+  buildHeadToHeadGrid(pairGames);
+
+  const champGames = allGames.filter(function(g){
+    return CHAMPIONSHIP_GAMES.some(function(c){ return c.season === g.season && (c.a === g.rosterId || c.b === g.rosterId); });
+  });
+
+  // ---- streak helpers (game-level, chronological per team) ----
+  function longestStreaks(games, wantWin){
+    const byTeam = {};
+    games.forEach(function(g){
+      if(!byTeam[g.rosterId]) byTeam[g.rosterId] = [];
+      byTeam[g.rosterId].push(g);
+    });
+    const streaks = [];
+    Object.keys(byTeam).forEach(function(rid){
+      const list = byTeam[rid].slice().sort(function(x,y){ return (x.season - y.season) || (x.week - y.week); });
+      let runStart = null, runLen = 0;
+      list.forEach(function(g, i){
+        const match = wantWin ? (g.isWin && !g.isTie) : (!g.isWin && !g.isTie);
+        if(match){
+          if(runLen === 0) runStart = g;
+          runLen++;
+        }
+        if(!match || i === list.length - 1){
+          if(runLen > 0){
+            streaks.push({rosterId: parseInt(rid), length: runLen, startSeason: runStart.season, startWeek: runStart.week, endSeason: (match ? g.season : list[i-1].season), endWeek: (match ? g.week : list[i-1].week)});
+          }
+          runLen = 0;
+        }
+      });
+    });
+    return streaks.sort(function(a,b){ return b.length - a.length; }).slice(0,5);
+  }
+
+  const RECORDS = {
+    highestScore: allGames.slice().sort(function(a,b){ return b.points - a.points; }).slice(0,5),
+    lowestScore: allGames.filter(function(g){ return g.points > 0; }).sort(function(a,b){ return a.points - b.points; }).slice(0,5),
+    highestCombined: pairGames.slice().sort(function(a,b){ return (b.ptsA+b.ptsB) - (a.ptsA+a.ptsB); }).slice(0,5),
+    lowestCombined: pairGames.slice().sort(function(a,b){ return (a.ptsA+a.ptsB) - (b.ptsA+b.ptsB); }).slice(0,5),
+    biggestBlowout: pairGames.slice().sort(function(a,b){ return Math.abs(b.ptsA-b.ptsB) - Math.abs(a.ptsA-a.ptsB); }).slice(0,5),
+    closestGame: pairGames.slice().sort(function(a,b){ return Math.abs(a.ptsA-a.ptsB) - Math.abs(b.ptsA-b.ptsB); }).slice(0,5),
+    highestScoreInLoss: allGames.filter(function(g){ return !g.isWin && !g.isTie; }).sort(function(a,b){ return b.points - a.points; }).slice(0,5),
+    lowestScoreInWin: allGames.filter(function(g){ return g.isWin; }).sort(function(a,b){ return a.points - b.points; }).slice(0,5),
+    highestPlayoffScore: allGames.filter(function(g){ return g.isPlayoff; }).sort(function(a,b){ return b.points - a.points; }).slice(0,5),
+    highestChampionshipScore: champGames.slice().sort(function(a,b){ return b.points - a.points; }).slice(0,5),
+    longestWinStreak: longestStreaks(allGames, true),
+    longestLoseStreak: longestStreaks(allGames, false)
+  };
+
+  renderRecordsAccordion(RECORDS);
+}
+
+function rowTeam(season, rosterId){
+  const t = teamForSeason(season, rosterId);
+  return '<span class="rec-avatar-wrap"><img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' + t.team + '</span>';
+}
+
+function renderRecordsAccordion(R){
+  const scoreCategories = [
+    {key:"highestScore", title:"Highest score ever", render: function(g,i){ return rankRow(i, rowTeam(g.season,g.rosterId) + ' <span class="rec-score">' + g.points.toFixed(1) + '</span>', g.season, g.week); }},
+    {key:"lowestScore", title:"Lowest score ever", render: function(g,i){ return rankRow(i, rowTeam(g.season,g.rosterId) + ' <span class="rec-score">' + g.points.toFixed(1) + '</span>', g.season, g.week); }},
+    {key:"highestCombined", title:"Highest combined matchup score", render: function(g,i){ return rankRow(i, rowTeam(g.season,g.rosterA) + ' <span class="rec-score">' + g.ptsA.toFixed(1) + '</span> vs ' + rowTeam(g.season,g.rosterB) + ' <span class="rec-score">' + g.ptsB.toFixed(1) + '</span> &mdash; <span class="rec-score">' + (g.ptsA+g.ptsB).toFixed(1) + ' total</span>', g.season, g.week); }},
+    {key:"lowestCombined", title:"Lowest combined matchup score", render: function(g,i){ return rankRow(i, rowTeam(g.season,g.rosterA) + ' <span class="rec-score">' + g.ptsA.toFixed(1) + '</span> vs ' + rowTeam(g.season,g.rosterB) + ' <span class="rec-score">' + g.ptsB.toFixed(1) + '</span> &mdash; <span class="rec-score">' + (g.ptsA+g.ptsB).toFixed(1) + ' total</span>', g.season, g.week); }},
+    {key:"biggestBlowout", title:"Biggest blowout", render: function(g,i){
+      const winA = g.ptsA > g.ptsB;
+      const w = winA ? g.rosterA : g.rosterB, wp = winA ? g.ptsA : g.ptsB, l = winA ? g.rosterB : g.rosterA, lp = winA ? g.ptsB : g.ptsA;
+      return rankRow(i, rowTeam(g.season,w) + ' <span class="rec-score">' + wp.toFixed(1) + '</span> over ' + rowTeam(g.season,l) + ' <span class="rec-score">' + lp.toFixed(1) + '</span> &mdash; margin <span class="rec-score">' + Math.abs(g.ptsA-g.ptsB).toFixed(1) + '</span>', g.season, g.week);
+    }},
+    {key:"closestGame", title:"Closest game", render: function(g,i){
+      const winA = g.ptsA >= g.ptsB;
+      const w = winA ? g.rosterA : g.rosterB, wp = winA ? g.ptsA : g.ptsB, l = winA ? g.rosterB : g.rosterA, lp = winA ? g.ptsB : g.ptsA;
+      return rankRow(i, rowTeam(g.season,w) + ' <span class="rec-score">' + wp.toFixed(1) + '</span> over ' + rowTeam(g.season,l) + ' <span class="rec-score">' + lp.toFixed(1) + '</span> &mdash; margin <span class="rec-score">' + Math.abs(g.ptsA-g.ptsB).toFixed(1) + '</span>', g.season, g.week);
+    }},
+    {key:"highestScoreInLoss", title:"Highest score in a loss", render: function(g,i){ return rankRow(i, rowTeam(g.season,g.rosterId) + ' <span class="rec-score">' + g.points.toFixed(1) + '</span> (lost to ' + rowTeam(g.season,g.oppRosterId) + ' ' + g.oppPoints.toFixed(1) + ')', g.season, g.week); }},
+    {key:"lowestScoreInWin", title:"Lowest score in a win", render: function(g,i){ return rankRow(i, rowTeam(g.season,g.rosterId) + ' <span class="rec-score">' + g.points.toFixed(1) + '</span> (beat ' + rowTeam(g.season,g.oppRosterId) + ' ' + g.oppPoints.toFixed(1) + ')', g.season, g.week); }},
+    {key:"highestPlayoffScore", title:"Highest playoff score", render: function(g,i){ return rankRow(i, rowTeam(g.season,g.rosterId) + ' <span class="rec-score">' + g.points.toFixed(1) + '</span>', g.season, g.week); }},
+    {key:"highestChampionshipScore", title:"Highest championship-game score", render: function(g,i){ return rankRow(i, rowTeam(g.season,g.rosterId) + ' <span class="rec-score">' + g.points.toFixed(1) + '</span>', g.season, g.week); }}
+  ];
+
+  const streakCategoriesLive = [
+    {key:"longestWinStreak", title:"Longest winning streak", render: function(s,i){
+      const t = teamForSeason(s.endSeason, s.rosterId);
+      return rankRow(i, t.team + ' <span class="rec-score">' + s.length + ' games</span>', s.startSeason === s.endSeason ? s.startSeason : (s.startSeason + '\u2013' + s.endSeason), null, "Wk " + s.startWeek + " \u2013 Wk " + s.endWeek);
+    }},
+    {key:"longestLoseStreak", title:"Longest losing streak", render: function(s,i){
+      const t = teamForSeason(s.endSeason, s.rosterId);
+      return rankRow(i, t.team + ' <span class="rec-score">' + s.length + ' games</span>', s.startSeason === s.endSeason ? s.startSeason : (s.startSeason + '\u2013' + s.endSeason), null, "Wk " + s.startWeek + " \u2013 Wk " + s.endWeek);
+    }}
+  ];
+
+  const hardcodedStreakCategories = [
+    {title:"Longest playoff winning streak", data:PLAYOFF_WIN_STREAKS, render: function(s,i){
+      const t = TEAMS.find(function(x){ return x.ownerId===s.ownerId; }) || {team:"Unknown"};
+      return rankRow(i, t.team + ' <span class="rec-score">' + s.games + ' games</span>', null, null, s.span);
+    }},
+    {title:"Longest streak without making playoffs", data:MISSED_PLAYOFF_STREAKS, render: function(s,i){
+      const t = TEAMS.find(function(x){ return x.ownerId===s.ownerId; }) || {team:"Unknown"};
+      return rankRow(i, t.team + ' <span class="rec-score">' + s.seasons + ' seasons</span>', null, null, s.span);
+    }},
+    {title:"Most consecutive championships", data:CONSECUTIVE_CHAMPIONSHIPS, render: function(s,i){
+      const t = TEAMS.find(function(x){ return x.ownerId===s.ownerId; }) || {team:"Unknown"};
+      return rankRow(i, t.team + ' <span class="rec-score">' + s.count + '</span>', null, null, s.span);
+    }},
+    {title:"Most consecutive championship-game appearances", data:CONSECUTIVE_TITLE_GAME_APPEARANCES, render: function(s,i){
+      const t = TEAMS.find(function(x){ return x.ownerId===s.ownerId; }) || {team:"Unknown"};
+      return rankRow(i, t.team + ' <span class="rec-score">' + s.count + '</span>', null, null, s.span);
+    }}
+  ];
+
+  const accordion = document.getElementById("recordsAccordion");
+  let html = "";
+
+  scoreCategories.forEach(function(cat){
+    const items = R[cat.key];
+    const rows = items.length > 0 ? items.map(cat.render).join("") : '<div class="rec-empty">No data yet.</div>';
+    html += '<details class="const-article"><summary>' + cat.title + '</summary><div class="const-body">' + rows + '</div></details>';
+  });
+
+  streakCategoriesLive.forEach(function(cat){
+    const items = R[cat.key];
+    const rows = items.length > 0 ? items.map(cat.render).join("") : '<div class="rec-empty">No data yet.</div>';
+    html += '<details class="const-article"><summary>' + cat.title + '</summary><div class="const-body">' + rows + '</div></details>';
+  });
+
+  hardcodedStreakCategories.forEach(function(cat){
+    const rows = cat.data.map(cat.render).join("");
+    html += '<details class="const-article"><summary>' + cat.title + '</summary><div class="const-body">' + rows + '</div></details>';
+  });
+
+  accordion.innerHTML = html;
+}
+
+function rankRow(i, mainHtml, season, week, extra){
+  const meta = extra ? extra : (season ? (season + (week ? (" Wk " + week) : "")) : "");
+  return '<div class="rec-row"><span class="rec-rank">' + (i+1) + '</span><span class="rec-main">' + mainHtml + '</span><span class="rec-meta">' + meta + '</span></div>';
+}
+
+function loadRivalryHistory(){
+  const seasonLeagueIds = {
+    2023: "996112028718841856",
+    2024: "1053587508728012800",
+    2025: "1180316624798797824",
+    2026: LEAGUE_ID
+  };
+  const requests = [];
+  Object.keys(seasonLeagueIds).forEach(function(season){
+    const lid = seasonLeagueIds[season];
+    for(let w=1; w<=17; w++){
+      requests.push(
+        fetchJSON("https://api.sleeper.app/v1/league/" + lid + "/matchups/" + w)
+          .then(function(data){ return {season: season, week: w, data: data}; })
+          .catch(function(){ return {season: season, week: w, data: null}; })
+      );
+    }
+  });
+  Promise.all(requests).then(function(results){
+    RIVALRY_HISTORY = results;
+    renderRivalry();
+    buildAndRenderRecords(results);
+    maybeComputePowerRankings();
+  }).catch(function(){
+    RIVALRY_HISTORY = "error";
+    renderRivalry();
+    document.getElementById("recordsStatus").textContent = "Records unavailable right now (live fetch was blocked by the browser).";
+    document.getElementById("powerStatus").textContent = "Power rankings unavailable right now (live fetch was blocked by the browser).";
+  });
+}
+
+function renderTeams(){
+  const grid = document.getElementById("teamsGrid");
+  grid.innerHTML = TEAMS.map(function(t){
+    return '<div class="team-card" data-team="' + t.team.replace(/"/g,'&quot;') + '">' +
+      '<img src="' + t.avatar + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+      '<div class="tname">' + t.team + '</div>' +
+      '<div class="tmgr">' + t.manager + '</div>' +
+    '</div>';
+  }).join("");
+  const cards = grid.querySelectorAll(".team-card");
+  cards.forEach(function(card){
+    card.addEventListener("click", function(){ showTeamDetail(card.dataset.team); });
+  });
+}
+
+function showTeamDetail(teamName){
+  const t = TEAMS.find(function(x){ return x.team === teamName; });
+  if(!t) return;
+  document.getElementById("teamsGrid").style.display = "none";
+  const detail = document.getElementById("teamDetail");
+  detail.classList.add("active");
+  document.getElementById("tdImg").src = t.avatar;
+  document.getElementById("tdName").textContent = t.team;
+  document.getElementById("tdMgr").textContent = "Managed by " + t.manager;
+  const rival = findRival(t.ownerId);
+  document.getElementById("tdRival").innerHTML = rival
+    ? 'Rivalry Week opponent: <span>' + rival + '</span>'
+    : "";
+
+  renderAllTime(t.ownerId);
+  renderPlayoffHistory(t.ownerId);
+  renderHeadToHead(t.ownerId);
+}
+
+function renderAllTime(ownerId){
+  const el = document.getElementById("tdAllTime");
+  const record = CAREER_STATS[ownerId];
+
+  if(!record || record.seasons.length === 0){
+    el.innerHTML = '<div class="alltime-title">All-time record</div>' +
+      '<div class="new-team-note">New to the league in 2026 &mdash; no prior seasons on record.</div>';
+    return;
+  }
+
+  const totals = record.seasons.reduce(function(acc, s){
+    acc.wins += s.wins; acc.losses += s.losses; acc.fpts += s.fpts;
+    return acc;
+  }, {wins:0, losses:0, fpts:0});
+  const winPct = totals.wins + totals.losses > 0
+    ? Math.round((totals.wins / (totals.wins + totals.losses)) * 100)
+    : 0;
+
+  const badges =
+    record.titles.map(function(y){ return '<span class="title-badge">🏆 ' + y + ' Champion</span>'; }).join("") +
+    record.runnerUps.map(function(y){ return '<span class="runnerup-badge">' + y + ' Runner-up</span>'; }).join("");
+
+  const rows = record.seasons.slice().reverse().map(function(s){
+    return '<tr><td>' + s.season + '</td><td>' + s.wins + '-' + s.losses + '</td><td>' + s.fpts.toFixed(1) + '</td></tr>';
+  }).join("");
+
+  el.innerHTML =
+    '<div class="alltime-title">All-time record</div>' +
+    '<div class="alltime-summary">' +
+      '<div><div class="num">' + totals.wins + '-' + totals.losses + '</div><div class="lbl">Career record</div></div>' +
+      '<div><div class="num">' + winPct + '%</div><div class="lbl">Win rate</div></div>' +
+      '<div><div class="num">' + record.seasons.length + '</div><div class="lbl">Seasons</div></div>' +
+      '<div><div class="num">' + totals.fpts.toFixed(0) + '</div><div class="lbl">Career points</div></div>' +
+    '</div>' +
+    (badges ? '<div class="titles-row">' + badges + '</div>' : '') +
+    '<table class="season-history"><thead><tr><th>Season</th><th>Record</th><th>Points</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function renderPlayoffHistory(ownerId){
+  const el = document.getElementById("tdPlayoffs");
+  const record = PLAYOFF_STATS[ownerId];
+
+  if(!record || record.seasons.length === 0){
+    el.innerHTML = '<div class="alltime-title">Playoff history</div>' +
+      '<div class="new-team-note">New to the league in 2026 &mdash; no playoff seasons on record.</div>';
+    return;
+  }
+
+  const appearances = record.seasons.filter(function(s){ return s.made; });
+  const totals = record.seasons.reduce(function(acc, s){
+    acc.wins += s.wins; acc.losses += s.losses;
+    return acc;
+  }, {wins:0, losses:0});
+
+  const finishRank = {"Champion":1, "Runner-up":2, "3rd":3, "4th":4, "5th":5, "6th":6};
+  let best = null;
+  record.seasons.forEach(function(s){
+    if(s.made && (!best || finishRank[s.finish] < finishRank[best.finish])) best = s;
+  });
+  const bestLine = best ? best.finish + " (" + best.season + ")" : "\u2014";
+
+  const rows = record.seasons.slice().reverse().map(function(s){
+    const resultLabel = s.made ? (s.finish + " \u00b7 " + s.wins + "-" + s.losses) : "Missed playoffs";
+    return '<tr><td>' + s.season + '</td><td colspan="2">' + resultLabel + '</td></tr>';
+  }).join("");
+
+  el.innerHTML =
+    '<div class="alltime-title">Playoff history</div>' +
+    '<div class="alltime-summary">' +
+      '<div><div class="num">' + appearances.length + '/' + record.seasons.length + '</div><div class="lbl">Appearances</div></div>' +
+      '<div><div class="num">' + totals.wins + '-' + totals.losses + '</div><div class="lbl">Playoff record</div></div>' +
+      '<div><div class="num" style="font-size:20px;">' + bestLine + '</div><div class="lbl">Best finish</div></div>' +
+    '</div>' +
+    '<table class="season-history"><thead><tr><th>Season</th><th colspan="2">Result</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+document.getElementById("teamDetailBack").addEventListener("click", function(){
+  document.getElementById("teamDetail").classList.remove("active");
+  document.getElementById("teamsGrid").style.display = "";
+});
+
+document.querySelectorAll(".navlinks button").forEach(function(btn){
+  btn.addEventListener("click", function(){
+    document.querySelectorAll(".navlinks button").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active");
+    document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
+    document.getElementById("section-" + btn.dataset.section).classList.add("active");
+  });
+});
+
+function loadLiveData(){
+  Promise.all([
+    fetch("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/users"),
+    fetch("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/rosters")
+  ]).then(function(responses){
+    if(!responses[0].ok || !responses[1].ok) throw new Error("bad response");
+    return Promise.all([responses[0].json(), responses[1].json()]);
+  }).then(function(results){
+    const users = results[0];
+    const rosters = results[1];
+    const userMap = {};
+    users.forEach(function(u){
+      const meta = u.metadata || {};
+      userMap[u.user_id] = {
+        manager: u.display_name,
+        team: meta.team_name ? meta.team_name.trim() : u.display_name,
+        avatar: meta.avatar ? meta.avatar : (u.avatar ? "https://sleepercdn.com/avatars/" + u.avatar : "")
+      };
+    });
+    const liveTeams = rosters.map(function(r){
+      const u = userMap[r.owner_id] || {};
+      const s = r.settings || {};
+      return {
+        rosterId: r.roster_id,
+        ownerId: r.owner_id,
+        team: u.team || ("Team " + r.roster_id),
+        manager: u.manager || "Unknown",
+        avatar: u.avatar || "",
+        wins: s.wins || 0,
+        losses: s.losses || 0,
+        ties: s.ties || 0,
+        fpts: (s.fpts || 0) + ((s.fpts_decimal || 0) / 100),
+        starters: r.starters || [],
+        players: r.players || []
+      };
+    });
+    if(liveTeams.length > 0){
+      TEAMS = liveTeams;
+      renderStandings(true);
+      renderRivalry();
+      renderDraftBoard();
+      renderTeams();
+      renderBonusGames();
+      if(LAST_MATCHUPS) renderMatchups(LAST_MATCHUPS.week, LAST_MATCHUPS.pairs, LAST_MATCHUPS.usedLive);
+      if(LAST_RECAP) renderRecap(LAST_RECAP.week, LAST_RECAP.pairs, true);
+      maybeComputePowerRankings();
+    } else {
+      throw new Error("empty");
+    }
+  }).catch(function(){
+    renderStandings(false);
+    document.getElementById("powerStatus").textContent = "Power rankings unavailable right now (live fetch was blocked by the browser).";
+  });
+}
+
+// ---------- POWER RANKINGS ----------
+let ALL_PLAYERS = null;
+let TRADED_PICKS = null;
+let POWER_TEAMS_READY = false;
+let POWER_MATCHUPS_READY = false;
+
+function maybeComputePowerRankings(){
+  if(TEAMS.length > 0 && TEAMS[0].starters !== undefined) POWER_TEAMS_READY = true;
+  if(Array.isArray(RIVALRY_HISTORY)) POWER_MATCHUPS_READY = true;
+  if(!POWER_TEAMS_READY || !POWER_MATCHUPS_READY) return;
+
+  Promise.all([
+    ALL_PLAYERS ? Promise.resolve(ALL_PLAYERS) : fetchJSON("https://api.sleeper.app/v1/players/nfl").catch(function(){ return null; }),
+    TRADED_PICKS ? Promise.resolve(TRADED_PICKS) : fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/traded_picks").catch(function(){ return []; })
+  ]).then(function(res){
+    ALL_PLAYERS = res[0];
+    TRADED_PICKS = res[1] || [];
+    computePowerRankings();
+  });
+}
+
+function minMaxNormalize(valuesObj, invert){
+  const vals = [];
+  TEAMS.forEach(function(t){
+    const v = valuesObj[t.rosterId];
+    if(v !== null && v !== undefined) vals.push(v);
+  });
+  const result = {};
+  if(vals.length === 0){
+    TEAMS.forEach(function(t){ result[t.rosterId] = 50; });
+    return result;
+  }
+  const min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  const range = (max - min) || 1;
+  TEAMS.forEach(function(t){
+    const v = valuesObj[t.rosterId];
+    if(v === null || v === undefined){ result[t.rosterId] = 50; return; }
+    let norm = ((v - min) / range) * 100;
+    if(invert) norm = 100 - norm;
+    result[t.rosterId] = norm;
+  });
+  return result;
+}
+
+function computeProductionAndRecent(){
+  const weeklyByRoster = {};
+  RIVALRY_HISTORY.forEach(function(entry){
+    if(String(entry.season) !== "2026" || !Array.isArray(entry.data)) return;
+    entry.data.forEach(function(m){
+      if(typeof m.points !== "number" || m.points === 0) return;
+      if(!weeklyByRoster[m.roster_id]) weeklyByRoster[m.roster_id] = [];
+      weeklyByRoster[m.roster_id].push({week: entry.week, points: m.points});
+    });
+  });
+  const production = {}, recent = {};
+  let maxWeek = 0;
+  Object.keys(weeklyByRoster).forEach(function(rid){
+    const list = weeklyByRoster[rid].sort(function(a,b){ return a.week - b.week; });
+    maxWeek = Math.max(maxWeek, list[list.length-1].week);
+    production[rid] = list.reduce(function(s,x){ return s+x.points; }, 0) / list.length;
+    const last = list.slice(-3);
+    recent[rid] = last.reduce(function(s,x){ return s+x.points; }, 0) / last.length;
+  });
+  return {production: production, recent: recent, asOfWeek: maxWeek};
+}
+
+function computeRosterAndDynasty(){
+  const rosterRaw = {}, dynastyRaw = {}, eliteYoungCount = {};
+  TEAMS.forEach(function(t){
+    const starterIds = (t.starters || []).filter(function(id){ return id && id !== "0"; });
+    const allIds = (t.players || []).filter(function(id){ return id && id !== "0"; });
+    let totalRank = 0, rankCnt = 0;
+    starterIds.forEach(function(pid){
+      const p = ALL_PLAYERS ? ALL_PLAYERS[pid] : null;
+      if(p && typeof p.search_rank === "number" && p.search_rank < 9999){ totalRank += p.search_rank; rankCnt++; }
+    });
+    rosterRaw[t.rosterId] = rankCnt > 0 ? (totalRank / rankCnt) : null;
+
+    let totalAge = 0, ageCnt = 0, elite = 0;
+    allIds.forEach(function(pid){
+      const p = ALL_PLAYERS ? ALL_PLAYERS[pid] : null;
+      if(p && typeof p.age === "number"){
+        totalAge += p.age; ageCnt++;
+        if(p.age < 24 && typeof p.search_rank === "number" && p.search_rank < 200) elite++;
+      }
+    });
+    dynastyRaw[t.rosterId] = ageCnt > 0 ? (totalAge / ageCnt) : null;
+    eliteYoungCount[t.rosterId] = elite;
+  });
+  return {rosterRaw: rosterRaw, dynastyRaw: dynastyRaw, eliteYoungCount: eliteYoungCount};
+}
+
+function computeDraftCapital(){
+  const pickValue = {1:1.0, 2:0.5, 3:0.25, 4:0.125};
+  const capital = {};
+  TEAMS.forEach(function(t){ capital[t.rosterId] = 0; });
+
+  const seasons = {};
+  (TRADED_PICKS || []).forEach(function(p){ seasons[p.season] = true; });
+  const seasonList = Object.keys(seasons);
+
+  if(seasonList.length === 0){
+    const baseline = pickValue[1] + pickValue[2] + pickValue[3] + pickValue[4];
+    TEAMS.forEach(function(t){ capital[t.rosterId] = baseline; });
+    return capital;
+  }
+
+  seasonList.forEach(function(season){
+    for(let round = 1; round <= 4; round++){
+      TEAMS.forEach(function(t){
+        let owner = t.rosterId;
+        const trade = (TRADED_PICKS || []).find(function(p){
+          return String(p.season) === String(season) && p.round === round && p.roster_id === t.rosterId;
+        });
+        if(trade) owner = trade.owner_id;
+        capital[owner] = (capital[owner] || 0) + (pickValue[round] || 0);
+      });
+    }
+  });
+  return capital;
+}
+
+const POWER_WEIGHTS = {production:0.30, roster:0.25, dynasty:0.20, draft:0.10, recent:0.10, record:0.05};
+
+function computePowerRankings(){
+  const status = document.getElementById("powerStatus");
+  const prAndRecent = computeProductionAndRecent();
+  const rosterAndDynasty = computeRosterAndDynasty();
+  const draftCapitalRaw = computeDraftCapital();
+
+  const recordRaw = {};
+  TEAMS.forEach(function(t){
+    const gp = t.wins + t.losses + t.ties;
+    recordRaw[t.rosterId] = gp > 0 ? ((t.wins + t.ties*0.5) / gp) : null;
+  });
+
+  const prodNorm = minMaxNormalize(prAndRecent.production, false);
+  const recentNorm = minMaxNormalize(prAndRecent.recent, false);
+  const rosterNorm = minMaxNormalize(rosterAndDynasty.rosterRaw, true);
+  let dynastyNorm = minMaxNormalize(rosterAndDynasty.dynastyRaw, true);
+  const draftNorm = minMaxNormalize(draftCapitalRaw, false);
+  const recordNorm = minMaxNormalize(recordRaw, false);
+
+  // small bonus for elite young assets, folded into dynasty score
+  TEAMS.forEach(function(t){
+    const bonus = Math.min(10, (rosterAndDynasty.eliteYoungCount[t.rosterId] || 0) * 2);
+    dynastyNorm[t.rosterId] = Math.min(100, dynastyNorm[t.rosterId] + bonus);
+  });
+
+  const finalScores = TEAMS.map(function(t){
+    const cats = {
+      production: prodNorm[t.rosterId],
+      roster: rosterNorm[t.rosterId],
+      dynasty: dynastyNorm[t.rosterId],
+      draft: draftNorm[t.rosterId],
+      recent: recentNorm[t.rosterId],
+      record: recordNorm[t.rosterId]
+    };
+    const score = cats.production*POWER_WEIGHTS.production + cats.roster*POWER_WEIGHTS.roster +
+      cats.dynasty*POWER_WEIGHTS.dynasty + cats.draft*POWER_WEIGHTS.draft +
+      cats.recent*POWER_WEIGHTS.recent + cats.record*POWER_WEIGHTS.record;
+    return {team: t, score: score, cats: cats};
+  }).sort(function(a,b){ return b.score - a.score; });
+
+  const asOfWeek = prAndRecent.asOfWeek;
+  const order = finalScores.map(function(f){ return f.team.rosterId; });
+
+  if(asOfWeek === 0){
+    status.textContent = "Preseason power rankings \u2014 based on roster strength, dynasty value, and draft capital only until Week 1 wraps up.";
+    renderPowerRankings(finalScores, {});
+    return;
+  }
+
+  safeStorageGet("power_rankings_wk" + (asOfWeek - 1), true).then(function(res){
+    let prevOrder = [];
+    try{ if(res && res.value) prevOrder = JSON.parse(res.value); }catch(e){}
+    const movement = {};
+    order.forEach(function(rid, i){
+      const prevIdx = prevOrder.indexOf(rid);
+      movement[rid] = prevIdx === -1 ? null : (prevIdx - i);
+    });
+    status.textContent = "Through Week " + asOfWeek + " \u2014 updates automatically as new weeks are played.";
+    renderPowerRankings(finalScores, movement);
+  }).catch(function(){
+    status.textContent = "Through Week " + asOfWeek + " \u2014 updates automatically as new weeks are played.";
+    renderPowerRankings(finalScores, {});
+  });
+
+  safeStorageSet("power_rankings_wk" + asOfWeek, JSON.stringify(order), true).catch(function(){});
+}
+
+function renderPowerRankings(finalScores, movement){
+  const grid = document.getElementById("powerGrid");
+  document.getElementById("powerMethodNote").style.display = "block";
+
+  const catLabels = {
+    production:["Current Production","30%"], roster:["Roster Strength","25%"], dynasty:["Dynasty Value","20%"],
+    draft:["Draft Capital","10%"], recent:["Recent Performance","10%"], record:["Record","5%"]
+  };
+
+  grid.innerHTML = finalScores.map(function(f, i){
+    const t = f.team;
+    const mv = movement[t.rosterId];
+    const mvHtml = mv === null || mv === undefined ? '<span class="power-move flat">NEW</span>'
+      : mv > 0 ? '<span class="power-move up">\u25B2' + mv + '</span>'
+      : mv < 0 ? '<span class="power-move down">\u25BC' + Math.abs(mv) + '</span>'
+      : '<span class="power-move flat">\u2013</span>';
+
+    const breakdownRows = Object.keys(catLabels).map(function(key){
+      const val = f.cats[key];
+      return '<div class="power-cat-row">' +
+        '<div class="power-cat-label">' + catLabels[key][0] + ' (' + catLabels[key][1] + ')</div>' +
+        '<div class="power-cat-bar-wrap"><div class="power-cat-bar" style="width:' + Math.max(0,Math.min(100,val)).toFixed(0) + '%"></div></div>' +
+        '<div class="power-cat-val">' + val.toFixed(0) + '</div>' +
+      '</div>';
+    }).join("");
+
+    return '<div class="power-row" data-idx="' + i + '">' +
+      '<div class="power-row-main">' +
+        '<div class="power-rank">' + (i+1) + '</div>' +
+        mvHtml +
+        '<div class="power-team"><img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/><span class="power-team-name">' + t.team + '</span></div>' +
+        '<div class="power-score">' + f.score.toFixed(1) + '</div>' +
+        '<div class="power-chevron">&#9660;</div>' +
+      '</div>' +
+      '<div class="power-breakdown">' + breakdownRows + '</div>' +
+    '</div>';
+  }).join("");
+
+  grid.querySelectorAll(".power-row").forEach(function(row){
+    row.querySelector(".power-row-main").addEventListener("click", function(){
+      row.classList.toggle("expanded");
+    });
+  });
+}
+
+function safeStorageGet(key, shared){
+  try{
+    if(!window.storage || typeof window.storage.get !== "function"){
+      return Promise.reject(new Error("storage unavailable"));
+    }
+    return window.storage.get(key, shared);
+  }catch(e){
+    return Promise.reject(e);
+  }
+}
+
+function safeStorageSet(key, value, shared){
+  try{
+    if(!window.storage || typeof window.storage.set !== "function"){
+      return Promise.reject(new Error("storage unavailable"));
+    }
+    return window.storage.set(key, value, shared);
+  }catch(e){
+    return Promise.reject(e);
+  }
+}
+
+function fetchJSON(url){
+  return fetch(url).then(function(r){
+    if(!r.ok) throw new Error("bad response " + url);
+    return r.json();
+  });
+}
+
+function buildUserMap(users){
+  const userMap = {};
+  users.forEach(function(u){
+    const meta = u.metadata || {};
+    userMap[u.user_id] = {
+      manager: u.display_name,
+      team: meta.team_name ? meta.team_name.trim() : u.display_name,
+      avatar: meta.avatar ? meta.avatar : (u.avatar ? "https://sleepercdn.com/avatars/" + u.avatar : "")
+    };
+  });
+  return userMap;
+}
+
+function buildSeasonSummary(leagueId){
+  return fetchJSON("https://api.sleeper.app/v1/league/" + leagueId).then(function(league){
+    return Promise.all([
+      fetchJSON("https://api.sleeper.app/v1/league/" + leagueId + "/users"),
+      fetchJSON("https://api.sleeper.app/v1/league/" + leagueId + "/rosters"),
+      fetchJSON("https://api.sleeper.app/v1/league/" + leagueId + "/winners_bracket").catch(function(){ return []; })
+    ]).then(function(results){
+      const users = results[0], rosters = results[1], bracket = results[2];
+      const userMap = buildUserMap(users);
+      const rosterMap = {};
+      rosters.forEach(function(r){
+        rosterMap[r.roster_id] = userMap[r.owner_id] || {team: "Team " + r.roster_id, manager: "Unknown", avatar: ""};
+      });
+      let champion = null, runnerUp = null;
+      const champGame = Array.isArray(bracket) ? bracket.find(function(m){ return m.p === 1; }) : null;
+      if(champGame){
+        champion = rosterMap[champGame.w] || null;
+        runnerUp = rosterMap[champGame.l] || null;
+      }
+      return {
+        leagueId: leagueId,
+        season: league.season,
+        previousLeagueId: league.previous_league_id,
+        champion: champion,
+        runnerUp: runnerUp
+      };
+    });
+  });
+}
+
+function renderHistory(history){
+  const sub = document.getElementById("historySub");
+  const list = document.getElementById("historyList");
+  if(history.length === 0){
+    sub.textContent = "No linked prior dynasty seasons found on Sleeper for this league.";
+    list.innerHTML = "";
+    return;
+  }
+  sub.textContent = history.length + " prior season" + (history.length === 1 ? "" : "s") + " found.";
+  list.innerHTML = history.map(function(s){
+    const champHtml = s.champion
+      ? '<img src="' + (s.champion.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<span class="cname">' + s.champion.team + '</span> <span class="cmgr">(' + s.champion.manager + ')</span>'
+      : '<span class="cmgr">Champion not available</span>';
+    const runnerHtml = s.runnerUp ? "Runner-up: " + s.runnerUp.team : "";
+    return '<div class="history-row">' +
+      '<div class="history-season">' + s.season + '</div>' +
+      '<div class="history-champ">' + champHtml + '</div>' +
+      '<div class="history-runnerup">' + runnerHtml + '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function loadDynastyHistory(){
+  fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID).then(function(base){
+    const history = [];
+    function step(prevId, guard){
+      if(!prevId || guard > 12){
+        renderHistory(history.length > 0 ? history : FALLBACK_HISTORY);
+        return;
+      }
+      buildSeasonSummary(prevId).then(function(summary){
+        history.push(summary);
+        step(summary.previousLeagueId, guard + 1);
+      }).catch(function(){
+        renderHistory(history.length > 0 ? history : FALLBACK_HISTORY);
+      });
+    }
+    step(base.previous_league_id, 0);
+  }).catch(function(){
+    renderHistory(FALLBACK_HISTORY);
+  });
+}
+
+renderStandings(false);
+renderFallbackMatchups();
+renderRivalry();
+renderDraftBoard();
+renderTeams();
+loadBonusWinners();
+loadLiveData();
+loadDynastyHistory();
+loadHomeData();
+loadRivalryHistory();
+</script>
+
+</body>
+</html>
