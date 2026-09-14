@@ -1180,6 +1180,7 @@ const FALLBACK_MATCHUPS = {
 };
 
 let LAST_MATCHUPS = null;
+let CURRENT_NFL_WEEK = null; // in-progress week; excluded from all-time stats until it's final
 
 function renderMatchups(week, pairsWithScores, usedLive){
   LAST_MATCHUPS = {week: week, pairs: pairsWithScores, usedLive: usedLive};
@@ -1315,6 +1316,7 @@ let LAST_RECAP = null;
 function loadHomeData(){
   fetchJSON("https://api.sleeper.app/v1/state/nfl").then(function(state){
     const week = Math.max(1, state.week || 1);
+    CURRENT_NFL_WEEK = week;
 
     fetchMatchupPairs(week).then(function(pairs){
       if(pairs.length === 0) throw new Error("no matchups yet");
@@ -2257,6 +2259,8 @@ function buildAndRenderRecords(results){
       const p1 = typeof pair[0].points === "number" ? pair[0].points : 0;
       const p2 = typeof pair[1].points === "number" ? pair[1].points : 0;
       if(p1 === 0 && p2 === 0) return; // unplayed week
+      const currentWk = CURRENT_NFL_WEEK || (LAST_MATCHUPS ? LAST_MATCHUPS.week : null);
+      if(season === 2026 && currentWk && week === currentWk) return; // week still in progress, not final yet
       const isPlayoff = week >= 15;
       pairGames.push({season:season, week:week, rosterA:pair[0].roster_id, ptsA:p1, rosterB:pair[1].roster_id, ptsB:p2, isPlayoff:isPlayoff});
       allGames.push({season:season, week:week, rosterId:pair[0].roster_id, points:p1, oppRosterId:pair[1].roster_id, oppPoints:p2, isWin:p1>p2, isTie:p1===p2, isPlayoff:isPlayoff});
