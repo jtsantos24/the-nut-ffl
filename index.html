@@ -2315,11 +2315,13 @@ function renderRecordsAccordion(R){
   const streakCategoriesLive = [
     {key:"longestWinStreak", title:"Longest winning streak", render: function(s,i){
       const t = teamForSeason(s.endSeason, s.rosterId);
-      return rankRow(i, t.team + ' <span class="rec-score">' + s.length + ' games</span>', s.startSeason === s.endSeason ? s.startSeason : (s.startSeason + '\u2013' + s.endSeason), null, "Wk " + s.startWeek + " \u2013 Wk " + s.endWeek);
+      const seasonLabel = s.startSeason === s.endSeason ? String(s.startSeason) : (s.startSeason + '\u2013' + s.endSeason);
+      return rankRow(i, t.team + ' <span class="rec-score">' + s.length + ' games</span>', null, null, seasonLabel + " \u00b7 Wk " + s.startWeek + " \u2013 Wk " + s.endWeek);
     }},
     {key:"longestLoseStreak", title:"Longest losing streak", render: function(s,i){
       const t = teamForSeason(s.endSeason, s.rosterId);
-      return rankRow(i, t.team + ' <span class="rec-score">' + s.length + ' games</span>', s.startSeason === s.endSeason ? s.startSeason : (s.startSeason + '\u2013' + s.endSeason), null, "Wk " + s.startWeek + " \u2013 Wk " + s.endWeek);
+      const seasonLabel = s.startSeason === s.endSeason ? String(s.startSeason) : (s.startSeason + '\u2013' + s.endSeason);
+      return rankRow(i, t.team + ' <span class="rec-score">' + s.length + ' games</span>', null, null, seasonLabel + " \u00b7 Wk " + s.startWeek + " \u2013 Wk " + s.endWeek);
     }}
   ];
 
