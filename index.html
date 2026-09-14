@@ -311,18 +311,21 @@
   /* ---------- MATCHUPS ---------- */
   .matchup-card{
     background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px;
-    padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    padding:16px 18px; margin-bottom:12px; position:relative;
   }
+  .matchup-top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
   .matchup-side{display:flex; align-items:center; gap:10px; flex:1; min-width:180px;}
   .matchup-side.right{justify-content:flex-end; text-align:right;}
   .matchup-side img{width:36px; height:36px; border-radius:6px; object-fit:cover; flex-shrink:0;}
   .matchup-team-name{font-size:14px; font-weight:500;}
   .matchup-team-record{font-size:11px; color:var(--chalk-dim);}
+  .matchup-team-avg{font-size:11px; color:var(--gold-dark); margin-top:1px;}
   .matchup-score{font-family:'Teko', sans-serif; font-size:30px; color:var(--gold); min-width:70px; text-align:center;}
   .matchup-score.leading{color:var(--gold);}
   .matchup-score.trailing{color:var(--chalk-dim);}
   .matchup-mid{display:flex; flex-direction:column; align-items:center; gap:2px;}
   .matchup-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-dim);}
+  .matchup-h2h{margin-top:10px; padding-top:10px; border-top:1px solid var(--turf-line); font-size:11px; color:var(--chalk-dim); text-align:center;}
   .matchup-card.is-gotw{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); position:relative;}
   .gotw-badge{
     position:absolute; top:-11px; left:16px; background:var(--gold); color:#2A2005;
@@ -1194,23 +1197,41 @@ function renderMatchups(week, pairsWithScores, usedLive){
     const aLead = m.aPoints !== null && m.bPoints !== null && m.aPoints > m.bPoints;
     const bLead = m.aPoints !== null && m.bPoints !== null && m.bPoints > m.aPoints;
     const isGotw = GOTW_PICK && ((GOTW_PICK.a === m.a && GOTW_PICK.b === m.b) || (GOTW_PICK.a === m.b && GOTW_PICK.b === m.a));
+
+    const h2hAvg = (a.ownerId && b.ownerId) ? computeH2HAvg(a.ownerId, b.ownerId) : {a:null, b:null};
+    const aAvgHtml = h2hAvg.a !== null ? '<div class="matchup-team-avg">' + h2hAvg.a.toFixed(1) + ' avg vs them</div>' : '';
+    const bAvgHtml = h2hAvg.b !== null ? '<div class="matchup-team-avg">' + h2hAvg.b.toFixed(1) + ' avg vs them</div>' : '';
+
+    let h2hHtml = "";
+    if(HEAD_TO_HEAD && a.ownerId && b.ownerId){
+      const rec = HEAD_TO_HEAD[a.ownerId] && HEAD_TO_HEAD[a.ownerId][b.ownerId];
+      if(rec && (rec.wins + rec.losses + rec.ties) > 0){
+        h2hHtml = '<div class="matchup-h2h">All-time: ' + (a.team||'Team '+m.a) + ' ' + rec.wins + '-' + rec.losses + (rec.ties?('-'+rec.ties):'') + ' ' + (b.team||'Team '+m.b) + '</div>';
+      } else {
+        h2hHtml = '<div class="matchup-h2h">All-time: first meeting</div>';
+      }
+    }
+
     return '<div class="matchup-card' + (isGotw ? ' is-gotw' : '') + '">' +
       (isGotw ? '<div class="gotw-badge">\u2605 Game of the Week</div>' : '') +
-      '<div class="matchup-side">' +
-        '<img src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
-        '<div><div class="matchup-team-name">' + (a.team||'Team '+m.a) + '</div>' +
-        '<div class="matchup-team-record">' + (a.wins||0) + '-' + (a.losses||0) + '</div></div>' +
+      '<div class="matchup-top-row">' +
+        '<div class="matchup-side">' +
+          '<img src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+          '<div><div class="matchup-team-name">' + (a.team||'Team '+m.a) + '</div>' +
+          '<div class="matchup-team-record">' + (a.wins||0) + '-' + (a.losses||0) + '</div>' + aAvgHtml + '</div>' +
+        '</div>' +
+        '<div class="matchup-mid">' +
+          '<div class="matchup-score ' + (aLead ? 'leading' : (bLead ? 'trailing' : '')) + '">' + aScore + '</div>' +
+          '<div class="matchup-vs">VS</div>' +
+          '<div class="matchup-score ' + (bLead ? 'leading' : (aLead ? 'trailing' : '')) + '">' + bScore + '</div>' +
+        '</div>' +
+        '<div class="matchup-side right">' +
+          '<div><div class="matchup-team-name">' + (b.team||'Team '+m.b) + '</div>' +
+          '<div class="matchup-team-record">' + (b.wins||0) + '-' + (b.losses||0) + '</div>' + bAvgHtml + '</div>' +
+          '<img src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '</div>' +
       '</div>' +
-      '<div class="matchup-mid">' +
-        '<div class="matchup-score ' + (aLead ? 'leading' : (bLead ? 'trailing' : '')) + '">' + aScore + '</div>' +
-        '<div class="matchup-vs">VS</div>' +
-        '<div class="matchup-score ' + (bLead ? 'leading' : (aLead ? 'trailing' : '')) + '">' + bScore + '</div>' +
-      '</div>' +
-      '<div class="matchup-side right">' +
-        '<div><div class="matchup-team-name">' + (b.team||'Team '+m.b) + '</div>' +
-        '<div class="matchup-team-record">' + (b.wins||0) + '-' + (b.losses||0) + '</div></div>' +
-        '<img src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
-      '</div>' +
+      h2hHtml +
     '</div>';
   }).join("");
 
@@ -1867,6 +1888,23 @@ function ownerForSeasonRoster(season, rosterId){
   return STATIC_ROSTER_OWNER[rosterId];
 }
 
+// Average points an owner has scored specifically in meetings against one other owner, all-time.
+function computeH2HAvg(ownerA, ownerB){
+  if(!ALL_PAIR_GAMES) return {a: null, b: null};
+  let sumA = 0, cntA = 0, sumB = 0, cntB = 0;
+  ALL_PAIR_GAMES.forEach(function(g){
+    const oA = ownerForSeasonRoster(g.season, g.rosterA);
+    const oB = ownerForSeasonRoster(g.season, g.rosterB);
+    if(!oA || !oB) return;
+    if(oA === ownerA && oB === ownerB){ sumA += g.ptsA; cntA++; sumB += g.ptsB; cntB++; }
+    else if(oA === ownerB && oB === ownerA){ sumA += g.ptsB; cntA++; sumB += g.ptsA; cntB++; }
+  });
+  return {
+    a: cntA > 0 ? (sumA/cntA) : null,
+    b: cntB > 0 ? (sumB/cntB) : null
+  };
+}
+
 let ALL_PAIR_GAMES = null;
 let POWER_SCORES = {};
 let POWER_TRENDS = {};
@@ -2395,6 +2433,7 @@ function loadRivalryHistory(){
     renderRivalry();
     buildAndRenderRecords(results);
     maybeComputePowerRankings();
+    if(LAST_MATCHUPS) renderMatchups(LAST_MATCHUPS.week, LAST_MATCHUPS.pairs, LAST_MATCHUPS.usedLive);
   }).catch(function(){
     RIVALRY_HISTORY = "error";
     renderRivalry();
