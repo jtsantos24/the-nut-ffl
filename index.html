@@ -179,6 +179,9 @@
   .history-champ .cname{font-weight:500;}
   .history-champ .cmgr{color:var(--chalk-dim); font-size:12px;}
   .history-runnerup{color:var(--chalk-dim); font-size:12px; margin-left:auto; text-align:right;}
+  .history-toilet-row{padding-top:6px; opacity:0.85;}
+  .history-champ.toilet img{width:26px; height:26px;}
+  .toilet-label{font-size:11px; color:var(--red); margin-right:8px; white-space:nowrap;}
 
   /* ---------- DRAFT ---------- */
   .draft-status{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
@@ -933,6 +936,16 @@ const FALLBACK_HISTORY = [
       team: "Lickety Splitz Squad",
       manager: "twillie391",
       avatar: "https://sleepercdn.com/uploads/e13fffc5091460abfd8400956b4731c5.jpg"
+    },
+    toiletBowlChamp: {
+      team: "2027 is my year!",
+      manager: "PAHTNAH",
+      avatar: "https://sleepercdn.com/uploads/f5d0b24b97f5ce592043a226012a8e53.jpg"
+    },
+    toiletBowlRunnerUp: {
+      team: "The OG Champ",
+      manager: "JeffPeterson20",
+      avatar: "https://sleepercdn.com/uploads/c7eef8bbb107e72d6bfc814062997354.jpg"
     }
   },
   {
@@ -948,6 +961,16 @@ const FALLBACK_HISTORY = [
       team: "Boom Goes The Dynamite",
       manager: "brandishrewsberry",
       avatar: "https://sleepercdn.com/uploads/bf3e42dfbfdd21ac884b0e920774269e"
+    },
+    toiletBowlChamp: {
+      team: "Aaron's Ayahuasca Dream",
+      manager: "BReyes",
+      avatar: "https://sleepercdn.com/uploads/e22c34c7cfec48980bb3fde64b746b16.jpg"
+    },
+    toiletBowlRunnerUp: {
+      team: "2025ISMYYEAR",
+      manager: "PAHTNAH",
+      avatar: "https://sleepercdn.com/uploads/189c1adfcdd33959515c507d2fbd480f.jpg"
     }
   },
   {
@@ -963,6 +986,16 @@ const FALLBACK_HISTORY = [
       team: "Bonney Lake Wookies",
       manager: "AlanCarignan",
       avatar: "https://sleepercdn.com/uploads/1eadadacb5e16318fd821c79ca9bbd52.jpg"
+    },
+    toiletBowlChamp: {
+      team: "That's What Cheesehead",
+      manager: "BReyes",
+      avatar: "https://sleepercdn.com/uploads/67e4e71862e21f6ca0ca41951208e835.jpg"
+    },
+    toiletBowlRunnerUp: {
+      team: "Be Right Back",
+      manager: "KShrewsberry",
+      avatar: "https://sleepercdn.com/avatars/74bcc29f6228ed44341cdefa0bb76ecf"
     }
   }
 ];
@@ -3140,9 +3173,10 @@ function buildSeasonSummary(leagueId){
     return Promise.all([
       fetchJSON("https://api.sleeper.app/v1/league/" + leagueId + "/users"),
       fetchJSON("https://api.sleeper.app/v1/league/" + leagueId + "/rosters"),
-      fetchJSON("https://api.sleeper.app/v1/league/" + leagueId + "/winners_bracket").catch(function(){ return []; })
+      fetchJSON("https://api.sleeper.app/v1/league/" + leagueId + "/winners_bracket").catch(function(){ return []; }),
+      fetchJSON("https://api.sleeper.app/v1/league/" + leagueId + "/losers_bracket").catch(function(){ return []; })
     ]).then(function(results){
-      const users = results[0], rosters = results[1], bracket = results[2];
+      const users = results[0], rosters = results[1], bracket = results[2], loserBracket = results[3];
       const userMap = buildUserMap(users);
       const rosterMap = {};
       rosters.forEach(function(r){
@@ -3154,12 +3188,23 @@ function buildSeasonSummary(leagueId){
         champion = rosterMap[champGame.w] || null;
         runnerUp = rosterMap[champGame.l] || null;
       }
+      // Toilet Bowl: the loser bracket's own "championship" (p:1) game winner is who
+      // finishes actual dead last (12th) -- the loser bracket rewards losing, so
+      // winning your way to its final means you're the worst team in the league.
+      let toiletBowlChamp = null, toiletBowlRunnerUp = null;
+      const toiletFinal = Array.isArray(loserBracket) ? loserBracket.find(function(m){ return m.p === 1; }) : null;
+      if(toiletFinal){
+        toiletBowlChamp = rosterMap[toiletFinal.w] || null; // winner of loser-bracket final = actual last place
+        toiletBowlRunnerUp = rosterMap[toiletFinal.l] || null; // loser of loser-bracket final = 2nd-to-last
+      }
       return {
         leagueId: leagueId,
         season: league.season,
         previousLeagueId: league.previous_league_id,
         champion: champion,
-        runnerUp: runnerUp
+        runnerUp: runnerUp,
+        toiletBowlChamp: toiletBowlChamp,
+        toiletBowlRunnerUp: toiletBowlRunnerUp
       };
     });
   });
@@ -3180,11 +3225,21 @@ function renderHistory(history){
         '<span class="cname">' + s.champion.team + '</span> <span class="cmgr">(' + s.champion.manager + ')</span>'
       : '<span class="cmgr">Champion not available</span>';
     const runnerHtml = s.runnerUp ? "Runner-up: " + s.runnerUp.team : "";
+    const toiletHtml = s.toiletBowlChamp
+      ? '<img src="' + (s.toiletBowlChamp.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<span class="cname">' + s.toiletBowlChamp.team + '</span> <span class="cmgr">(' + s.toiletBowlChamp.manager + ')</span>'
+      : "";
+    const toiletRunnerHtml = s.toiletBowlRunnerUp ? "2nd-to-last: " + s.toiletBowlRunnerUp.team : "";
     return '<div class="history-row">' +
       '<div class="history-season">' + s.season + '</div>' +
       '<div class="history-champ">' + champHtml + '</div>' +
       '<div class="history-runnerup">' + runnerHtml + '</div>' +
-    '</div>';
+    '</div>' +
+    (toiletHtml ? '<div class="history-row history-toilet-row">' +
+      '<div class="history-season">&nbsp;</div>' +
+      '<div class="history-champ toilet"><span class="toilet-label">\uD83D\uDEBD Toilet Bowl</span>' + toiletHtml + '</div>' +
+      '<div class="history-runnerup">' + toiletRunnerHtml + '</div>' +
+    '</div>' : '');
   }).join("");
 }
 
