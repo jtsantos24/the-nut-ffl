@@ -8,55 +8,135 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+
   :root{
-    --turf:#2B2B29;
-    --turf-dark:#1E1E1D;
-    --turf-darker:#141413;
-    --turf-line:#3D3D3A;
-    --chalk:#F2F1EC;
-    --chalk-dim:#ACAAA3;
-    --gold:#B7A888;
-    --gold-dark:#7E735C;
-    --red:#A2695C;
-    --red-dark:#5A3E36;
+    --bg:#0A0C12;
+    --bg-glow: radial-gradient(ellipse 900px 500px at 15% -10%, rgba(242,181,66,0.10), transparent 60%),
+               radial-gradient(ellipse 700px 500px at 100% 0%, rgba(69,214,196,0.07), transparent 55%);
+    --surface:#161A25;
+    --surface-2:#1D2230;
+    --surface-3:#232A3B;
+    --line:#2A3145;
+    --line-soft:rgba(255,255,255,0.06);
+    --chalk:#F4F6FA;
+    --chalk-dim:#8B93A8;
+    --chalk-faint:#5C6478;
+    --gold:#F2B542;
+    --gold-bright:#FFD46B;
+    --gold-dark:#B9822A;
+    --gold-soft:rgba(242,181,66,0.14);
+    --teal:#45D6C4;
+    --teal-dark:#2B8B7F;
+    --red:#FF6B6B;
+    --red-dark:#7A3B3B;
+    --red-soft:rgba(255,107,107,0.12);
+    --green:#34D399;
+    --shadow-card:0 14px 34px -16px rgba(0,0,0,0.6);
+    --shadow-soft:0 6px 18px -8px rgba(0,0,0,0.5);
+    --shadow-pop:0 20px 46px -14px rgba(0,0,0,0.7);
+    --radius:14px;
+    --radius-sm:8px;
+    --ticker-h:34px;
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
+  ::selection{background:var(--gold-soft); color:var(--gold-bright);}
   body{
     margin:0;
-    background:var(--turf-darker);
+    background:var(--bg-glow), var(--bg);
+    background-attachment:fixed;
     color:var(--chalk);
     font-family:'Inter', sans-serif;
     min-height:100vh;
     overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
   }
   img{max-width:100%;}
   a{color:inherit;}
-  h1,h2,h3{font-family:'Teko', sans-serif; font-weight:600; margin:0;}
+  h1,h2,h3{font-family:'Teko', sans-serif; font-weight:600; margin:0; letter-spacing:0.2px;}
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--surface-3); border-radius:8px; border:2px solid var(--bg);}
+  ::-webkit-scrollbar-thumb:hover{background:var(--gold-dark);}
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:3px;}
+
+  /* ---------- LIVE TICKER ---------- */
+  .ticker-bar{
+    position:sticky; top:0; z-index:60; height:var(--ticker-h);
+    background:#000000; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; overflow:hidden;
+  }
+  .ticker-bar::before{
+    content:''; position:absolute; inset:0; z-index:2; pointer-events:none;
+    background:linear-gradient(90deg, #000 0%, transparent 5%, transparent 95%, #000 100%);
+  }
+  .ticker-track{
+    display:inline-flex; align-items:center; white-space:nowrap; will-change:transform;
+  }
+  .ticker-bar:hover .ticker-track{animation-play-state:paused;}
+  @keyframes tickerScroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .ticker-item{
+    display:inline-flex; align-items:center; gap:6px; padding:0 4px;
+    font-size:12px; font-weight:600; letter-spacing:0.2px; color:var(--chalk);
+  }
+  .ticker-sep{color:var(--chalk-faint); opacity:0.4; padding:0 14px;}
+  .ticker-tag-trade{color:var(--teal);}
+  .ticker-tag-add{color:var(--green);}
+  .ticker-tag-drop{color:var(--red);}
+  .ticker-tag-news{color:var(--chalk-dim);}
+  .ticker-tag-nfltrade{color:var(--gold-bright);}
+  .ticker-tag-score{color:var(--gold);}
+  .ticker-tag-empty{color:var(--chalk-faint); font-style:italic; padding:0 16px; font-weight:400;}
+  @media (max-width:640px){
+    .ticker-item{font-size:11px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{animation:none !important;}
+    .ticker-bar{overflow-x:auto;}
+  }
 
   /* ---------- NAV ---------- */
   .topnav{
-    position:sticky; top:0; z-index:50;
-    background:var(--turf-dark);
-    border-bottom:3px solid var(--gold);
+    position:sticky; top:var(--ticker-h); z-index:50;
+    background:rgba(13,15,22,0.94);
+    border-bottom:1px solid var(--line);
+    box-shadow:0 1px 0 rgba(242,181,66,0.25), 0 12px 28px -20px rgba(0,0,0,0.8);
     display:flex; align-items:center; justify-content:space-between;
-    padding:10px 16px; gap:10px;
+    padding:12px 20px; gap:12px;
+    isolation:isolate;
   }
-  .brand{font-family:'Teko', sans-serif; font-size:22px; font-weight:700; color:var(--chalk); letter-spacing:0.3px; white-space:nowrap; flex-shrink:0;}
+  .topnav::before{
+    content:''; position:absolute; inset:0; z-index:-1;
+    background:rgba(13,15,22,0.6);
+    backdrop-filter:blur(14px) saturate(1.3);
+    -webkit-backdrop-filter:blur(14px) saturate(1.3);
+  }
+  .brand{
+    font-family:'Teko', sans-serif; font-size:23px; font-weight:700; color:var(--chalk);
+    letter-spacing:0.4px; white-space:nowrap; flex-shrink:1; min-width:0; overflow:hidden; text-overflow:ellipsis;
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .navlinks{display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex:1; min-width:0;}
   .navlinks::-webkit-scrollbar{display:none;}
   .navlinks button{
     background:transparent; border:1px solid transparent; color:var(--chalk-dim);
-    font-family:'Inter', sans-serif; font-size:13px; font-weight:500; padding:8px 14px;
-    border-radius:4px; cursor:pointer; white-space:nowrap; flex-shrink:0;
+    font-family:'Inter', sans-serif; font-size:13px; font-weight:500; padding:9px 15px;
+    border-radius:999px; cursor:pointer; white-space:nowrap; flex-shrink:0;
+    transition:color 0.15s, background 0.15s, border-color 0.15s;
   }
-  .navlinks button:hover{color:var(--chalk); border-color:var(--turf-line);}
-  .navlinks button.active{color:var(--gold-dark); background:var(--chalk); border-color:var(--chalk);}
+  .navlinks button:hover{color:var(--chalk); border-color:var(--line);}
+  .navlinks button.active{
+    color:#1A1304; background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark));
+    border-color:transparent; font-weight:600; box-shadow:0 4px 14px -4px rgba(242,181,66,0.5);
+  }
 
   /* ---------- MOBILE MENU ---------- */
   .hamburger-btn{
-    display:none; background:transparent; border:1px solid var(--turf-line); color:var(--chalk);
-    font-size:20px; line-height:1; padding:6px 10px; border-radius:4px; cursor:pointer; flex-shrink:0;
+    display:none; background:var(--surface); border:1px solid var(--line); color:var(--chalk);
+    font-size:19px; line-height:1; padding:7px 12px; border-radius:var(--radius-sm); cursor:pointer; flex-shrink:0;
+    transition:border-color 0.15s, color 0.15s;
   }
   .hamburger-btn:hover{border-color:var(--gold-dark); color:var(--gold);}
   .mobile-menu-close{display:none;}
@@ -66,288 +146,375 @@
     .hamburger-btn{display:block;}
     .navlinks{
       display:none; position:fixed; top:0; right:0; bottom:0; width:78%; max-width:300px;
-      background:var(--turf-dark); border-left:1px solid var(--turf-line);
+      background:var(--surface); border-left:1px solid var(--line);
       flex-direction:column; align-items:stretch; overflow-y:auto;
-      padding:16px; gap:2px; z-index:101; flex:none;
-      box-shadow:-8px 0 24px rgba(0,0,0,0.4);
+      padding:18px; gap:3px; z-index:101; flex:none;
+      box-shadow:-16px 0 40px rgba(0,0,0,0.55);
     }
     .navlinks.open{display:flex;}
-    .navlinks button{text-align:left; padding:12px 10px; font-size:14px; border-radius:4px;}
+    .navlinks button{text-align:left; padding:13px 12px; font-size:14px; border-radius:var(--radius-sm);}
+    .navlinks button.active{box-shadow:none;}
     .mobile-menu-close{
       display:block; align-self:flex-end; background:transparent; border:none; color:var(--chalk-dim);
-      font-size:26px; line-height:1; cursor:pointer; padding:4px 8px; margin-bottom:8px;
+      font-size:26px; line-height:1; cursor:pointer; padding:4px 8px; margin-bottom:10px;
     }
     .mobile-menu-close:hover{color:var(--chalk);}
     .nav-backdrop.open{
-      display:block; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:40;
+      display:block; position:fixed; inset:0; background:rgba(4,5,9,0.65); backdrop-filter:blur(2px); z-index:40;
     }
   }
 
   /* ---------- HERO ---------- */
   .hero{
+    position:relative;
     background:
-      radial-gradient(ellipse at top left, rgba(183,168,136,0.12), transparent 55%),
-      var(--turf);
-    border-bottom:1px solid var(--turf-line);
-    padding:28px 16px 24px;
+      radial-gradient(ellipse 640px 320px at 12% 0%, rgba(242,181,66,0.16), transparent 60%),
+      radial-gradient(ellipse 520px 360px at 92% 20%, rgba(69,214,196,0.10), transparent 60%),
+      linear-gradient(180deg, var(--surface) 0%, #12151F 100%);
+    border-bottom:1px solid var(--line);
+    padding:38px 20px 30px;
+    overflow:hidden;
   }
-  .hero-inner{max-width:1040px; margin:0 auto;}
-  .hero h1{font-size:36px; color:var(--chalk); line-height:1;}
-  .hero p{color:var(--chalk-dim); font-size:14px; margin-top:6px; max-width:520px;}
-  .welcome-message{max-width:680px; margin-top:12px;}
-  .welcome-message p{color:var(--chalk-dim); font-size:14px; line-height:1.6; margin:0 0 12px;}
-  .welcome-message p:last-child{margin-bottom:0;}
-  .welcome-message strong{color:var(--chalk); font-size:15px;}
+  .hero::before{
+    content:''; position:absolute; inset:0; pointer-events:none; opacity:0.5;
+    background-image:linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:100% 26px;
+    mask-image:linear-gradient(180deg, rgba(0,0,0,0.6), transparent 75%);
+  }
+  .hero-inner{max-width:1080px; margin:0 auto; position:relative;}
+  .hero-eyebrow{
+    display:inline-flex; align-items:center; gap:6px; font-size:11px; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--gold); font-weight:600; background:var(--gold-soft); border:1px solid rgba(242,181,66,0.35);
+    padding:4px 10px; border-radius:999px; margin-bottom:12px;
+  }
+  .hero h1{
+    font-size:44px; line-height:0.95;
+    background:linear-gradient(135deg, var(--chalk) 30%, var(--gold-bright));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p{color:var(--chalk-dim); font-size:14px; margin-top:8px; max-width:540px;}
+  .keydates-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:12px;}
+  .keydate-item{
+    background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--gold-dark);
+    border-radius:var(--radius-sm); padding:13px 15px;
+  }
+  .keydate-label{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-faint);}
+  .keydate-value{font-family:'Teko', sans-serif; font-size:21px; color:var(--gold); margin-top:4px;}
+  .keydate-item.is-tba{border-left-color:var(--line);}
+  .keydate-item.is-tba .keydate-value{color:var(--chalk-dim); font-family:'Inter', sans-serif; font-size:13px; font-style:italic; font-weight:500;}
 
-  .contact-strip{display:flex; align-items:center; gap:16px; margin-top:18px; flex-wrap:wrap;}
-  .contact-label{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim);}
+  .contact-strip{display:flex; align-items:center; gap:12px; margin-top:20px; flex-wrap:wrap;}
+  .contact-label{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--chalk-faint); margin-right:2px;}
   .contact-strip a{
-    color:var(--gold); font-size:14px; font-weight:500; text-decoration:none;
-    border-bottom:1px solid var(--gold-dark); padding-bottom:1px;
+    color:var(--chalk); font-size:13px; font-weight:500; text-decoration:none;
+    border:1px solid var(--line); background:var(--surface-2); border-radius:999px; padding:7px 15px;
+    transition:border-color 0.15s, color 0.15s, background 0.15s;
   }
-  .contact-strip a:hover{color:var(--chalk); border-color:var(--chalk-dim);}
+  .contact-strip a:hover{color:var(--gold-bright); border-color:var(--gold-dark); background:var(--gold-soft);}
 
   /* ---------- LAYOUT ---------- */
-  .wrap{max-width:1040px; margin:0 auto; padding:20px 16px 60px;}
-  .section{display:none;}
+  .wrap{max-width:1080px; margin:0 auto; padding:26px 20px 70px;}
+  .section{display:none; animation:fadeIn 0.35s ease;}
   .section.active{display:block;}
-  .panel{background:var(--turf); border:1px solid var(--turf-line); border-radius:6px; padding:22px 24px; margin-bottom:20px;}
-  .panel-title{font-size:24px; margin-bottom:14px; color:var(--chalk);}
-  .panel-sub{color:var(--chalk-dim); font-size:13px; margin:-8px 0 16px;}
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  .panel{
+    background:linear-gradient(180deg, var(--surface) 0%, var(--surface) 100%);
+    border:1px solid var(--line); border-radius:var(--radius); padding:24px 26px; margin-bottom:22px;
+    box-shadow:var(--shadow-card);
+  }
+  .panel-title{font-size:25px; margin-bottom:16px; color:var(--chalk); display:flex; align-items:center; gap:10px;}
+  .panel-title::before{content:''; width:4px; height:20px; background:linear-gradient(180deg, var(--gold-bright), var(--gold-dark)); border-radius:3px; display:inline-block;}
+  .panel-sub{color:var(--chalk-dim); font-size:13px; margin:-10px 0 18px;}
 
   /* ---------- STANDINGS ---------- */
   table.standings{width:100%; border-collapse:collapse; font-size:14px;}
-  table.standings th{text-align:left; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim); padding:8px; border-bottom:1px solid var(--turf-line);}
-  table.standings td{padding:9px 8px; border-bottom:1px solid var(--turf-line); vertical-align:middle;}
+  table.standings th{text-align:left; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--chalk-faint); padding:10px 8px; border-bottom:1px solid var(--line);}
+  table.standings td{padding:11px 8px; border-bottom:1px solid var(--line-soft); vertical-align:middle;}
+  table.standings tbody tr{transition:background 0.15s;}
+  table.standings tbody tr:hover{background:rgba(255,255,255,0.025);}
   table.standings tr:last-child td{border-bottom:none;}
-  .team-cell{display:flex; align-items:center; gap:10px;}
-  .team-avatar{width:30px; height:30px; border-radius:4px; object-fit:cover; background:var(--turf-dark); flex-shrink:0;}
+  .team-cell{display:flex; align-items:center; gap:11px;}
+  .team-avatar{width:32px; height:32px; border-radius:8px; object-fit:cover; background:var(--surface-2); flex-shrink:0; border:1px solid var(--line-soft);}
   .team-cell-name{font-weight:500;}
   .team-cell-mgr{color:var(--chalk-dim); font-size:12px;}
-  .rank-num{font-family:'Teko', sans-serif; font-size:20px; color:var(--gold); width:24px; display:inline-block;}
-  .status-banner{background:rgba(183,168,136,0.12); border:1px solid var(--gold-dark); border-radius:4px; padding:10px 14px; font-size:13px; color:var(--chalk-dim); margin-bottom:16px;}
+  .rank-num{
+    font-family:'Teko', sans-serif; font-size:18px; color:var(--gold); width:26px; height:26px; line-height:26px;
+    display:inline-block; text-align:center; background:var(--gold-soft); border-radius:7px;
+  }
+  .status-banner{
+    background:var(--gold-soft); border:1px solid rgba(242,181,66,0.3); border-radius:var(--radius-sm);
+    padding:11px 15px; font-size:13px; color:var(--chalk); margin-bottom:18px;
+  }
   .playoff-cutoff-row td{padding:0; border-bottom:none;}
   .playoff-cutoff-line{
-    display:flex; align-items:center; gap:10px; padding:6px 8px; margin:2px 0;
+    display:flex; align-items:center; gap:10px; padding:7px 10px; margin:4px 0;
     border-top:2px dashed var(--gold); border-bottom:2px dashed var(--gold);
-    background:rgba(183,168,136,0.10);
+    background:var(--gold-soft); border-radius:5px;
   }
   .playoff-cutoff-line span{
-    font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--gold); font-weight:600;
+    font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold-bright); font-weight:700;
   }
 
   /* ---------- RIVALRY ---------- */
   .rivalry-grid{display:grid; grid-template-columns:1fr; gap:14px;}
   .rivalry-card{
-    background:var(--turf-dark); border:1px solid var(--red-dark); border-radius:6px;
-    padding:16px 18px;
+    background:linear-gradient(160deg, var(--surface-2) 0%, var(--surface) 100%);
+    border:1px solid var(--red-dark); border-left:3px solid var(--red); border-radius:var(--radius);
+    padding:18px 20px; box-shadow:var(--shadow-soft); transition:transform 0.15s, box-shadow 0.15s;
   }
+  .rivalry-card:hover{transform:translateY(-2px); box-shadow:var(--shadow-card);}
   .rivalry-top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
   .rivalry-side{display:flex; align-items:center; gap:10px; flex:1; min-width:180px;}
-  .rivalry-side img{width:38px; height:38px; border-radius:6px; object-fit:cover;}
-  .rivalry-vs{font-family:'Teko', sans-serif; font-size:22px; color:var(--red); padding:0 4px;}
+  .rivalry-side img{width:40px; height:40px; border-radius:8px; object-fit:cover; border:1px solid var(--line-soft);}
+  .rivalry-vs{font-family:'Teko', sans-serif; font-size:22px; color:var(--red); padding:0 6px;}
   .rivalry-weeks{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim); text-align:center; min-width:110px;}
-  .rivalry-weeks span{display:block; color:var(--gold); font-family:'Teko',sans-serif; font-size:16px; letter-spacing:0;}
-  .rivalry-history{margin-top:12px; padding-top:12px; border-top:1px solid var(--turf-line); display:flex; flex-wrap:wrap; gap:6px 14px; align-items:baseline;}
-  .rivalry-history .rh-series{font-size:13px; color:var(--gold); font-weight:500;}
+  .rivalry-weeks span{display:block; color:var(--gold); font-family:'Teko',sans-serif; font-size:17px; letter-spacing:0;}
+  .rivalry-history{margin-top:14px; padding-top:14px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:6px 16px; align-items:baseline;}
+  .rivalry-history .rh-series{font-size:13px; color:var(--gold); font-weight:600;}
   .rivalry-history .rh-last{font-size:12px; color:var(--chalk-dim);}
   .rivalry-history .rh-note{font-size:12px; color:var(--chalk-dim); font-style:italic;}
 
   /* ---------- CHAMPIONS / RECORDS ---------- */
-  .empty-trophy{text-align:center; padding:34px 10px; color:var(--chalk-dim);}
-  .empty-trophy .icon{font-size:40px; opacity:0.5; margin-bottom:10px;}
+  .empty-trophy{text-align:center; padding:38px 10px; color:var(--chalk-dim);}
+  .empty-trophy .icon{font-size:44px; opacity:0.6; margin-bottom:12px; filter:drop-shadow(0 4px 12px rgba(242,181,66,0.35));}
   .records-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  .record-card{background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px; padding:14px 16px;}
-  .record-card .rlabel{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim);}
-  .record-card .rvalue{font-family:'Teko', sans-serif; font-size:22px; color:var(--gold); margin-top:4px;}
+  .record-card{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:15px 17px;
+    border-left:3px solid var(--gold-dark);
+  }
+  .record-card .rlabel{font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--chalk-faint);}
+  .record-card .rvalue{font-family:'Teko', sans-serif; font-size:23px; color:var(--gold); margin-top:4px;}
 
-  .rec-row{display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--turf-line); font-size:13px; flex-wrap:wrap;}
+  .rec-row{display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--line-soft); font-size:13px; flex-wrap:wrap;}
   .rec-row:last-child{border-bottom:none;}
   .rec-rank{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold-dark); width:20px; flex-shrink:0;}
   .rec-main{flex:1; min-width:200px;}
-  .rec-score{color:var(--gold); font-weight:500;}
+  .rec-score{color:var(--gold); font-weight:600;}
   .rec-meta{color:var(--chalk-dim); font-size:11px; white-space:nowrap;}
   .rec-avatar-wrap{display:inline-flex; align-items:center; gap:6px;}
-  .rec-avatar-wrap img{width:20px; height:20px; border-radius:3px; object-fit:cover; vertical-align:middle;}
+  .rec-avatar-wrap img{width:20px; height:20px; border-radius:5px; object-fit:cover; vertical-align:middle;}
   .rec-empty{color:var(--chalk-dim); font-size:13px; font-style:italic; padding:6px 0;}
 
   /* ---------- HISTORY ---------- */
-  .history-row{display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--turf-line);}
+  .history-row{display:flex; align-items:center; gap:14px; padding:13px 0; border-bottom:1px solid var(--line-soft);}
   .history-row:last-child{border-bottom:none;}
-  .history-season{font-family:'Teko', sans-serif; font-size:26px; color:var(--gold-dark); background:rgba(183,168,136,0.14); border:1px solid var(--gold-dark); border-radius:4px; padding:2px 12px; min-width:64px; text-align:center;}
-  .history-champ img{width:32px; height:32px; border-radius:4px; object-fit:cover; margin-right:8px; vertical-align:middle;}
-  .history-champ .cname{font-weight:500;}
+  .history-season{
+    font-family:'Teko', sans-serif; font-size:25px; color:#1A1304;
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark));
+    border-radius:8px; padding:3px 14px; min-width:64px; text-align:center; font-weight:700;
+  }
+  .history-champ img{width:34px; height:34px; border-radius:7px; object-fit:cover; margin-right:8px; vertical-align:middle; border:1px solid var(--line-soft);}
+  .history-champ .cname{font-weight:600;}
   .history-champ .cmgr{color:var(--chalk-dim); font-size:12px;}
   .history-runnerup{color:var(--chalk-dim); font-size:12px; margin-left:auto; text-align:right;}
-  .history-toilet-row{padding-top:6px; opacity:0.85;}
+  .history-toilet-row{padding-top:8px; opacity:0.8;}
   .history-champ.toilet img{width:26px; height:26px;}
+  .history-toilet-row .history-season{background:var(--surface-3); color:var(--chalk-dim); box-shadow:none;}
   .toilet-label{font-size:11px; color:var(--red); margin-right:8px; white-space:nowrap;}
 
   /* ---------- DRAFT ---------- */
   .draft-status{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
-  .draft-status .badge{background:rgba(183,168,136,0.18); color:var(--gold); border:1px solid var(--gold-dark); border-radius:4px; padding:6px 12px; font-size:12px; font-weight:500;}
+  .draft-status .badge{background:var(--gold-soft); color:var(--gold-bright); border:1px solid rgba(242,181,66,0.35); border-radius:999px; padding:6px 14px; font-size:12px; font-weight:600;}
 
   /* ---------- CONSTITUTION ---------- */
-  /* ---------- CONSTITUTION ---------- */
-  .const-article{border-bottom:1px solid var(--turf-line); padding:4px 0;}
+  .const-article{border-bottom:1px solid var(--line-soft); padding:4px 0;}
   .const-article:last-child{border-bottom:none;}
   .const-article summary{
-    cursor:pointer; list-style:none; padding:12px 4px; font-family:'Teko', sans-serif; font-size:19px;
-    color:var(--chalk); display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer; list-style:none; padding:14px 6px; font-family:'Teko', sans-serif; font-size:19px;
+    color:var(--chalk); display:flex; align-items:center; justify-content:space-between; border-radius:8px;
+    transition:color 0.15s, background 0.15s;
   }
   .const-article summary::-webkit-details-marker{display:none;}
-  .const-article summary::after{content:'\25BC'; font-size:11px; color:var(--chalk-dim); transition:transform 0.15s;}
-  .const-article[open] summary::after{transform:rotate(180deg);}
-  .const-article summary:hover{color:var(--gold);}
-  .const-body{padding:2px 4px 16px; font-size:14px; line-height:1.6; color:var(--chalk);}
+  .const-article summary::after{content:'\25BC'; font-size:11px; color:var(--chalk-faint); transition:transform 0.2s;}
+  .const-article[open] summary::after{transform:rotate(180deg); color:var(--gold);}
+  .const-article summary:hover{color:var(--gold); background:rgba(255,255,255,0.02);}
+  .const-body{padding:2px 6px 18px; font-size:14px; line-height:1.7; color:var(--chalk);}
   .const-body p{margin:0 0 10px;}
   .const-body p:last-child{margin-bottom:0;}
   .const-note{color:var(--chalk-dim); font-size:12px; font-style:italic;}
   .const-olist, .const-ulist{margin:0; padding-left:20px;}
   .const-olist li, .const-ulist li{margin-bottom:8px;}
   .officers-table, .payout-table, .draft-order-table{
-    width:100%; border-collapse:collapse; font-size:13px; margin:10px 0;
+    width:100%; border-collapse:collapse; font-size:13px; margin:12px 0;
   }
   .officers-table td, .payout-table td, .payout-table th, .draft-order-table td, .draft-order-table th{
-    padding:7px 10px; border-bottom:1px solid var(--turf-line); text-align:left;
+    padding:8px 12px; border-bottom:1px solid var(--line-soft); text-align:left;
   }
-  .draft-order-table th{color:var(--chalk-dim); font-size:11px; text-transform:uppercase; letter-spacing:1px;}
-  .payout-table td:nth-child(2){color:var(--gold); font-family:'Teko', sans-serif; font-size:16px;}
+  .draft-order-table th{color:var(--chalk-faint); font-size:11px; text-transform:uppercase; letter-spacing:1px;}
+  .payout-table td:nth-child(2){color:var(--gold); font-family:'Teko', sans-serif; font-size:17px;}
 
   /* ---------- TEAMS ---------- */
   .teams-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(210px, 1fr)); gap:14px;}
   .team-card{
-    background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px; padding:16px;
-    cursor:pointer; transition:border-color 0.15s;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:16px;
+    cursor:pointer; transition:border-color 0.15s, transform 0.15s, box-shadow 0.15s;
   }
-  .team-card:hover{border-color:var(--gold);}
-  .team-card img{width:100%; aspect-ratio:1; object-fit:cover; border-radius:6px; margin-bottom:10px; background:var(--turf);}
-  .team-card .tname{font-size:15px; font-weight:500;}
+  .team-card:hover{border-color:var(--gold-dark); transform:translateY(-3px); box-shadow:var(--shadow-card);}
+  .team-card img{width:100%; aspect-ratio:1; object-fit:cover; border-radius:var(--radius-sm); margin-bottom:10px; background:var(--surface-3); border:1px solid var(--line-soft);}
+  .team-card .tname{font-size:15px; font-weight:600;}
   .team-card .tmgr{font-size:12px; color:var(--chalk-dim); margin-top:2px;}
 
-  .team-detail{display:none; margin-top:18px;}
+  .team-detail{display:none; margin-top:20px;}
   .team-detail.active{display:block;}
-  .team-detail-inner{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap;}
-  .team-detail-inner img{width:110px; height:110px; border-radius:8px; object-fit:cover;}
-  .td-back{background:transparent; border:1px solid var(--turf-line); color:var(--chalk-dim); font-size:12px; padding:6px 12px; border-radius:4px; cursor:pointer; margin-bottom:14px;}
-  .td-back:hover{color:var(--chalk); border-color:var(--gold);}
-  .td-name{font-size:26px; color:var(--chalk);}
+  .team-detail-inner{display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;}
+  .team-detail-inner img{width:112px; height:112px; border-radius:12px; object-fit:cover; border:1px solid var(--line);}
+  .td-back{background:var(--surface-2); border:1px solid var(--line); color:var(--chalk-dim); font-size:12px; padding:7px 14px; border-radius:999px; cursor:pointer; margin-bottom:16px; transition:color 0.15s, border-color 0.15s;}
+  .td-back:hover{color:var(--chalk); border-color:var(--gold-dark);}
+  .td-name{font-size:27px; color:var(--chalk);}
   .td-mgr{color:var(--chalk-dim); font-size:14px; margin-top:2px;}
   .td-rival{margin-top:10px; font-size:13px; color:var(--chalk-dim);}
   .td-rival span{color:var(--red);}
 
   /* ---------- ALL-TIME RECORD ---------- */
-  .alltime{margin-top:22px; padding-top:18px; border-top:1px solid var(--turf-line); width:100%;}
+  .alltime{margin-top:24px; padding-top:20px; border-top:1px solid var(--line-soft); width:100%;}
   .alltime-title{font-size:18px; color:var(--chalk); margin-bottom:10px;}
   .alltime-summary{display:flex; gap:24px; flex-wrap:wrap; margin-bottom:14px;}
-  .alltime-summary .num{font-family:'Teko', sans-serif; font-size:28px; color:var(--gold); line-height:1;}
-  .alltime-summary .lbl{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim); margin-top:2px;}
+  .alltime-summary .num{font-family:'Teko', sans-serif; font-size:29px; color:var(--gold); line-height:1;}
+  .alltime-summary .lbl{font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--chalk-faint); margin-top:3px;}
   .titles-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
-  .title-badge{background:rgba(183,168,136,0.18); color:var(--gold); border:1px solid var(--gold-dark); border-radius:4px; padding:4px 10px; font-size:12px; font-weight:500;}
-  .runnerup-badge{background:rgba(172,170,163,0.1); color:var(--chalk-dim); border:1px solid var(--turf-line); border-radius:4px; padding:4px 10px; font-size:12px;}
+  .title-badge{background:var(--gold-soft); color:var(--gold-bright); border:1px solid rgba(242,181,66,0.35); border-radius:999px; padding:4px 11px; font-size:12px; font-weight:600;}
+  .runnerup-badge{background:rgba(139,147,168,0.1); color:var(--chalk-dim); border:1px solid var(--line); border-radius:999px; padding:4px 11px; font-size:12px;}
   table.season-history{width:100%; border-collapse:collapse; font-size:13px;}
-  table.season-history th{text-align:left; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-dim); padding:6px 8px; border-bottom:1px solid var(--turf-line);}
-  table.season-history td{padding:6px 8px; border-bottom:1px solid var(--turf-line);}
+  table.season-history th{text-align:left; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--chalk-faint); padding:7px 8px; border-bottom:1px solid var(--line);}
+  table.season-history td{padding:7px 8px; border-bottom:1px solid var(--line-soft);}
   table.season-history tr:last-child td{border-bottom:none;}
   .new-team-note{color:var(--chalk-dim); font-size:13px; font-style:italic;}
   .h2h-opp{display:flex; align-items:center; gap:8px;}
-  .h2h-opp img{width:22px; height:22px; border-radius:4px; object-fit:cover;}
+  .h2h-opp img{width:22px; height:22px; border-radius:5px; object-fit:cover;}
 
   /* ---------- POWER RANKINGS ---------- */
   .power-table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
   .power-table{width:100%; border-collapse:collapse; font-size:13px;}
   .power-table th{
-    text-align:left; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; color:var(--chalk-dim);
-    padding:8px 10px; border-bottom:1px solid var(--turf-line); white-space:nowrap;
+    text-align:left; font-size:11px; letter-spacing:0.6px; text-transform:uppercase; color:var(--chalk-faint);
+    padding:9px 10px; border-bottom:1px solid var(--line); white-space:nowrap;
   }
-  .power-table td{padding:8px 10px; border-bottom:1px solid var(--turf-line); white-space:nowrap; vertical-align:middle;}
-  .power-row{cursor:pointer;}
-  .power-row:hover td{background:rgba(183,168,136,0.05);}
-  .power-rank{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold-dark);}
+  .power-table td{padding:9px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap; vertical-align:middle;}
+  .power-row{cursor:pointer; transition:background 0.15s;}
+  .power-row:hover td{background:rgba(255,255,255,0.03);}
+  .power-rank{font-family:'Teko', sans-serif; font-size:19px; color:var(--gold-dark);}
   .power-move{font-size:10px;}
-  .power-move.up{color:#7FA87A;}
+  .power-move.up{color:var(--green);}
   .power-move.down{color:var(--red);}
   .power-move.flat{color:var(--chalk-dim);}
   .power-team{display:flex; align-items:center; gap:8px; min-width:170px;}
-  .power-team img{width:24px; height:24px; border-radius:5px; object-fit:cover; flex-shrink:0;}
+  .power-team img{width:25px; height:25px; border-radius:6px; object-fit:cover; flex-shrink:0; border:1px solid var(--line-soft);}
   .power-team-name{font-weight:500;}
-  .power-score{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold);}
-  .power-chevron{color:var(--chalk-dim); font-size:10px; margin-left:auto; transition:transform 0.15s;}
-  .power-row.expanded .power-chevron{transform:rotate(180deg);}
+  .power-score{font-family:'Teko', sans-serif; font-size:19px; color:var(--gold);}
+  .power-chevron{color:var(--chalk-faint); font-size:10px; margin-left:auto; transition:transform 0.15s;}
+  .power-row.expanded .power-chevron{transform:rotate(180deg); color:var(--gold);}
   .trend-arrow{font-size:18px; font-weight:700;}
-  .trend-up{color:#7FA87A;}
+  .trend-up{color:var(--green);}
   .trend-flat{color:var(--chalk-dim);}
   .trend-down{color:var(--red);}
   .power-breakdown-row{display:none;}
   .power-breakdown-row.open{display:table-row;}
-  .power-breakdown{padding:12px 4px;}
-  .power-cat-row{display:flex; align-items:center; gap:10px; font-size:12px; padding:4px 0;}
+  .power-breakdown{padding:14px 6px; background:rgba(255,255,255,0.015);}
+  .power-cat-row{display:flex; align-items:center; gap:10px; font-size:12px; padding:5px 0;}
   .power-cat-label{width:150px; color:var(--chalk-dim); flex-shrink:0;}
-  .power-cat-bar-wrap{flex:1; background:var(--turf-darker); border-radius:3px; height:6px; overflow:hidden;}
-  .power-cat-bar{height:100%; background:var(--gold);}
+  .power-cat-bar-wrap{flex:1; background:var(--bg); border-radius:4px; height:7px; overflow:hidden; border:1px solid var(--line-soft);}
+  .power-cat-bar{height:100%; background:linear-gradient(90deg, var(--gold-dark), var(--gold-bright)); border-radius:4px;}
   .power-cat-val{width:34px; text-align:right; color:var(--chalk-dim); flex-shrink:0;}
 
   /* ---------- BONUS GAMES ---------- */
-  .bonus-row{display:flex; align-items:flex-start; gap:14px; padding:14px 0; border-bottom:1px solid var(--turf-line);}
+  .bonus-row{display:flex; align-items:center; flex-wrap:wrap; gap:14px; padding:15px 0; border-bottom:1px solid var(--line-soft);}
   .bonus-row:last-child{border-bottom:none;}
-  .bonus-week{font-family:'Teko', sans-serif; font-size:22px; color:var(--gold-dark); background:rgba(183,168,136,0.14); border:1px solid var(--gold-dark); border-radius:4px; padding:2px 12px; min-width:80px; text-align:center; flex-shrink:0;}
+  .bonus-week{
+    font-family:'Teko', sans-serif; font-size:22px; color:#1A1304;
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark));
+    border-radius:8px; padding:3px 14px; min-width:80px; text-align:center; flex-shrink:0; font-weight:700;
+  }
   .bonus-body{flex:1;}
-  .bonus-name{font-weight:500; font-size:14px;}
+  .bonus-name{font-weight:600; font-size:14px;}
   .bonus-desc{color:var(--chalk-dim); font-size:13px; margin-top:2px;}
-  .bonus-prize{font-family:'Teko', sans-serif; font-size:20px; color:var(--gold); flex-shrink:0; align-self:center;}
+  .bonus-prize{font-family:'Teko', sans-serif; font-size:21px; color:var(--gold); flex-shrink:0; align-self:center;}
+  .bonus-winner{display:flex; align-items:center; gap:8px; flex-shrink:0; max-width:220px;}
+  .bonus-winner img{width:27px; height:27px; border-radius:6px; object-fit:cover; flex-shrink:0; border:1px solid var(--line-soft);}
+  .bonus-winner-name{font-size:13px; font-weight:600;}
+  .bonus-winner-detail{font-size:11px; color:var(--chalk-dim);}
+  .bonus-pending{font-size:12px; color:var(--chalk-dim); font-style:italic; flex-shrink:0;}
+  .bonus-leaderboard-row{display:flex; align-items:center; gap:10px; padding:7px 0; font-size:13px; border-bottom:1px solid var(--line-soft);}
+  .bonus-leaderboard-row:last-child{border-bottom:none;}
+  .bonus-leaderboard-row .blb-name{flex:1;}
+  .bonus-leaderboard-row .blb-amount{font-family:'Teko', sans-serif; font-size:19px; color:var(--gold);}
+  .bonus-empty{color:var(--chalk-dim); font-size:13px; font-style:italic;}
 
-  /* ---------- DRAFT BOARD ---------- */
-  .draft-round{margin-top:22px;}
+  /* ---------- DRAFT SEARCH / COLLAPSE ---------- */
+  .draft-search{
+    width:100%; background:var(--surface-2); border:1px solid var(--line); color:var(--chalk);
+    font-family:'Inter', sans-serif; font-size:13px; padding:10px 14px; border-radius:var(--radius-sm); margin-top:16px;
+    transition:border-color 0.15s;
+  }
+  .draft-search::placeholder{color:var(--chalk-faint);}
+  .draft-search:focus{outline:none; border-color:var(--gold-dark);}
+  .draft-round{margin-top:24px;}
   .draft-round:first-child{margin-top:0;}
-  .draft-round-title{font-size:16px; color:var(--gold-dark); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--turf-line);}
-  .draft-pick-row{display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--turf-line); font-size:13px;}
+  .draft-round-title{font-size:16px; color:var(--gold-dark); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:9px; padding-bottom:7px; border-bottom:1px solid var(--line); cursor:pointer; display:flex; align-items:center; justify-content:space-between;}
+  .draft-round-title .chevron{transition:transform 0.15s; color:var(--chalk-faint); font-size:14px;}
+  .draft-round.collapsed .chevron{transform:rotate(-90deg);}
+  .draft-round.collapsed .draft-pick-row{display:none;}
+  .draft-round-count{color:var(--chalk-faint); font-size:11px; text-transform:none; letter-spacing:0;}
+  .draft-pick-row{display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid var(--line-soft); font-size:13px;}
   .draft-pick-row:last-child{border-bottom:none;}
-  .draft-pick-no{font-family:'Teko', sans-serif; font-size:18px; color:var(--chalk-dim); width:32px; flex-shrink:0;}
+  .draft-pick-no{font-family:'Teko', sans-serif; font-size:18px; color:var(--chalk-faint); width:32px; flex-shrink:0;}
   .draft-team{display:flex; align-items:center; gap:8px; width:220px; flex-shrink:0;}
-  .draft-team img{width:24px; height:24px; border-radius:4px; object-fit:cover;}
+  .draft-team img{width:25px; height:25px; border-radius:6px; object-fit:cover; border:1px solid var(--line-soft);}
   .draft-team-name{font-size:12px; color:var(--chalk-dim);}
   .draft-player{flex:1;}
-  .draft-player-name{font-weight:500;}
-  .draft-pos{display:inline-block; font-size:11px; color:var(--gold-dark); background:rgba(183,168,136,0.14); border:1px solid var(--gold-dark); border-radius:3px; padding:1px 6px; margin-right:8px;}
+  .draft-player-name{font-weight:600;}
+  .draft-pos{display:inline-block; font-size:11px; color:var(--gold-bright); background:var(--gold-soft); border:1px solid rgba(242,181,66,0.3); border-radius:5px; padding:2px 7px; margin-right:8px; font-weight:600;}
   .draft-nfl{color:var(--chalk-dim); font-size:12px;}
+  .draft-truncated-note{color:var(--chalk-dim); font-size:12px; font-style:italic; margin-top:10px;}
+
+  /* ---------- DRAFT YEAR TABS ---------- */
+  .draft-year-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; background:var(--surface-2); padding:5px; border-radius:999px; width:fit-content; border:1px solid var(--line);}
+  .draft-year-tabs button{
+    background:transparent; border:1px solid transparent; color:var(--chalk-dim);
+    font-family:'Teko', sans-serif; font-size:16px; padding:6px 18px; border-radius:999px; cursor:pointer;
+    transition:color 0.15s, background 0.15s;
+  }
+  .draft-year-tabs button:hover{color:var(--chalk);}
+  .draft-year-tabs button.active{background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304; font-weight:700;}
+
+  .footer-note{font-size:12px; color:var(--chalk-faint); text-align:center; margin-top:14px;}
 
   /* ---------- MATCHUPS ---------- */
   .matchup-card{
-    background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px;
-    padding:16px 18px; margin-bottom:12px; position:relative;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:13px; position:relative; box-shadow:var(--shadow-soft);
   }
   .matchup-top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
   .matchup-side{display:flex; align-items:center; gap:10px; flex:1; min-width:180px;}
   .matchup-side.right{justify-content:flex-end; text-align:right;}
-  .matchup-side img{width:36px; height:36px; border-radius:6px; object-fit:cover; flex-shrink:0;}
-  .matchup-team-name{font-size:14px; font-weight:500;}
+  .matchup-side img{width:38px; height:38px; border-radius:8px; object-fit:cover; flex-shrink:0; border:1px solid var(--line-soft);}
+  .matchup-team-name{font-size:14px; font-weight:600;}
   .matchup-team-record{font-size:11px; color:var(--chalk-dim);}
   .matchup-team-avg{font-size:11px; color:var(--gold-dark); margin-top:1px;}
-  .matchup-score{font-family:'Teko', sans-serif; font-size:30px; color:var(--gold); min-width:70px; text-align:center;}
-  .matchup-score.leading{color:var(--gold);}
+  .matchup-score{font-family:'Teko', sans-serif; font-size:31px; color:var(--gold); min-width:70px; text-align:center;}
+  .matchup-score.leading{color:var(--gold-bright);}
   .matchup-score.trailing{color:var(--chalk-dim);}
   .matchup-mid{display:flex; flex-direction:column; align-items:center; gap:2px;}
-  .matchup-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-dim);}
-  .matchup-h2h{margin-top:10px; padding-top:10px; border-top:1px solid var(--turf-line); font-size:11px; color:var(--chalk-dim); text-align:center;}
-  .matchup-card.is-gotw{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); position:relative;}
+  .matchup-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-faint);}
+  .matchup-h2h{margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft); font-size:11px; color:var(--chalk-dim); text-align:center;}
+  .matchup-card.is-gotw{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold), 0 0 26px -8px rgba(242,181,66,0.4); position:relative;}
   .gotw-badge{
-    position:absolute; top:-11px; left:16px; background:var(--gold); color:#2A2005;
-    font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;
-    padding:3px 10px; border-radius:3px;
+    position:absolute; top:-11px; left:18px; background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;
+    font-size:10px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;
+    padding:4px 11px; border-radius:999px; box-shadow:0 4px 10px -2px rgba(242,181,66,0.5);
   }
 
   /* ---------- GAME OF THE WEEK HERO ---------- */
   .gotw-hero{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
-  .gotw-side{display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; min-width:120px;}
+  .gotw-side{display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; min-width:120px;}
   .gotw-side.right{align-items:center;}
-  .gotw-side img{width:56px; height:56px; border-radius:8px; object-fit:cover;}
+  .gotw-side img{width:58px; height:58px; border-radius:10px; object-fit:cover; border:1px solid var(--line);}
   .gotw-team-name{font-weight:600; font-size:15px; text-align:center;}
   .gotw-record{font-size:12px; color:var(--chalk-dim);}
   .gotw-mid{display:flex; align-items:center; gap:12px; flex-direction:column;}
-  .gotw-mid .gotw-score{font-family:'Teko', sans-serif; font-size:34px; color:var(--gold); display:inline;}
-  .gotw-mid .gotw-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-dim); display:inline; margin:0 8px;}
+  .gotw-mid .gotw-score{font-family:'Teko', sans-serif; font-size:35px; color:var(--gold); display:inline;}
+  .gotw-mid .gotw-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-faint); display:inline; margin:0 8px;}
   .gotw-total{font-size:11px; color:var(--chalk-dim); margin-top:2px;}
-  .gotw-why{font-size:13px; color:var(--chalk-dim); text-align:center; margin:14px 0 0; font-style:italic;}
+  .gotw-why{font-size:13px; color:var(--chalk-dim); text-align:center; margin:16px 0 0; font-style:italic;}
   .gotw-details{margin-top:10px;}
   .gotw-details summary{cursor:pointer; font-size:12px; color:var(--gold-dark); text-align:center; list-style:none;}
   .gotw-details summary::-webkit-details-marker{display:none;}
@@ -355,76 +522,48 @@
 
   /* ---------- RECAP ---------- */
   .recap-card{
-    background:var(--turf-dark); border:1px solid var(--turf-line); border-radius:6px;
-    padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:13px;
   }
-  .recap-card .matchup-side.loser{opacity:0.55;}
-  .recap-card .matchup-side.loser img{filter:grayscale(40%);}
-  .recap-winner-name{color:var(--gold);}
+  .recap-top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+  .recap-card .matchup-side.loser{opacity:0.5;}
+  .recap-card .matchup-side.loser img{filter:grayscale(50%);}
+  .recap-winner-name{color:var(--gold-bright);}
   .recap-mid{display:flex; flex-direction:column; align-items:center; gap:2px;}
-  .recap-final-tag{font-size:10px; letter-spacing:1px; color:var(--chalk-dim); text-transform:uppercase;}
+  .recap-final-tag{font-size:10px; letter-spacing:1.2px; color:var(--chalk-faint); text-transform:uppercase;}
+  .recap-summary{
+    margin-top:14px; padding-top:14px; border-top:1px solid var(--line-soft);
+    font-size:13px; color:var(--chalk-dim); line-height:1.65;
+  }
+  .recap-summary .recap-flourish{color:var(--gold-dark); font-style:italic;}
   .recap-margin{font-size:11px; color:var(--chalk-dim); margin-top:2px;}
 
   /* ---------- SORTABLE STANDINGS ---------- */
   th.sortable{cursor:pointer; user-select:none;}
   th.sortable:hover{color:var(--chalk);}
-  th.sortable .arrow{margin-left:3px; opacity:0.5;}
+  th.sortable .arrow{margin-left:3px; opacity:0.45;}
+  th.sortable.sorted{color:var(--gold);}
   th.sortable.sorted .arrow{opacity:1; color:var(--gold);}
 
   /* ---------- EDITABLE RECORDS ---------- */
   .record-card{position:relative;}
   .record-card .rvalue-input{
-    width:100%; background:transparent; border:none; border-bottom:1px dashed var(--turf-line);
+    width:100%; background:transparent; border:none; border-bottom:1px dashed var(--line);
     font-family:'Teko', sans-serif; font-size:22px; color:var(--gold); padding:2px 0; margin-top:4px;
   }
   .record-card .rvalue-input:focus{outline:none; border-bottom-color:var(--gold);}
   .record-card .rsaved{font-size:10px; color:var(--gold); opacity:0; transition:opacity 0.2s; position:absolute; top:12px; right:12px;}
   .record-card .rsaved.show{opacity:1;}
 
-  /* ---------- BONUS WINNER (AUTOMATED) ---------- */
-  .bonus-row{align-items:center;}
-  .bonus-winner{display:flex; align-items:center; gap:8px; flex-shrink:0; max-width:220px;}
-  .bonus-winner img{width:26px; height:26px; border-radius:5px; object-fit:cover; flex-shrink:0;}
-  .bonus-winner-name{font-size:13px; font-weight:500;}
-  .bonus-winner-detail{font-size:11px; color:var(--chalk-dim);}
-  .bonus-pending{font-size:12px; color:var(--chalk-dim); font-style:italic; flex-shrink:0;}
-  .bonus-leaderboard-row{display:flex; align-items:center; gap:10px; padding:6px 0; font-size:13px;}
-  .bonus-leaderboard-row .blb-name{flex:1;}
-  .bonus-leaderboard-row .blb-amount{font-family:'Teko', sans-serif; font-size:18px; color:var(--gold);}
-  .bonus-empty{color:var(--chalk-dim); font-size:13px; font-style:italic;}
-
-  /* ---------- DRAFT SEARCH / COLLAPSE ---------- */
-  .draft-search{
-    width:100%; background:var(--turf-dark); border:1px solid var(--turf-line); color:var(--chalk);
-    font-family:'Inter', sans-serif; font-size:13px; padding:9px 12px; border-radius:4px; margin-top:14px;
-  }
-  .draft-search:focus{outline:none; border-color:var(--gold);}
-  .draft-round-title{cursor:pointer; display:flex; align-items:center; justify-content:space-between;}
-  .draft-round-title .chevron{transition:transform 0.15s; color:var(--chalk-dim); font-size:14px;}
-  .draft-round.collapsed .chevron{transform:rotate(-90deg);}
-  .draft-round.collapsed .draft-pick-row{display:none;}
-  .draft-round-count{color:var(--chalk-dim); font-size:11px; text-transform:none; letter-spacing:0;}
-
-  /* ---------- DRAFT YEAR TABS ---------- */
-  .draft-year-tabs{display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap;}
-  .draft-year-tabs button{
-    background:var(--turf-dark); border:1px solid var(--turf-line); color:var(--chalk-dim);
-    font-family:'Teko', sans-serif; font-size:16px; padding:6px 16px; border-radius:4px; cursor:pointer;
-  }
-  .draft-year-tabs button:hover{color:var(--chalk); border-color:var(--gold-dark);}
-  .draft-year-tabs button.active{background:var(--gold); color:#2A2005; border-color:var(--gold);}
-  .draft-truncated-note{color:var(--chalk-dim); font-size:12px; font-style:italic; margin-top:10px;}
-
-  .footer-note{font-size:12px; color:var(--chalk-dim); text-align:center; margin-top:10px;}
-
   /* ---------- RESPONSIVE ---------- */
   @media (max-width:640px){
-    .brand{font-size:18px;}
-    .hero h1{font-size:28px;}
+    .brand{font-size:19px;}
+    .hero{padding:28px 16px 22px;}
+    .hero h1{font-size:30px;}
     .hero p{font-size:13px;}
-    .contact-strip{gap:12px;}
-    .panel{padding:16px 14px;}
-    .panel-title{font-size:20px;}
+    .contact-strip{gap:10px;}
+    .panel{padding:18px 16px;}
+    .panel-title{font-size:21px;}
 
     .records-grid{grid-template-columns:1fr;}
     .teams-grid{grid-template-columns:repeat(2, 1fr);}
@@ -438,7 +577,7 @@
     .rivalry-weeks{min-width:0; width:100%; order:3;}
 
     .matchup-side{min-width:0;}
-    .matchup-score{font-size:24px; min-width:50px;}
+    .matchup-score{font-size:25px; min-width:50px;}
 
     .rec-main{min-width:0; width:100%;}
     .rec-meta{width:100%;}
@@ -447,24 +586,31 @@
     .bonus-winner{max-width:none; width:100%; order:3;}
 
     .team-detail-inner{gap:12px;}
-    .team-detail-inner img{width:80px; height:80px;}
-    .td-name{font-size:22px;}
+    .team-detail-inner img{width:82px; height:82px;}
+    .td-name{font-size:23px;}
 
-    table.standings th, table.standings td{padding:7px 4px; font-size:12px;}
+    table.standings th, table.standings td{padding:8px 4px; font-size:12px;}
     .team-cell-mgr{display:none;}
 
     .officers-table td, .payout-table td, .payout-table th, .draft-order-table td, .draft-order-table th{
-      padding:6px 4px; font-size:12px;
+      padding:7px 4px; font-size:12px;
     }
   }
 
   @media (max-width:400px){
     .teams-grid{grid-template-columns:1fr 1fr;}
-    .hero h1{font-size:24px;}
+    .hero h1{font-size:26px;}
   }
+
 </style>
 </head>
 <body>
+
+<div class="ticker-bar" id="tickerBar" role="marquee" aria-label="Live league and NFL news ticker">
+  <div class="ticker-track" id="tickerTrack">
+    <span class="ticker-item ticker-tag-empty">Loading live ticker&hellip;</span>
+  </div>
+</div>
 
 <div class="topnav">
   <div class="brand">🏈 The NUT Fantasy Football League</div>
@@ -485,7 +631,9 @@
 
 <div class="hero">
   <div class="hero-inner">
+    <div class="hero-eyebrow">🏈 Year 4 &middot; Dynasty League</div>
     <h1>2026 Season</h1>
+    <p>Twelve teams, two divisions, one trophy. Standings, matchups, and power rankings update live all season long.</p>
     <div class="contact-strip">
       <span class="contact-label">Contact us</span>
       <a href="https://www.facebook.com/profile.php?id=61580410562046" target="_blank" rel="noopener">Facebook</a>
@@ -498,14 +646,38 @@
 
   <div class="section active" id="section-home">
     <div class="panel">
-      <div class="welcome-message">
-        <p><strong>Welcome back to the NutFriends Fantasy Football League &mdash; 2026 Season</strong></p>
-        <p>The NUTS have been buried, the trash talk has been sharpened, and it's time to see who's actually been paying attention to preseason football instead of just their fantasy rankings. Another year, another chance to prove you're the sharpest NUT.</p>
-        <p>Pretty amazing that we're already heading into Year 4 of the dynasty league. It's wild to think back to where our rosters started and how much has changed since then &mdash; the trades, the rebuilds, the rivalries that have only gotten spicier. I want to wish everyone a great season.</p>
-        <p>And Awesomeus &mdash; welcome to the league. This league has seen it all: buzzer-beater trades, waiver wire heists, and at least one commissioner decision that's still being litigated in the group chat. Whether you're the reigning champ defending your crown or the toilet king, the slate is clean and the standings are zero across the board.</p>
-        <p>So gather your nuts, set your lineups, and may your bench players stay healthy and your studs go off. Good luck to everyone.</p>
-        <p>Let's go, NutFriends. Year 4 starts now.</p>
+      <h2 class="panel-title">Key Dates &amp; League Info</h2>
+      <div class="keydates-grid">
+        <div class="keydate-item is-tba">
+          <div class="keydate-label">Draft Day</div>
+          <div class="keydate-value">TBA</div>
+        </div>
+        <div class="keydate-item">
+          <div class="keydate-label">Trade Deadline</div>
+          <div class="keydate-value">Week 13</div>
+        </div>
+        <div class="keydate-item">
+          <div class="keydate-label">Rivalry Week</div>
+          <div class="keydate-value">Weeks 5 &amp; 10</div>
+        </div>
+        <div class="keydate-item">
+          <div class="keydate-label">Playoffs Begin</div>
+          <div class="keydate-value">Week 15</div>
+        </div>
+        <div class="keydate-item">
+          <div class="keydate-label">Championship Round</div>
+          <div class="keydate-value">Weeks 15&ndash;16</div>
+        </div>
+        <div class="keydate-item">
+          <div class="keydate-label">Loser Bracket Ends</div>
+          <div class="keydate-value">Week 17</div>
+        </div>
+        <div class="keydate-item is-tba">
+          <div class="keydate-label">Entry Fees Due</div>
+          <div class="keydate-value">TBA</div>
+        </div>
       </div>
+      <p class="const-note" style="margin-top:14px;">TBA items will be confirmed by the commissioner &mdash; full rules for all of the above live in the Constitution tab.</p>
     </div>
     <div class="panel" id="gotwPanel" style="display:none;">
       <h2 class="panel-title">Dynasty Game of the Week</h2>
@@ -692,7 +864,7 @@
             <li>Valid veto reasons: (a) the players traded aren't of comparable value given position and team needs, or (b) the trade doesn't improve both teams.</li>
             <li>If 60%+ of valid votes oppose the trade, it's voided. Managers involved in the trade don't vote.</li>
             <li>Traded players can't be traded back for 3 game weeks (no short-term loans).</li>
-            <li>Trade deadline: TBA.</li>
+            <li>Trade deadline: Week 13.</li>
           </ol>
         </div>
       </details>
@@ -1279,6 +1451,73 @@ function renderFallbackMatchups(){
   renderMatchups(FALLBACK_MATCHUPS.week, pairs, false);
 }
 
+// Highest-scoring starter for a side of a matchup, using that week's starters list
+// (skipping empty slots) and the players_points map Sleeper returns per matchup.
+function getTopStarter(starters, playerPoints){
+  if(!Array.isArray(starters) || !playerPoints) return null;
+  let best = null;
+  starters.forEach(function(pid){
+    if(!pid || pid === "0") return;
+    const pts = playerPoints[pid];
+    if(typeof pts !== "number") return;
+    if(!best || pts > best.points){ best = {id: pid, points: pts}; }
+  });
+  return best;
+}
+
+// Resolves a Sleeper player_id to a display name + position using the full player
+// database (ALL_PLAYERS), which loads a little after the recap first renders --
+// callers should treat a null return as "not ready yet" and re-render once it is.
+function playerLabel(pid){
+  if(!ALL_PLAYERS) return null;
+  const p = ALL_PLAYERS[pid];
+  if(!p) return null;
+  const name = p.full_name || ((p.first_name||"") + " " + (p.last_name||"")).trim();
+  if(!name) return null;
+  return {name: name, pos: p.position || ""};
+}
+
+const RECAP_CLOSE_OPENERS = ["survived a nail-biter over", "narrowly held off", "edged out", "escaped with a win over"];
+const RECAP_BLOWOUT_OPENERS = ["blew past", "ran away from", "cruised past", "steamrolled"];
+const RECAP_NORMAL_OPENERS = ["defeated", "took down", "handled", "got past"];
+
+// Builds a short Yahoo-style recap paragraph for one matchup: a result sentence
+// scaled to the margin, then a top-scorer callout for each side when we know who
+// started and how many points they put up.
+function buildRecapSummary(a, b, aPts, bPts, aTop, bTop, idx, flourish){
+  const aName = a.team || "Team A", bName = b.team || "Team B";
+  const margin = Math.abs(aPts - bPts);
+
+  if(margin < 0.05){
+    let tie = aName + " and " + bName + " tied at " + aPts.toFixed(1) + " points apiece.";
+    if(aTop) tie += " " + aTop.label + " led the way for " + aName + " with " + aTop.points.toFixed(1) + ".";
+    if(bTop) tie += " " + bTop.label + " topped " + bName + " with " + bTop.points.toFixed(1) + ".";
+    if(flourish) tie += ' <span class="recap-flourish">' + flourish + '</span>';
+    return tie;
+  }
+
+  const winnerName = aPts > bPts ? aName : bName;
+  const loserName = aPts > bPts ? bName : aName;
+  const winnerTop = aPts > bPts ? aTop : bTop;
+  const loserTop = aPts > bPts ? bTop : aTop;
+  const wPts = Math.max(aPts, bPts), lPts = Math.min(aPts, bPts);
+
+  let pool = RECAP_NORMAL_OPENERS;
+  if(margin < 6) pool = RECAP_CLOSE_OPENERS;
+  else if(margin > 35) pool = RECAP_BLOWOUT_OPENERS;
+  const verb = pool[idx % pool.length];
+
+  let out = winnerName + " " + verb + " " + loserName + ", " + wPts.toFixed(1) + "&ndash;" + lPts.toFixed(1) + ".";
+  if(winnerTop){
+    out += " " + winnerTop.label + " paced " + winnerName + " with " + winnerTop.points.toFixed(1) + " points.";
+  }
+  if(loserTop){
+    out += " " + loserTop.label + " did what they could for " + loserName + ", dropping " + loserTop.points.toFixed(1) + " in the loss.";
+  }
+  if(flourish) out += ' <span class="recap-flourish">' + flourish + '</span>';
+  return out;
+}
+
 function renderRecap(week, pairs, usedLive){
   document.getElementById("recapTitle").textContent = week > 0 ? ("Week " + week + " Recap") : "Weekly Recap";
 
@@ -1299,13 +1538,46 @@ function renderRecap(week, pairs, usedLive){
   }
 
   statusEl.textContent = "Final scores from Sleeper.";
-  grid.innerHTML = pairs.map(function(m){
+
+  // Week-wide superlatives (highest score, tightest game) used to flavor one line
+  // in the relevant card(s), the same way Yahoo's recap notes call out standouts.
+  let topScore = {rosterId: null, pts: -1};
+  let closest = {margin: Infinity, idx: -1};
+  pairs.forEach(function(m, idx){
+    const aPts = m.aPoints || 0, bPts = m.bPoints || 0;
+    if(aPts > topScore.pts) topScore = {rosterId: m.a, pts: aPts};
+    if(bPts > topScore.pts) topScore = {rosterId: m.b, pts: bPts};
+    const margin = Math.abs(aPts - bPts);
+    if(margin < closest.margin) closest = {margin: margin, idx: idx};
+  });
+
+  grid.innerHTML = pairs.map(function(m, idx){
     const a = TEAMS.find(function(t){ return t.rosterId === m.a; }) || {};
     const b = TEAMS.find(function(t){ return t.rosterId === m.b; }) || {};
     const aPts = m.aPoints || 0, bPts = m.bPoints || 0;
     const aWin = aPts > bPts, bWin = bPts > aPts;
     const margin = Math.abs(aPts - bPts).toFixed(1);
+
+    const aStarter = getTopStarter(m.aStarters, m.aPlayerPoints);
+    const bStarter = getTopStarter(m.bStarters, m.bPlayerPoints);
+    const aLbl = aStarter && playerLabel(aStarter.id);
+    const bLbl = bStarter && playerLabel(bStarter.id);
+    const aTop = aLbl ? {label: (aLbl.pos ? aLbl.pos + " " : "") + aLbl.name, points: aStarter.points} : null;
+    const bTop = bLbl ? {label: (bLbl.pos ? bLbl.pos + " " : "") + bLbl.name, points: bStarter.points} : null;
+
+    let flourish = "";
+    if(pairs.length > 1){
+      if(idx === closest.idx && closest.margin < 20){
+        flourish = "Tightest game of the week.";
+      } else if((m.a === topScore.rosterId && aPts === topScore.pts) || (m.b === topScore.rosterId && bPts === topScore.pts)){
+        flourish = (topScore.pts === aPts ? (a.team||"They") : (b.team||"They")) + "'s " + topScore.pts.toFixed(1) + " was the high score of the week.";
+      }
+    }
+
+    const summary = buildRecapSummary(a, b, aPts, bPts, aTop, bTop, idx, flourish);
+
     return '<div class="recap-card">' +
+      '<div class="recap-top-row">' +
       '<div class="matchup-side' + (bWin ? ' loser' : '') + '">' +
         '<img src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
         '<div><div class="matchup-team-name' + (aWin ? ' recap-winner-name' : '') + '">' + (a.team||'Team '+m.a) + '</div>' +
@@ -1321,6 +1593,8 @@ function renderRecap(week, pairs, usedLive){
         '<div class="matchup-team-record">' + bPts.toFixed(1) + ' pts</div></div>' +
         '<img src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
       '</div>' +
+      '</div>' +
+      '<div class="recap-summary">' + summary + '</div>' +
     '</div>';
   }).join("");
 }
@@ -1338,7 +1612,9 @@ function fetchMatchupPairs(week){
       .map(function(g){
         return {
           a: g[0].roster_id, aPoints: (typeof g[0].points === "number") ? g[0].points : null,
-          b: g[1].roster_id, bPoints: (typeof g[1].points === "number") ? g[1].points : null
+          aStarters: g[0].starters || [], aPlayerPoints: g[0].players_points || {},
+          b: g[1].roster_id, bPoints: (typeof g[1].points === "number") ? g[1].points : null,
+          bStarters: g[1].starters || [], bPlayerPoints: g[1].players_points || {}
         };
       });
   });
@@ -2718,9 +2994,23 @@ function loadLiveData(){
 
 // ---------- POWER RANKINGS ----------
 let ALL_PLAYERS = null;
+let ALL_PLAYERS_PROMISE = null;
 let TRADED_PICKS = null;
 let POWER_TEAMS_READY = false;
 let POWER_MATCHUPS_READY = false;
+
+// Shared loader for Sleeper's full player database (a multi-MB one-time download) so the
+// power-rankings loader and the live ticker don't each kick off their own copy of it.
+function getAllPlayers(){
+  if(ALL_PLAYERS) return Promise.resolve(ALL_PLAYERS);
+  if(!ALL_PLAYERS_PROMISE){
+    ALL_PLAYERS_PROMISE = fetchJSON("https://api.sleeper.app/v1/players/nfl").then(function(players){
+      ALL_PLAYERS = players;
+      return players;
+    }).catch(function(){ return null; });
+  }
+  return ALL_PLAYERS_PROMISE;
+}
 
 function maybeComputePowerRankings(){
   if(TEAMS.length > 0 && TEAMS[0].starters !== undefined) POWER_TEAMS_READY = true;
@@ -2731,13 +3021,16 @@ function maybeComputePowerRankings(){
   renderStandings();
 
   Promise.all([
-    ALL_PLAYERS ? Promise.resolve(ALL_PLAYERS) : fetchJSON("https://api.sleeper.app/v1/players/nfl").catch(function(){ return null; }),
+    getAllPlayers(),
     TRADED_PICKS ? Promise.resolve(TRADED_PICKS) : fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/traded_picks").catch(function(){ return []; })
   ]).then(function(res){
     ALL_PLAYERS = res[0];
     TRADED_PICKS = res[1] || [];
     computePowerRankings();
     computeBonusResults();
+    // Re-render the recap now that ALL_PLAYERS is loaded, so top-performer
+    // callouts (which need player names) fill in instead of staying score-only.
+    if(LAST_RECAP) renderRecap(LAST_RECAP.week, LAST_RECAP.pairs, true);
   });
 }
 
@@ -3264,6 +3557,190 @@ function loadDynastyHistory(){
   });
 }
 
+// ---------- LIVE TICKER ----------
+// Stock-ticker-style marquee combining our own league activity (Sleeper transactions --
+// same API and player-name lookup the rest of the page uses, so this half is reliable)
+// with real NFL news/scores/trades (ESPN's public site API -- not something this page has
+// used before, so it's treated as best-effort: any failure here just quietly drops those
+// items rather than breaking the ticker or the page).
+let TICKER_ITEMS = { league: [], nfl: [] };
+let LEAGUE_TX_RAW = [];
+
+function rosterTeamName(rid){
+  const t = TEAMS.find(function(x){ return x.rosterId === rid; });
+  return t ? (t.team || ("Team " + rid)) : ("Team " + rid);
+}
+
+function tickerPlayerLabel(pid){
+  const lbl = playerLabel(pid);
+  if(!lbl) return null;
+  return (lbl.pos ? lbl.pos + " " : "") + lbl.name;
+}
+
+// Turns one Sleeper transaction into zero or more ticker items. Player-add/drop items
+// are skipped (not just shown blank) until ALL_PLAYERS is loaded and can name the player;
+// rebuildLeagueTickerItems() re-runs this once that data arrives so they backfill in.
+function buildLeagueTickerItems(tx){
+  if(!tx || tx.status !== "complete") return [];
+  const ts = tx.status_updated || tx.created || 0;
+  const items = [];
+
+  if(tx.type === "trade"){
+    const rids = tx.roster_ids || [];
+    if(rids.length < 2) return [];
+    const received = {};
+    rids.forEach(function(rid){ received[rid] = []; });
+    if(tx.adds){
+      Object.keys(tx.adds).forEach(function(pid){
+        const rid = tx.adds[pid];
+        const lbl = tickerPlayerLabel(pid);
+        if(received[rid] && lbl) received[rid].push(lbl);
+      });
+    }
+    if(Array.isArray(tx.draft_picks)){
+      tx.draft_picks.forEach(function(dp){
+        if(received[dp.owner_id] !== undefined){
+          received[dp.owner_id].push(dp.season + " Rd " + dp.round + " pick");
+        }
+      });
+    }
+    const parts = rids.map(function(rid){
+      const got = received[rid];
+      return rosterTeamName(rid) + (got.length ? " get " + got.join(", ") : "");
+    });
+    items.push({cat:"trade", html:"🔁 LEAGUE TRADE: " + parts.join("  ⇄  "), ts: ts});
+  } else if(tx.type === "waiver" || tx.type === "free_agent"){
+    if(tx.adds){
+      Object.keys(tx.adds).forEach(function(pid){
+        const lbl = tickerPlayerLabel(pid);
+        if(!lbl) return;
+        items.push({cat:"add", html:"➕ " + rosterTeamName(tx.adds[pid]) + " added " + lbl, ts: ts});
+      });
+    }
+    if(tx.drops){
+      Object.keys(tx.drops).forEach(function(pid){
+        const lbl = tickerPlayerLabel(pid);
+        if(!lbl) return;
+        items.push({cat:"drop", html:"➖ " + rosterTeamName(tx.drops[pid]) + " dropped " + lbl, ts: ts});
+      });
+    }
+  }
+  return items;
+}
+
+function rebuildLeagueTickerItems(){
+  const items = [];
+  LEAGUE_TX_RAW.forEach(function(tx){ items.push.apply(items, buildLeagueTickerItems(tx)); });
+  items.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+  TICKER_ITEMS.league = items.slice(0, 15);
+  renderTicker();
+}
+
+function loadLeagueTickerData(){
+  fetchJSON("https://api.sleeper.app/v1/state/nfl").then(function(state){
+    const week = Math.max(1, state.week || 1);
+    const weeks = [];
+    for(let w = Math.max(1, week - 1); w <= week; w++) weeks.push(w);
+    return Promise.all(weeks.map(function(w){
+      return fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/transactions/" + w).catch(function(){ return []; });
+    }));
+  }).then(function(weekResults){
+    LEAGUE_TX_RAW = [].concat.apply([], weekResults.filter(Array.isArray));
+    // Player-add/drop names need ALL_PLAYERS; getAllPlayers() shares one fetch with
+    // power rankings instead of downloading the (multi-MB) player database twice.
+    getAllPlayers().then(rebuildLeagueTickerItems);
+  }).catch(function(){
+    TICKER_ITEMS.league = [];
+    renderTicker();
+  });
+}
+
+function loadNflTickerData(){
+  Promise.all([
+    fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard").catch(function(){ return null; }),
+    fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/news").catch(function(){ return null; })
+  ]).then(function(res){
+    const scoreboard = res[0], news = res[1];
+    const items = [];
+
+    if(scoreboard && Array.isArray(scoreboard.events)){
+      scoreboard.events.forEach(function(ev){
+        try{
+          const comp = ev.competitions && ev.competitions[0];
+          const competitors = comp && comp.competitors;
+          if(!competitors) return;
+          const home = competitors.find(function(c){ return c.homeAway === "home"; });
+          const away = competitors.find(function(c){ return c.homeAway === "away"; });
+          if(!home || !away) return;
+          const state = ev.status && ev.status.type && ev.status.type.state;
+          const detail = (ev.status && ev.status.type && ev.status.type.shortDetail) || "";
+          const tag = state === "in" ? "🔴 LIVE" : (state === "post" ? "FINAL" : detail || "UPCOMING");
+          const awayName = (away.team && (away.team.abbreviation || away.team.shortDisplayName)) || "Away";
+          const homeName = (home.team && (home.team.abbreviation || home.team.shortDisplayName)) || "Home";
+          items.push({
+            cat:"score",
+            html: tag + ": " + awayName + " " + (away.score||"0") + " &ndash; " + homeName + " " + (home.score||"0"),
+            ts: Date.now()
+          });
+        } catch(e){ /* skip malformed event */ }
+      });
+    }
+
+    if(news && Array.isArray(news.articles)){
+      news.articles.slice(0, 12).forEach(function(a){
+        if(!a || !a.headline) return;
+        const isTrade = /trade/i.test(a.headline);
+        items.push({
+          cat: isTrade ? "nfltrade" : "news",
+          html: (isTrade ? "🔁 NFL TRADE" : "🏈 NFL") + ": " + a.headline,
+          ts: a.published ? new Date(a.published).getTime() : Date.now()
+        });
+      });
+    }
+
+    TICKER_ITEMS.nfl = items;
+    renderTicker();
+  }).catch(function(){
+    TICKER_ITEMS.nfl = [];
+    renderTicker();
+  });
+}
+
+function renderTicker(){
+  const bar = document.getElementById("tickerBar");
+  const track = document.getElementById("tickerTrack");
+  if(!bar || !track) return;
+
+  const all = TICKER_ITEMS.league.concat(TICKER_ITEMS.nfl);
+  if(all.length === 0){
+    track.style.animation = "none";
+    track.innerHTML = '<span class="ticker-item ticker-tag-empty">Live ticker unavailable right now.</span>';
+    return;
+  }
+
+  all.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+  const html = all.map(function(it){
+    return '<span class="ticker-item ticker-tag-' + it.cat + '">' + it.html + '</span><span class="ticker-sep">&bull;</span>';
+  }).join("");
+  // Duplicate the content back-to-back so translateX(-50%) loops seamlessly into
+  // what looks like the same feed continuing, instead of snapping/jumping.
+  track.style.animation = "none";
+  track.innerHTML = html + html;
+  requestAnimationFrame(function(){
+    const singleWidth = track.scrollWidth / 2;
+    const pxPerSecond = 55;
+    const duration = Math.max(20, singleWidth / pxPerSecond);
+    track.style.animation = "tickerScroll " + duration + "s linear infinite";
+  });
+}
+
+function startTicker(){
+  loadLeagueTickerData();
+  loadNflTickerData();
+  setInterval(loadLeagueTickerData, 120000);
+  setInterval(loadNflTickerData, 120000);
+}
+
 renderStandings(false);
 renderFallbackMatchups();
 renderRivalry();
@@ -3275,6 +3752,7 @@ loadDynastyHistory();
 loadHomeData();
 loadRivalryHistory();
 loadTransactionStats();
+startTicker();
 </script>
 
 </body>
