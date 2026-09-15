@@ -118,18 +118,54 @@
     display:flex; align-items:center; gap:8px;
   }
   .brand span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .navlinks{display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; flex:1; min-width:0;}
+  .brand-icon{display:inline-block; transition:transform 0.35s cubic-bezier(.34,1.56,.64,1); flex-shrink:0;}
+  .brand:hover .brand-icon{transform:rotate(-18deg) scale(1.2);}
+  .navlinks{
+    display:flex; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+    flex:1; min-width:0; position:relative;
+  }
   .navlinks::-webkit-scrollbar{display:none;}
+  .nav-pill{
+    position:absolute; top:4px; bottom:4px; left:0; width:0; z-index:0;
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark));
+    border-radius:999px; pointer-events:none;
+    transition:left 0.4s cubic-bezier(.34,1.56,.64,1), width 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+    animation:navPillGlow 2.4s ease-in-out infinite;
+    opacity:0;
+  }
+  .nav-pill.ready{opacity:1;}
+  @keyframes navPillGlow{
+    0%,100%{ box-shadow:0 4px 14px -4px rgba(242,181,66,0.5), 0 0 0 1px rgba(242,181,66,0.2) inset; }
+    50%{ box-shadow:0 4px 22px -2px rgba(242,181,66,0.85), 0 0 0 1px rgba(242,181,66,0.4) inset; }
+  }
   .navlinks button{
+    position:relative; z-index:1; overflow:hidden;
     background:transparent; border:1px solid transparent; color:var(--chalk-dim);
     font-family:'Inter', sans-serif; font-size:13px; font-weight:500; padding:9px 15px;
     border-radius:999px; cursor:pointer; white-space:nowrap; flex-shrink:0;
-    transition:color 0.15s, background 0.15s, border-color 0.15s;
+    transition:color 0.15s, border-color 0.15s, transform 0.15s;
   }
-  .navlinks button:hover{color:var(--chalk); border-color:var(--line);}
+  .navlinks button::after{
+    content:''; position:absolute; left:50%; right:50%; bottom:5px; height:2px;
+    background:var(--gold); border-radius:2px; opacity:0;
+    transition:left 0.22s ease, right 0.22s ease, opacity 0.22s ease;
+  }
+  .navlinks button:hover{color:var(--chalk); border-color:var(--line); transform:translateY(-1px);}
+  .navlinks button:hover::after{left:10px; right:10px; opacity:1;}
   .navlinks button.active{
-    color:#1A1304; background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark));
-    border-color:transparent; font-weight:600; box-shadow:0 4px 14px -4px rgba(242,181,66,0.5);
+    color:#1A1304; font-weight:700;
+  }
+  .navlinks button.active::after{display:none;}
+  .nav-ripple{
+    position:absolute; border-radius:50%; background:rgba(255,255,255,0.4);
+    transform:scale(0); opacity:1; animation:navRipple 0.55s ease-out forwards;
+    pointer-events:none; z-index:2;
+  }
+  @keyframes navRipple{ to{transform:scale(1); opacity:0;} }
+  @media (prefers-reduced-motion: reduce){
+    .nav-pill{animation:none; transition:none;}
+    .navlinks button{transition:none;}
+    .nav-ripple{display:none;}
   }
 
   /* ---------- MOBILE MENU ---------- */
@@ -152,15 +188,41 @@
       box-shadow:-16px 0 40px rgba(0,0,0,0.55);
     }
     .navlinks.open{display:flex;}
-    .navlinks button{text-align:left; padding:13px 12px; font-size:14px; border-radius:var(--radius-sm);}
-    .navlinks button.active{box-shadow:none;}
+    .nav-pill{display:none;}
+    .navlinks button{
+      text-align:left; padding:13px 14px; font-size:14px; border-radius:var(--radius-sm);
+      border-left:3px solid transparent; transition:border-color 0.2s, background 0.2s, color 0.15s, transform 0.15s;
+    }
+    .navlinks button::after{display:none;}
+    .navlinks button:hover{
+      border-left-color:var(--gold-dark); background:rgba(242,181,66,0.07); transform:translateX(3px);
+    }
+    .navlinks button.active{
+      color:#1A1304; font-weight:700; box-shadow:none; border-left-color:var(--gold-bright);
+      background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark));
+    }
+    .navlinks.open button{opacity:0; transform:translateX(20px); animation:navItemIn 0.4s ease forwards;}
+    .navlinks.open .mobile-menu-close{opacity:0; animation:navItemIn 0.3s ease forwards;}
+    .navlinks.open button:nth-child(2){animation-delay:0.05s;}
+    .navlinks.open button:nth-child(3){animation-delay:0.09s;}
+    .navlinks.open button:nth-child(4){animation-delay:0.13s;}
+    .navlinks.open button:nth-child(5){animation-delay:0.17s;}
+    .navlinks.open button:nth-child(6){animation-delay:0.21s;}
+    .navlinks.open button:nth-child(7){animation-delay:0.25s;}
+    .navlinks.open button:nth-child(8){animation-delay:0.29s;}
+    .navlinks.open button:nth-child(9){animation-delay:0.33s;}
+    @keyframes navItemIn{ to{opacity:1; transform:translateX(0);} }
     .mobile-menu-close{
       display:block; align-self:flex-end; background:transparent; border:none; color:var(--chalk-dim);
       font-size:26px; line-height:1; cursor:pointer; padding:4px 8px; margin-bottom:10px;
+      transition:transform 0.2s, color 0.15s;
     }
-    .mobile-menu-close:hover{color:var(--chalk);}
+    .mobile-menu-close:hover{color:var(--chalk); transform:rotate(90deg);}
     .nav-backdrop.open{
       display:block; position:fixed; inset:0; background:rgba(4,5,9,0.65); backdrop-filter:blur(2px); z-index:40;
+    }
+    @media (prefers-reduced-motion: reduce){
+      .navlinks.open button, .navlinks.open .mobile-menu-close{animation:none; opacity:1; transform:none;}
     }
   }
 
@@ -613,17 +675,18 @@
 </div>
 
 <div class="topnav">
-  <div class="brand">🏈 The NUT Fantasy Football League</div>
+  <div class="brand"><span class="brand-icon">🏈</span><span>The NUT Fantasy Football League</span></div>
   <div class="navlinks" id="navlinks">
+    <span class="nav-pill" id="navPill"></span>
     <button class="mobile-menu-close" id="mobileMenuClose">&times;</button>
-    <button data-section="home" class="active">Home</button>
-    <button data-section="standings">Standings</button>
-    <button data-section="rivalry">Rivalry Week</button>
-    <button data-section="bonus">Bonus Games</button>
-    <button data-section="champions">Champions &amp; Records</button>
-    <button data-section="draft">The Draft</button>
-    <button data-section="constitution">Constitution</button>
-    <button data-section="teams">Teams</button>
+    <button data-section="home" class="active">🏠 Home</button>
+    <button data-section="standings">📊 Standings</button>
+    <button data-section="rivalry">🔥 Rivalry Week</button>
+    <button data-section="bonus">🎯 Bonus Games</button>
+    <button data-section="champions">🏆 Champions &amp; Records</button>
+    <button data-section="draft">📋 The Draft</button>
+    <button data-section="constitution">📜 Constitution</button>
+    <button data-section="teams">👥 Teams</button>
   </div>
   <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">&#9776;</button>
 </div>
@@ -2877,10 +2940,33 @@ function safeHistoryReplace(state, url){
   catch(e){ HISTORY_ENABLED = false; return false; }
 }
 
+function moveNavPill(btn){
+  const pill = document.getElementById("navPill");
+  if(!pill || !btn) return;
+  pill.style.width = btn.offsetWidth + "px";
+  pill.style.left = btn.offsetLeft + "px";
+  pill.classList.add("ready");
+}
+
+function createNavRipple(e){
+  const btn = e.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const ripple = document.createElement("span");
+  ripple.className = "nav-ripple";
+  const size = Math.max(rect.width, rect.height) * 1.5;
+  ripple.style.width = ripple.style.height = size + "px";
+  const x = (typeof e.clientX === "number" && e.clientX) ? e.clientX - rect.left : rect.width / 2;
+  const y = (typeof e.clientY === "number" && e.clientY) ? e.clientY - rect.top : rect.height / 2;
+  ripple.style.left = (x - size / 2) + "px";
+  ripple.style.top = (y - size / 2) + "px";
+  btn.appendChild(ripple);
+  ripple.addEventListener("animationend", function(){ ripple.remove(); });
+}
+
 function goToSection(section, skipPush){
   document.querySelectorAll(".navlinks button[data-section]").forEach(function(b){ b.classList.remove("active"); });
   const btn = document.querySelector('.navlinks button[data-section="' + section + '"]');
-  if(btn) btn.classList.add("active");
+  if(btn){ btn.classList.add("active"); moveNavPill(btn); }
   document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
   const target = document.getElementById("section-" + section);
   if(target) target.classList.add("active");
@@ -2917,9 +3003,24 @@ document.getElementById("teamDetailBack").addEventListener("click", function(){
 });
 
 document.querySelectorAll(".navlinks button[data-section]").forEach(function(btn){
-  btn.addEventListener("click", function(){
+  btn.addEventListener("click", function(e){
+    createNavRipple(e);
     goToSection(btn.dataset.section);
   });
+});
+
+// Position the sliding pill under the initially-active tab once layout has settled,
+// and keep it aligned if the window is resized (button widths/positions can shift).
+function syncNavPillNow(){
+  const active = document.querySelector(".navlinks button.active[data-section]");
+  if(active) moveNavPill(active);
+}
+requestAnimationFrame(function(){ requestAnimationFrame(syncNavPillNow); });
+window.addEventListener("load", syncNavPillNow);
+let navPillResizeTimer = null;
+window.addEventListener("resize", function(){
+  clearTimeout(navPillResizeTimer);
+  navPillResizeTimer = setTimeout(syncNavPillNow, 120);
 });
 
 function openMobileMenu(){
