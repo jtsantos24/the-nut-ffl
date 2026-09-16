@@ -258,12 +258,40 @@
   .keydates-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:12px;}
   .keydate-item{
     background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--gold-dark);
-    border-radius:var(--radius-sm); padding:13px 15px;
+    border-radius:var(--radius-sm); padding:13px 15px; transition:border-color 0.2s, box-shadow 0.2s;
   }
   .keydate-label{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-faint);}
   .keydate-value{font-family:'Teko', sans-serif; font-size:21px; color:var(--gold); margin-top:4px;}
   .keydate-item.is-tba{border-left-color:var(--line);}
   .keydate-item.is-tba .keydate-value{color:var(--chalk-dim); font-family:'Inter', sans-serif; font-size:13px; font-style:italic; font-weight:500;}
+
+  /* ---------- KEY DATE COUNTDOWNS ---------- */
+  .keydate-item.has-countdown{border-left-color:var(--teal); cursor:default;}
+  .keydate-item.has-countdown:hover{border-color:var(--teal); box-shadow:0 0 0 1px rgba(69,214,196,0.25), 0 8px 20px -10px rgba(69,214,196,0.35);}
+  .keydate-countdown{display:flex; align-items:center; gap:5px; margin-top:10px;}
+  .cd-box{
+    background:var(--bg); border:1px solid var(--line-soft); border-radius:6px;
+    padding:4px 6px; min-width:34px; text-align:center; flex:1;
+  }
+  .cd-num{
+    display:block; font-family:'Teko', sans-serif; font-size:20px; line-height:1; color:var(--teal);
+    font-variant-numeric:tabular-nums;
+  }
+  .cd-unit{display:block; font-size:8px; letter-spacing:0.6px; text-transform:uppercase; color:var(--chalk-faint); margin-top:1px;}
+  .cd-colon{color:var(--chalk-faint); font-family:'Teko', sans-serif; font-size:18px; padding-bottom:8px;}
+  .keydate-countdown.cd-urgent .cd-num{color:var(--red); animation:cdPulse 1s ease-in-out infinite;}
+  .keydate-countdown.cd-urgent .cd-box{border-color:var(--red-dark);}
+  @keyframes cdPulse{ 0%,100%{opacity:1;} 50%{opacity:0.45;} }
+  .cd-done{
+    font-family:'Teko', sans-serif; font-size:16px; color:var(--green); letter-spacing:0.5px;
+    margin-top:10px; display:flex; align-items:center; gap:6px;
+  }
+  .cd-done::before{content:'\25CF'; font-size:9px; animation:cdLivePulse 1.4s ease-in-out infinite;}
+  @keyframes cdLivePulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  @media (max-width:480px){
+    .cd-box{min-width:0;}
+    .cd-num{font-size:17px;}
+  }
 
   .contact-strip{display:flex; align-items:center; gap:12px; margin-top:20px; flex-wrap:wrap;}
   .contact-label{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--chalk-faint); margin-right:2px;}
@@ -701,6 +729,53 @@
   .gotw-details summary::-webkit-details-marker{display:none;}
   .gotw-details summary:hover{color:var(--gold);}
 
+  /* ---------- GAME OF THE WEEK: FIREWORKS REDESIGN ---------- */
+  .gotw-panel{
+    position:relative; overflow:hidden; border-color:var(--gold-dark);
+    background:linear-gradient(165deg, rgba(242,181,66,0.07), var(--surface) 45%);
+    animation:gotwBorderPulse 3.2s ease-in-out infinite;
+  }
+  @keyframes gotwBorderPulse{
+    0%,100%{ box-shadow:0 0 0 1px rgba(242,181,66,0.22), 0 0 28px -12px rgba(242,181,66,0.35); }
+    50%{ box-shadow:0 0 0 1px rgba(242,181,66,0.5), 0 0 44px -8px rgba(242,181,66,0.55); }
+  }
+  .gotw-panel::before{
+    content:''; position:absolute; inset:-45%; z-index:0; pointer-events:none;
+    background:conic-gradient(from 0deg, transparent 0deg, rgba(242,181,66,0.12) 55deg, transparent 130deg,
+      rgba(69,214,196,0.10) 210deg, transparent 290deg);
+    animation:gotwSpin 16s linear infinite;
+  }
+  @keyframes gotwSpin{ to{ transform:rotate(360deg); } }
+  .gotw-title{
+    position:relative; z-index:1; display:flex; align-items:center; gap:9px;
+    background:linear-gradient(90deg, var(--gold-bright), var(--gold), var(--teal), var(--gold-bright));
+    background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:gotwTitleShine 5s linear infinite; width:fit-content;
+  }
+  @keyframes gotwTitleShine{ 0%{background-position:0% 50%;} 100%{background-position:300% 50%;} }
+  .gotw-title-badge{
+    display:inline-block; filter:drop-shadow(0 0 6px rgba(242,181,66,0.65));
+    animation:gotwBadgeBounce 1.6s ease-in-out infinite;
+  }
+  @keyframes gotwBadgeBounce{ 0%,100%{ transform:translateY(0) rotate(-8deg); } 50%{ transform:translateY(-3px) rotate(8deg); } }
+  .gotw-stage{position:relative; z-index:1; border-radius:var(--radius);}
+  .gotw-fireworks{
+    position:absolute; inset:0; z-index:3; width:100%; height:100%;
+    cursor:pointer; mix-blend-mode:screen; touch-action:none;
+  }
+  .gotw-hint{
+    position:relative; z-index:1; text-align:center; font-size:11px; color:var(--chalk-faint);
+    font-style:italic; margin-top:12px; letter-spacing:0.2px;
+  }
+  .gotw-hero{position:relative; z-index:1;}
+  .gotw-why, .gotw-details{position:relative; z-index:1;}
+  .gotw-mid .gotw-score{text-shadow:0 0 16px rgba(242,181,66,0.55);}
+  .gotw-side img{transition:transform 0.25s ease;}
+  .gotw-side:hover img{transform:scale(1.08) rotate(-2deg);}
+  @media (prefers-reduced-motion: reduce){
+    .gotw-panel, .gotw-panel::before, .gotw-title, .gotw-title-badge{animation:none;}
+  }
+
   /* ---------- RECAP ---------- */
   .recap-card{
     background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
@@ -833,24 +908,27 @@
           <div class="keydate-label">Draft Day</div>
           <div class="keydate-value">TBA</div>
         </div>
-        <div class="keydate-item">
+        <div class="keydate-item has-countdown">
           <div class="keydate-label">Trade Deadline</div>
           <div class="keydate-value">Week 13</div>
+          <div class="keydate-countdown" id="cd-tradeDeadline"></div>
         </div>
-        <div class="keydate-item">
+        <div class="keydate-item has-countdown">
           <div class="keydate-label">Rivalry Week</div>
           <div class="keydate-value">Weeks 5 &amp; 10</div>
+          <div class="keydate-countdown" id="cd-rivalryWeek"></div>
         </div>
-        <div class="keydate-item">
+        <div class="keydate-item has-countdown">
           <div class="keydate-label">Playoffs Begin</div>
           <div class="keydate-value">Week 15</div>
+          <div class="keydate-countdown" id="cd-playoffsBegin"></div>
         </div>
         <div class="keydate-item">
           <div class="keydate-label">Championship Round</div>
-          <div class="keydate-value">Weeks 15&ndash;16</div>
+          <div class="keydate-value">Weeks 15&ndash;17</div>
         </div>
         <div class="keydate-item">
-          <div class="keydate-label">Loser Bracket Ends</div>
+          <div class="keydate-label">Toilet Bowl Championship</div>
           <div class="keydate-value">Week 17</div>
         </div>
         <div class="keydate-item is-tba">
@@ -860,9 +938,13 @@
       </div>
       <p class="const-note" style="margin-top:14px;">TBA items will be confirmed by the commissioner &mdash; full rules for all of the above live in the Constitution tab.</p>
     </div>
-    <div class="panel" id="gotwPanel" style="display:none;">
-      <h2 class="panel-title">Dynasty Game of the Week</h2>
-      <div id="gotwCard"></div>
+    <div class="panel gotw-panel" id="gotwPanel" style="display:none;">
+      <h2 class="panel-title gotw-title"><span class="gotw-title-badge">🏆</span> Dynasty Game of the Week</h2>
+      <div class="gotw-stage">
+        <canvas class="gotw-fireworks" id="gotwFireworks"></canvas>
+        <div id="gotwCard"></div>
+      </div>
+      <p class="gotw-hint">🎆 Click or tap anywhere in the box to set off fireworks</p>
     </div>
     <div class="panel">
       <h2 class="panel-title" id="matchupsTitle">This Week's Matchups</h2>
@@ -2703,6 +2785,96 @@ function maybeComputeGameOfWeek(){
   });
 }
 
+// ---------- GAME OF THE WEEK: FIREWORKS ----------
+const GOTW_FW = {canvas:null, ctx:null, particles:[], raf:null, lastAuto:0, running:false};
+const GOTW_FW_COLORS = ["#F2B542","#FFD46B","#45D6C4","#FF6B6B","#34D399","#9B8CFF","#FF9F5A"];
+
+function gotwFireworksResize(){
+  const canvas = GOTW_FW.canvas;
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if(w === 0 || h === 0) return;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  GOTW_FW.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function gotwLaunchFirework(x, y){
+  if(!GOTW_FW.ctx) return;
+  const color = GOTW_FW_COLORS[Math.floor(Math.random() * GOTW_FW_COLORS.length)];
+  const count = 24 + Math.floor(Math.random() * 16);
+  for(let i = 0; i < count; i++){
+    const angle = (Math.PI * 2) * (i / count) + Math.random() * 0.3;
+    const speed = 1.4 + Math.random() * 3.2;
+    GOTW_FW.particles.push({
+      x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+      life: 1, decay: 0.011 + Math.random() * 0.013, color: color,
+      size: 1.4 + Math.random() * 1.8, gravity: 0.045
+    });
+  }
+  GOTW_FW.particles.push({x:x, y:y, vx:0, vy:0, life:1, decay:0.09, color:"#ffffff", size:7, gravity:0});
+}
+
+function gotwFireworksTick(ts){
+  const canvas = GOTW_FW.canvas, ctx = GOTW_FW.ctx;
+  if(!canvas || !ctx) return;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  ctx.clearRect(0, 0, w, h);
+
+  GOTW_FW.particles = GOTW_FW.particles.filter(function(p){ return p.life > 0; });
+  GOTW_FW.particles.forEach(function(p){
+    p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= 0.985; p.life -= p.decay;
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  if(!ts) ts = performance.now();
+  if(ts - GOTW_FW.lastAuto > (2200 + Math.random() * 2000)){
+    GOTW_FW.lastAuto = ts;
+    if(w > 0 && h > 0) gotwLaunchFirework(w * 0.15 + Math.random() * w * 0.7, h * 0.15 + Math.random() * h * 0.4);
+  }
+
+  GOTW_FW.raf = requestAnimationFrame(gotwFireworksTick);
+}
+
+function initGotwFireworks(){
+  const canvas = document.getElementById("gotwFireworks");
+  if(!canvas || GOTW_FW.running) return;
+  GOTW_FW.canvas = canvas;
+  GOTW_FW.ctx = canvas.getContext("2d");
+  gotwFireworksResize();
+  window.addEventListener("resize", gotwFireworksResize);
+
+  function launchAt(clientX, clientY){
+    const rect = canvas.getBoundingClientRect();
+    gotwLaunchFirework(clientX - rect.left, clientY - rect.top);
+  }
+  canvas.addEventListener("click", function(e){ launchAt(e.clientX, e.clientY); });
+  canvas.addEventListener("touchstart", function(e){
+    if(e.touches && e.touches[0]) launchAt(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  GOTW_FW.running = true;
+
+  if(reduceMotion){
+    setTimeout(function(){ gotwLaunchFirework(canvas.clientWidth/2, canvas.clientHeight*0.35); }, 150);
+    GOTW_FW.raf = requestAnimationFrame(gotwFireworksTick);
+    return;
+  }
+
+  setTimeout(function(){ gotwLaunchFirework(canvas.clientWidth*0.3, canvas.clientHeight*0.3); }, 150);
+  setTimeout(function(){ gotwLaunchFirework(canvas.clientWidth*0.7, canvas.clientHeight*0.25); }, 450);
+  setTimeout(function(){ gotwLaunchFirework(canvas.clientWidth*0.5, canvas.clientHeight*0.42); }, 750);
+
+  GOTW_FW.raf = requestAnimationFrame(gotwFireworksTick);
+}
+
 function renderGameOfWeek(pick, week){
   const panel = document.getElementById("gotwPanel");
   const card = document.getElementById("gotwCard");
@@ -2738,6 +2910,8 @@ function renderGameOfWeek(pick, week){
     '</div>' +
     '<p class="gotw-why">Selected for ' + whyText + '.</p>' +
     '<details class="gotw-details"><summary>See the full scoring breakdown</summary><div class="power-breakdown" style="padding:12px 4px 0;">' + breakdown + '</div></details>';
+
+  initGotwFireworks();
 }
 
 function buildAndRenderRecords(results){
@@ -4247,6 +4421,80 @@ function startTicker(){
   setInterval(loadNflTickerData, 120000);
 }
 
+// ---------- KEY DATE COUNTDOWNS ----------
+// First kickoff (Thursday Night Football, 8:15pm ET) of each named week in the real
+// 2026 NFL schedule -- this is the moment each of these league milestones actually lands.
+const NFL_2026_KICKOFFS = {
+  week5:  new Date("2026-10-08T20:15:00-04:00"),
+  week10: new Date("2026-11-12T20:15:00-05:00"),
+  week13: new Date("2026-12-03T20:15:00-05:00"),
+  week15: new Date("2026-12-17T20:15:00-05:00")
+};
+
+function pickRivalryCountdownTarget(){
+  const now = new Date();
+  if(now < NFL_2026_KICKOFFS.week5) return {date: NFL_2026_KICKOFFS.week5, label: "Week 5"};
+  if(now < NFL_2026_KICKOFFS.week10) return {date: NFL_2026_KICKOFFS.week10, label: "Week 10"};
+  return null;
+}
+
+function keyDateCountdownConfigs(){
+  return [
+    {id: "cd-tradeDeadline", date: NFL_2026_KICKOFFS.week13, doneText: "Deadline has passed"},
+    {id: "cd-rivalryWeek", target: pickRivalryCountdownTarget, doneText: "Rivalry Week has wrapped"},
+    {id: "cd-playoffsBegin", date: NFL_2026_KICKOFFS.week15, doneText: "Playoffs are underway"}
+  ];
+}
+
+function tickKeyDateCountdowns(){
+  keyDateCountdownConfigs().forEach(function(cfg){
+    const el = document.getElementById(cfg.id);
+    if(!el) return;
+
+    let targetDate = cfg.date || null;
+    if(cfg.target){
+      const picked = cfg.target();
+      targetDate = picked ? picked.date : null;
+    }
+
+    if(!targetDate){
+      el.innerHTML = '<div class="cd-done">' + cfg.doneText + '</div>';
+      el.classList.remove("cd-urgent");
+      return;
+    }
+
+    const diff = targetDate.getTime() - Date.now();
+    if(diff <= 0){
+      el.innerHTML = '<div class="cd-done">' + cfg.doneText + '</div>';
+      el.classList.remove("cd-urgent");
+      return;
+    }
+
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+
+    el.classList.toggle("cd-urgent", diff < 24 * 3600000);
+    el.innerHTML =
+      '<div class="cd-box"><span class="cd-num">' + days + '</span><span class="cd-unit">Days</span></div>' +
+      '<div class="cd-colon">:</div>' +
+      '<div class="cd-box"><span class="cd-num">' + String(hours).padStart(2,"0") + '</span><span class="cd-unit">Hrs</span></div>' +
+      '<div class="cd-colon">:</div>' +
+      '<div class="cd-box"><span class="cd-num">' + String(mins).padStart(2,"0") + '</span><span class="cd-unit">Min</span></div>' +
+      '<div class="cd-colon">:</div>' +
+      '<div class="cd-box"><span class="cd-num">' + String(secs).padStart(2,"0") + '</span><span class="cd-unit">Sec</span></div>';
+    el.title = "Countdown to " + targetDate.toLocaleString("en-US", {
+      weekday:"long", month:"long", day:"numeric", hour:"numeric", minute:"2-digit", timeZoneName:"short"
+    });
+  });
+}
+
+function startKeyDateCountdowns(){
+  tickKeyDateCountdowns();
+  setInterval(tickKeyDateCountdowns, 1000);
+}
+
 renderStandings(false);
 renderFallbackMatchups();
 renderRivalry();
@@ -4259,6 +4507,7 @@ loadHomeData();
 loadRivalryHistory();
 loadTransactionStats();
 startTicker();
+startKeyDateCountdowns();
 </script>
 
 </body>
