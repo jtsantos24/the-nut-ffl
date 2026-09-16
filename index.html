@@ -478,6 +478,125 @@
   .power-cat-bar{height:100%; background:linear-gradient(90deg, var(--gold-dark), var(--gold-bright)); border-radius:4px;}
   .power-cat-val{width:34px; text-align:right; color:var(--chalk-dim); flex-shrink:0;}
 
+  /* ---------- POWER LINES CHART ---------- */
+  .plchart-panel{padding-top:20px;}
+  .plchart-header{display:flex; flex-direction:column; gap:2px; margin-bottom:2px;}
+  .plchart-title{
+    display:flex; align-items:center; gap:10px; font-family:'Teko', sans-serif; font-size:30px; line-height:1;
+  }
+  .plchart-title-power{color:var(--chalk); letter-spacing:1px;}
+  .plchart-title-lines{color:var(--teal); letter-spacing:1px;}
+  .plchart-squiggle{width:110px; height:22px; flex-shrink:0;}
+  .plchart-squiggle path{
+    fill:none; stroke:var(--red); stroke-width:2.5; stroke-linecap:round;
+    stroke-dasharray:130; stroke-dashoffset:130; animation:plSquiggleDraw 2.2s ease-out forwards infinite alternate;
+  }
+  @keyframes plSquiggleDraw{ to{stroke-dashoffset:0;} }
+  .plchart-tagline{color:var(--chalk-faint); font-size:12px; margin:-2px 0 14px;}
+
+  .plchart-body{
+    background:var(--bg); border:1px solid var(--line); border-top:3px dashed var(--gold-dark);
+    border-radius:var(--radius); padding:16px 16px 10px;
+  }
+  .plchart-wrap{display:flex; gap:6px;}
+  .plchart-ranks{flex-shrink:0; width:30px; padding-top:30px;}
+  .plchart-rank-num{
+    height:44px; display:flex; align-items:center; justify-content:center;
+    font-family:'Teko', sans-serif; font-size:17px; color:var(--teal); position:relative;
+  }
+  .plchart-rank-num.pl-playoff-mark::before{
+    content:'PLAYOFFS'; position:absolute; top:-9px; left:0; font-family:'Inter',sans-serif;
+    font-size:8px; font-weight:700; letter-spacing:0.5px; color:var(--green); white-space:nowrap;
+  }
+  .plchart-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; flex:1; min-width:0;}
+  .plchart-inner{position:relative;}
+  .plchart-weekrow{display:flex; height:30px; align-items:flex-end; padding-bottom:6px;}
+  .plchart-week-label{
+    flex-shrink:0; text-align:center; font-size:10px; letter-spacing:1px; text-transform:uppercase;
+    color:var(--chalk-faint); font-weight:600; transition:color 0.2s;
+  }
+  .plchart-week-label.pl-current{color:var(--gold-bright);}
+  .plchart-week-label.pl-pre{color:var(--chalk-dim);}
+  .plchart-week-label.pl-scrub-active{color:var(--gold-bright); text-shadow:0 0 8px rgba(255,212,107,0.6);}
+  .plchart-svg{display:block; overflow:visible;}
+  .pl-gridline{stroke:var(--line-soft); stroke-width:1; stroke-dasharray:3 4;}
+  .pl-playoff-line{stroke:var(--green); stroke-width:1.5; stroke-dasharray:6 4; opacity:0.55;}
+  .pl-line{fill:none; stroke-width:2.5; transition:opacity 0.25s, stroke-width 0.25s; opacity:0.85;}
+  .pl-line.pl-traced{stroke-width:4; opacity:1; filter:drop-shadow(0 0 6px currentColor);}
+  .pl-line.pl-dimmed{opacity:0.1;}
+  .pl-node-group{cursor:pointer; transition:opacity 0.25s;}
+  .pl-node-group.pl-dimmed{opacity:0.15;}
+  .pl-node-ring{fill:var(--surface-2); stroke-width:2.5; transition:r 0.15s;}
+  .pl-node-group:hover .pl-node-ring, .pl-node-group.pl-traced .pl-node-ring{filter:drop-shadow(0 0 5px currentColor);}
+  .pl-node-group:hover .pl-node-ring{r:16;}
+
+  .plchart-controls{display:flex; align-items:center; gap:12px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft);}
+  .plchart-play{
+    flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1px solid var(--gold-dark);
+    background:var(--gold-soft); color:var(--gold-bright); font-size:12px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:transform 0.15s, background 0.15s;
+  }
+  .plchart-play:hover{background:var(--gold-dark); color:#1A1304; transform:scale(1.08);}
+  .plchart-scrubwrap{position:relative; flex:1; min-width:0; height:24px; display:flex; align-items:center;}
+  .plchart-scrub{
+    -webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:4px;
+    background:linear-gradient(90deg, var(--gold-dark), var(--line) 0%); cursor:pointer; margin:0;
+  }
+  .plchart-scrub::-webkit-slider-thumb{-webkit-appearance:none; width:1px; height:1px; opacity:0;}
+  .plchart-scrub::-moz-range-thumb{width:1px; height:1px; opacity:0; border:none;}
+  .plchart-scrub-handle{
+    position:absolute; top:50%; left:0; font-size:18px; line-height:1; pointer-events:none;
+    transform:translate(-50%,-50%); transition:left 0.1s linear; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+  }
+  .plchart-scrub-label{
+    flex-shrink:0; font-family:'Teko', sans-serif; font-size:15px; color:var(--gold); letter-spacing:0.5px;
+    min-width:96px; text-align:right;
+  }
+  .plchart-hint{font-size:11px; color:var(--chalk-faint); font-style:italic; margin-top:10px;}
+
+  .plchart-legend{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .plchart-pill{
+    display:flex; align-items:center; gap:7px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:999px; padding:6px 12px 6px 6px; cursor:pointer; font-size:12px; font-weight:600; color:var(--chalk-dim);
+    transition:border-color 0.2s, color 0.2s, background 0.2s, transform 0.15s;
+  }
+  .plchart-pill img{width:20px; height:20px; border-radius:50%; object-fit:cover; border:2px solid var(--line);}
+  .plchart-pill:hover{color:var(--chalk); transform:translateY(-1px);}
+  .plchart-pill.pl-traced{color:var(--chalk); background:rgba(255,255,255,0.06);}
+  .plchart-pill.pl-dimmed{opacity:0.4;}
+
+  .pl-tooltip{
+    position:fixed; z-index:200; width:250px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:var(--radius-sm); box-shadow:var(--shadow-pop); padding:14px 16px; pointer-events:none;
+    opacity:0; transform:translateY(6px) scale(0.97); transition:opacity 0.15s, transform 0.15s;
+  }
+  .pl-tooltip.pl-show{opacity:1; transform:translateY(0) scale(1);}
+  .pl-tt-head{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .pl-tt-head img{width:34px; height:34px; border-radius:8px; object-fit:cover; border:2px solid var(--line);}
+  .pl-tt-name{font-weight:700; font-size:14px; color:var(--chalk); line-height:1.25;}
+  .pl-tt-meta{font-size:11px; color:var(--chalk-dim);}
+  .pl-tt-stats{display:flex; gap:14px; margin-bottom:10px;}
+  .pl-tt-stat .num{font-family:'Teko', sans-serif; font-size:22px; color:var(--gold); line-height:1;}
+  .pl-tt-stat .lbl{font-size:9px; letter-spacing:0.8px; text-transform:uppercase; color:var(--chalk-faint); margin-top:2px;}
+  .pl-tt-trend{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px;
+    border-radius:999px; margin-bottom:10px;
+  }
+  .pl-tt-trend.up{color:var(--green); background:rgba(52,211,153,0.12);}
+  .pl-tt-trend.flat{color:var(--chalk-dim); background:rgba(139,147,168,0.12);}
+  .pl-tt-trend.down{color:var(--red); background:var(--red-soft);}
+  .pl-tt-cats .power-cat-row{padding:3px 0; font-size:11px;}
+  .pl-tt-cats .power-cat-label{width:96px; font-size:10px;}
+
+  @media (max-width:640px){
+    .plchart-title{font-size:24px;}
+    .plchart-squiggle{width:80px;}
+    .pl-tooltip{width:210px; padding:12px 14px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .plchart-squiggle path{animation:none; stroke-dashoffset:0;}
+  }
+
   /* ---------- BONUS GAMES ---------- */
   .bonus-row{display:flex; align-items:center; flex-wrap:wrap; gap:14px; padding:15px 0; border-bottom:1px solid var(--line-soft);}
   .bonus-row:last-child{border-bottom:none;}
@@ -696,7 +815,6 @@
   <div class="hero-inner">
     <div class="hero-eyebrow">🏈 Year 4 &middot; Dynasty League</div>
     <h1>2026 Season</h1>
-    <p>Twelve teams, two divisions, one trophy. Standings, matchups, and power rankings update live all season long.</p>
     <div class="contact-strip">
       <span class="contact-label">Contact us</span>
       <a href="https://www.facebook.com/profile.php?id=61580410562046" target="_blank" rel="noopener">Facebook</a>
@@ -756,12 +874,21 @@
       <div class="status-banner" id="recapStatus">Loading last week's results&hellip;</div>
       <div id="recapGrid"></div>
     </div>
-    <div class="panel">
-      <h2 class="panel-title">Power Rankings</h2>
+    <div class="panel plchart-panel">
+      <div class="plchart-header">
+        <h2 class="plchart-title">
+          <span class="plchart-title-power">POWER RANKING</span> <span class="plchart-title-lines">LINES</span>
+          <svg class="plchart-squiggle" viewBox="0 0 140 28" preserveAspectRatio="none" aria-hidden="true">
+            <circle cx="6" cy="14" r="4" fill="var(--red)"></circle>
+            <path d="M14 14 Q 26 14 32 4 T 50 14 T 68 24 T 86 4 T 104 14 T 122 24 T 136 14" />
+          </svg>
+        </h2>
+        <div class="plchart-tagline">The rise &amp; fall, week to week</div>
+      </div>
       <p class="panel-sub" id="powerStatus">Crunching production, roster strength, dynasty value, draft capital, recent form, and record&hellip;</p>
       <div id="powerGrid"></div>
       <p class="const-note" id="powerMethodNote" style="margin-top:12px; display:none;">
-        Click a team to see its category breakdown. Roster Strength and Dynasty Value are estimated from Sleeper's player database (search rank and age); Draft Capital reflects owned future 1st/2nd-round rookie picks. PF Rank is rank by actual season scoring average; Max PF Rank ranks teams by an <em>approximate</em> optimal-lineup average (best possible starters each week) &mdash; a big gap between the two often means points are being left on the bench. Trend blends recent scoring momentum, roster youth, and draft capital into Rising/Steady/Falling. These are heuristics, not an official Sleeper metric.
+        PRE is a preseason estimate from roster strength, dynasty value, and draft capital. Every week after that is real cumulative standings position (record, then points as tiebreaker) &mdash; exactly how playoff seeding works. Hover a name below for that team's current Power Score breakdown; click a name to trace just their line. Roster Strength and Dynasty Value are estimated from Sleeper's player database (search rank and age); Draft Capital reflects owned future 1st/2nd-round rookie picks. Trend blends recent scoring momentum, roster youth, and draft capital into Rising/Steady/Falling. These are heuristics, not an official Sleeper metric.
       </p>
     </div>
   </div>
@@ -3365,6 +3492,367 @@ function computeDraftCapital(){
   return capital;
 }
 
+// ---------- POWER LINES: weekly standings-based rank history ----------
+// PRE (before Week 1 results exist) uses roster strength + dynasty value + draft capital only,
+// since there's no actual play to rank yet. Every week from WK1 onward is a REAL cumulative
+// standings rank built straight from RIVALRY_HISTORY -- wins first, cumulative points-for as the
+// tiebreaker -- exactly how Sleeper decides playoff seeding. That's why the chart can look like a
+// bump chart of "power" while actually tracing the real, auditable standings position over time.
+function computeWeeklyStandingsRanks(){
+  const byWeek = {};
+  RIVALRY_HISTORY.forEach(function(entry){
+    if(String(entry.season) !== "2026" || !Array.isArray(entry.data)) return;
+    const week = entry.week;
+    entry.data.forEach(function(m){
+      if(typeof m.points !== "number") return;
+      if(!byWeek[week]) byWeek[week] = [];
+      byWeek[week].push({rosterId: m.roster_id, points: m.points, matchupId: m.matchup_id});
+    });
+  });
+
+  const weeks = Object.keys(byWeek).map(Number).filter(function(w){
+    return byWeek[w].some(function(x){ return x.points > 0; });
+  }).sort(function(a,b){ return a-b; });
+
+  const cum = {};
+  TEAMS.forEach(function(t){ cum[t.rosterId] = {w:0, l:0, t:0, pf:0}; });
+
+  const ranksByWeek = {};
+  weeks.forEach(function(week){
+    const groups = {};
+    byWeek[week].forEach(function(x){
+      if(!groups[x.matchupId]) groups[x.matchupId] = [];
+      groups[x.matchupId].push(x);
+    });
+    Object.keys(groups).forEach(function(mid){
+      const pair = groups[mid];
+      pair.forEach(function(x){ if(cum[x.rosterId]) cum[x.rosterId].pf += x.points; });
+      if(pair.length === 2){
+        const a = pair[0], b = pair[1];
+        if(!cum[a.rosterId] || !cum[b.rosterId]) return;
+        if(a.points > b.points){ cum[a.rosterId].w++; cum[b.rosterId].l++; }
+        else if(b.points > a.points){ cum[b.rosterId].w++; cum[a.rosterId].l++; }
+        else { cum[a.rosterId].t++; cum[b.rosterId].t++; }
+      }
+    });
+
+    const order = TEAMS.map(function(t){
+      const c = cum[t.rosterId];
+      return {rosterId: t.rosterId, winPct: c.w + 0.5*c.t, pf: c.pf};
+    }).sort(function(a,b){ return (b.winPct - a.winPct) || (b.pf - a.pf); });
+
+    const ranks = {};
+    order.forEach(function(o, i){ ranks[o.rosterId] = i + 1; });
+    ranksByWeek[week] = ranks;
+  });
+
+  return {weeks: weeks, ranksByWeek: ranksByWeek};
+}
+
+function computePreseasonRanks(){
+  const rosterAndDynasty = computeRosterAndDynasty();
+  const draftCapitalRaw = computeDraftCapital();
+  const rosterNorm = minMaxNormalize(rosterAndDynasty.rosterRaw, true);
+  const dynastyNorm = minMaxNormalize(rosterAndDynasty.dynastyRaw, true);
+  const draftNorm = minMaxNormalize(draftCapitalRaw, false);
+  TEAMS.forEach(function(t){
+    const bonus = Math.min(10, (rosterAndDynasty.eliteYoungCount[t.rosterId] || 0) * 2);
+    dynastyNorm[t.rosterId] = Math.min(100, dynastyNorm[t.rosterId] + bonus);
+  });
+  const preRaw = {};
+  TEAMS.forEach(function(t){
+    preRaw[t.rosterId] = rosterNorm[t.rosterId]*0.45 + dynastyNorm[t.rosterId]*0.35 + draftNorm[t.rosterId]*0.20;
+  });
+  return rankFromRaw(preRaw, true);
+}
+
+// Combines the preseason estimate and the real weekly standings ranks into one
+// {weekLabels, series} structure the chart renders directly from.
+function buildPowerLinesData(){
+  const preRanks = computePreseasonRanks();
+  const weekly = computeWeeklyStandingsRanks();
+  const weekLabels = ["PRE"].concat(weekly.weeks.map(function(w){ return "WK " + w; }));
+  const series = {};
+  TEAMS.forEach(function(t){
+    const row = [preRanks[t.rosterId] || null];
+    weekly.weeks.forEach(function(w){
+      const r = weekly.ranksByWeek[w];
+      row.push(r ? (r[t.rosterId] || null) : null);
+    });
+    series[t.rosterId] = row;
+  });
+  return {weekLabels: weekLabels, series: series};
+}
+
+const PL_COLORS = ["#F2B542","#45D6C4","#FF6B6B","#34D399","#9B8CFF","#FF9F5A","#5AB8FF","#E85D9C","#B4D645","#7A93FF","#F2799E","#4DD0E1"];
+function plColorForRoster(rosterId, allRosterIds){
+  const idx = allRosterIds.indexOf(rosterId);
+  return PL_COLORS[((idx % PL_COLORS.length) + PL_COLORS.length) % PL_COLORS.length];
+}
+
+let PL_STATE = null;
+
+function plTooltipEl(){
+  let el = document.getElementById("plTooltip");
+  if(!el){
+    el = document.createElement("div");
+    el.className = "pl-tooltip";
+    el.id = "plTooltip";
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+function plTooltipHtml(f, rank){
+  const t = f.team;
+  const trendLabel = {up:"Rising", flat:"Steady", down:"Falling"}[f.trend];
+  const trendClass = f.trend;
+  const trendArrow = f.trend === "up" ? "↑" : (f.trend === "down" ? "↓" : "→");
+  const rec = t.wins + "-" + t.losses + (t.ties ? ("-" + t.ties) : "");
+  const catLabels = {
+    production:["Production","30%"], roster:["Roster Strength","25%"], dynasty:["Dynasty Value","20%"],
+    draft:["Draft Capital","10%"], recent:["Recent Form","10%"], record:["Record","5%"]
+  };
+  const catsHtml = Object.keys(catLabels).map(function(key){
+    const val = f.cats[key];
+    return '<div class="power-cat-row"><div class="power-cat-label">' + catLabels[key][0] + '</div>' +
+      '<div class="power-cat-bar-wrap"><div class="power-cat-bar" style="width:' + Math.max(0,Math.min(100,val)).toFixed(0) + '%"></div></div>' +
+      '<div class="power-cat-val">' + val.toFixed(0) + '</div></div>';
+  }).join("");
+  return '<div class="pl-tt-head"><img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+    '<div><div class="pl-tt-name">' + t.team + '</div><div class="pl-tt-meta">' + rec + ' &middot; Power Rank #' + rank + '</div></div></div>' +
+    '<div class="pl-tt-stats"><div class="pl-tt-stat"><div class="num">' + f.score.toFixed(1) + '</div><div class="lbl">Power Score</div></div></div>' +
+    '<div class="pl-tt-trend ' + trendClass + '">' + trendArrow + ' ' + trendLabel + ' &mdash; ' +
+      (f.trend === "up" ? "climbing on hot scoring, a young core, and stocked picks." : (f.trend === "down" ? "cooling off on recent form, age, or thin draft capital." : "holding steady, no major swings.")) +
+    '</div>' +
+    '<div class="pl-tt-cats">' + catsHtml + '</div>';
+}
+
+function plShowTooltip(rosterId, anchorRect){
+  if(!PL_STATE) return;
+  const f = PL_STATE.scoreByRoster[rosterId];
+  if(!f) return;
+  const rank = PL_STATE.finalScores.indexOf(f) + 1;
+  const el = plTooltipEl();
+  el.innerHTML = plTooltipHtml(f, rank);
+  el.classList.add("pl-show");
+
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const ttW = el.offsetWidth || 250, ttH = el.offsetHeight || 260;
+  let left = anchorRect.left + anchorRect.width/2 - ttW/2;
+  let top = anchorRect.top - ttH - 12;
+  if(top < 8) top = anchorRect.bottom + 12;
+  if(left < 8) left = 8;
+  if(left + ttW > vw - 8) left = vw - 8 - ttW;
+  if(top + ttH > vh - 8) top = Math.max(8, vh - 8 - ttH);
+  el.style.left = left + "px";
+  el.style.top = top + "px";
+}
+
+function plHideTooltip(){
+  const el = document.getElementById("plTooltip");
+  if(el) el.classList.remove("pl-show");
+}
+
+function plSetTraced(rosterId){
+  if(!PL_STATE) return;
+  const grid = document.getElementById("powerGrid");
+  PL_STATE.traced = (PL_STATE.traced === rosterId) ? null : rosterId;
+  const traced = PL_STATE.traced;
+  grid.querySelectorAll("[data-roster]").forEach(function(el){
+    const rid = el.getAttribute("data-roster");
+    const isMatch = String(rid) === String(traced);
+    el.classList.toggle("pl-traced", !!traced && isMatch);
+    el.classList.toggle("pl-dimmed", !!traced && !isMatch);
+  });
+}
+
+function plUpdateScrubVisual(idx, numCols, colW, padX, nodeR){
+  const grid = document.getElementById("powerGrid");
+  const handle = grid.querySelector(".plchart-scrub-handle");
+  const label = grid.querySelector(".plchart-scrub-label");
+  const input = grid.querySelector(".plchart-scrub");
+  const rect = grid.querySelector("#plRevealRect");
+  const pct = numCols > 1 ? (idx / (numCols - 1)) * 100 : 0;
+  if(handle) handle.style.left = pct + "%";
+  if(label) label.textContent = idx === 0 ? "PRESEASON" : PL_STATE.linesData.weekLabels[idx];
+  if(input) input.value = idx;
+  if(rect){
+    const revealX = padX + idx*colW + nodeR + 4;
+    rect.setAttribute("width", Math.max(0, revealX));
+  }
+  grid.querySelectorAll(".plchart-week-label").forEach(function(lbl, i){
+    lbl.classList.toggle("pl-scrub-active", i === idx);
+  });
+}
+
+function renderPowerLines(finalScores, linesData){
+  const grid = document.getElementById("powerGrid");
+  document.getElementById("powerMethodNote").style.display = "block";
+
+  const teamsByRoster = {};
+  TEAMS.forEach(function(t){ teamsByRoster[t.rosterId] = t; });
+  const scoreByRoster = {};
+  finalScores.forEach(function(f){ scoreByRoster[f.team.rosterId] = f; });
+  const allRosterIds = finalScores.map(function(f){ return f.team.rosterId; });
+
+  const numTeams = TEAMS.length;
+  const weekLabels = linesData.weekLabels;
+  const numCols = weekLabels.length;
+  const rowH = 44, headH = 30, colW = 60, padX = 24, nodeR = 11;
+  const svgW = colW * (numCols - 1) + padX*2;
+  const svgH = rowH * numTeams;
+  const playoffCutoff = Math.min(6, numTeams);
+
+  function xForCol(i){ return padX + i*colW; }
+  function yForRank(r){ return (r - 0.5) * rowH; }
+
+  let ranksHtml = "";
+  for(let r=1; r<=numTeams; r++){
+    ranksHtml += '<div class="plchart-rank-num' + (r === playoffCutoff+1 ? ' pl-playoff-mark' : '') + '" style="height:' + rowH + 'px;">' + r + '</div>';
+  }
+
+  let weekHtml = "";
+  weekLabels.forEach(function(label, i){
+    const cls = i === numCols-1 ? ' pl-current' : (i === 0 ? ' pl-pre' : '');
+    weekHtml += '<div class="plchart-week-label' + cls + '" style="position:absolute; left:' + xForCol(i) + 'px; top:0; transform:translateX(-50%); width:52px;">' + label + '</div>';
+  });
+
+  let gridlinesHtml = "";
+  for(let i=0; i<numCols; i++){
+    gridlinesHtml += '<line class="pl-gridline" x1="' + xForCol(i) + '" y1="0" x2="' + xForCol(i) + '" y2="' + svgH + '"></line>';
+  }
+  const playoffY = playoffCutoff * rowH;
+  gridlinesHtml += '<line class="pl-playoff-line" x1="0" y1="' + playoffY + '" x2="' + svgW + '" y2="' + playoffY + '"></line>';
+
+  let linesHtml = "";
+  let nodesHtml = "";
+  allRosterIds.forEach(function(rosterId){
+    const t = teamsByRoster[rosterId];
+    if(!t) return;
+    const series = linesData.series[rosterId] || [];
+    const color = plColorForRoster(rosterId, allRosterIds);
+    const clipId = "plclip-" + rosterId;
+
+    const points = [];
+    series.forEach(function(rank, i){
+      if(rank === null || rank === undefined) return;
+      points.push({x: xForCol(i), y: yForRank(rank), i: i});
+    });
+
+    const segments = [];
+    let cur = [];
+    let lastI = null;
+    points.forEach(function(p){
+      if(lastI !== null && p.i !== lastI + 1){ segments.push(cur); cur = []; }
+      cur.push(p);
+      lastI = p.i;
+    });
+    if(cur.length) segments.push(cur);
+
+    let pathD = "";
+    segments.forEach(function(seg){
+      if(seg.length === 0) return;
+      pathD += "M" + seg[0].x + " " + seg[0].y;
+      for(let k=0; k<seg.length-1; k++){
+        const p0 = seg[k], p1 = seg[k+1];
+        const midX = (p0.x + p1.x)/2;
+        pathD += " C " + midX + " " + p0.y + " " + midX + " " + p1.y + " " + p1.x + " " + p1.y;
+      }
+    });
+
+    linesHtml += '<path class="pl-line" data-roster="' + rosterId + '" d="' + pathD + '" style="stroke:' + color + '; color:' + color + ';"></path>';
+
+    nodesHtml += '<clipPath id="' + clipId + '"><circle cx="0" cy="0" r="' + (nodeR-2) + '"></circle></clipPath>';
+    points.forEach(function(p){
+      const isLast = p.i === points[points.length-1].i;
+      nodesHtml += '<g class="pl-node-group" data-roster="' + rosterId + '" transform="translate(' + p.x + ',' + p.y + ')" style="color:' + color + ';">' +
+        '<title>' + t.team + ' — #' + series[p.i] + '</title>' +
+        '<circle class="pl-node-ring" r="' + nodeR + '" style="stroke:' + color + ';"></circle>' +
+        '<image href="' + (t.avatar||'') + '" x="' + (-(nodeR-2)) + '" y="' + (-(nodeR-2)) + '" width="' + (nodeR-2)*2 + '" height="' + (nodeR-2)*2 + '" clip-path="url(#' + clipId + ')" preserveAspectRatio="xMidYMid slice"></image>' +
+        (isLast ? '<circle r="3" fill="' + color + '" cx="' + (nodeR-2) + '" cy="' + (-(nodeR-2)) + '"></circle>' : '') +
+      '</g>';
+    });
+  });
+
+  const legendHtml = allRosterIds.map(function(rosterId){
+    const t = teamsByRoster[rosterId];
+    if(!t) return "";
+    const color = plColorForRoster(rosterId, allRosterIds);
+    return '<div class="plchart-pill" data-roster="' + rosterId + '" style="border-color:' + color + '66;">' +
+      '<img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+      '<span>' + t.team + '</span></div>';
+  }).join("");
+
+  grid.innerHTML =
+    '<div class="plchart-body">' +
+      '<div class="plchart-wrap">' +
+        '<div class="plchart-ranks" style="padding-top:' + headH + 'px;">' + ranksHtml + '</div>' +
+        '<div class="plchart-scroll"><div class="plchart-inner" style="width:' + svgW + 'px;">' +
+          '<div class="plchart-weekrow" style="position:relative; height:' + headH + 'px;">' + weekHtml + '</div>' +
+          '<svg class="plchart-svg" width="' + svgW + '" height="' + svgH + '" viewBox="0 0 ' + svgW + ' ' + svgH + '">' +
+            '<defs><clipPath id="plRevealClip"><rect id="plRevealRect" x="0" y="-30" width="' + svgW + '" height="' + (svgH+60) + '"></rect></clipPath></defs>' +
+            gridlinesHtml +
+            '<g clip-path="url(#plRevealClip)">' + linesHtml + nodesHtml + '</g>' +
+          '</svg>' +
+        '</div></div>' +
+      '</div>' +
+      '<div class="plchart-controls">' +
+        '<button class="plchart-play" id="plPlayBtn" aria-label="Play trajectory" type="button">&#9654;</button>' +
+        '<div class="plchart-scrubwrap">' +
+          '<input type="range" class="plchart-scrub" id="plScrub" min="0" max="' + (numCols-1) + '" value="' + (numCols-1) + '" step="1">' +
+          '<span class="plchart-scrub-handle">\u{1F3C8}</span>' +
+        '</div>' +
+        '<span class="plchart-scrub-label"></span>' +
+      '</div>' +
+      '<div class="plchart-legend">' + legendHtml + '</div>' +
+      '<p class="plchart-hint">Drag the football to rewind the chart week by week, or click a team name to trace just their line. Hover any name or dot for their full Power Score breakdown.</p>' +
+    '</div>';
+
+  PL_STATE = {finalScores: finalScores, scoreByRoster: scoreByRoster, linesData: linesData, traced: null, playing: false, playTimer: null};
+
+  grid.querySelectorAll(".pl-node-group, .plchart-pill").forEach(function(el){
+    el.addEventListener("mouseenter", function(){
+      plShowTooltip(el.getAttribute("data-roster"), el.getBoundingClientRect());
+    });
+    el.addEventListener("mouseleave", plHideTooltip);
+    el.addEventListener("click", function(){
+      plSetTraced(el.getAttribute("data-roster"));
+    });
+  });
+
+  const scrubInput = grid.querySelector("#plScrub");
+  const playBtn = grid.querySelector("#plPlayBtn");
+
+  function stopPlaying(){
+    if(PL_STATE.playTimer){ clearInterval(PL_STATE.playTimer); PL_STATE.playTimer = null; }
+    PL_STATE.playing = false;
+    if(playBtn) playBtn.innerHTML = "&#9654;";
+  }
+
+  scrubInput.addEventListener("input", function(){
+    stopPlaying();
+    plUpdateScrubVisual(parseInt(scrubInput.value, 10), numCols, colW, padX, nodeR);
+  });
+
+  playBtn.addEventListener("click", function(){
+    if(PL_STATE.playing){ stopPlaying(); return; }
+    PL_STATE.playing = true;
+    playBtn.innerHTML = "&#10074;&#10074;";
+    let idx = parseInt(scrubInput.value, 10);
+    if(idx >= numCols-1) idx = 0;
+    plUpdateScrubVisual(idx, numCols, colW, padX, nodeR);
+    PL_STATE.playTimer = setInterval(function(){
+      idx++;
+      if(idx > numCols-1){ stopPlaying(); return; }
+      plUpdateScrubVisual(idx, numCols, colW, padX, nodeR);
+      if(idx === numCols-1) stopPlaying();
+    }, 850);
+  });
+
+  plUpdateScrubVisual(numCols-1, numCols, colW, padX, nodeR);
+}
+
 const POWER_WEIGHTS = {production:0.30, roster:0.25, dynasty:0.20, draft:0.10, recent:0.10, record:0.05};
 
 function computePowerRankings(){
@@ -3429,95 +3917,12 @@ function computePowerRankings(){
   maybeComputeGameOfWeek();
 
   const asOfWeek = prAndRecent.asOfWeek;
-  const order = finalScores.map(function(f){ return f.team.rosterId; });
 
-  if(asOfWeek === 0){
-    status.textContent = "Preseason power rankings \u2014 based on roster strength, dynasty value, and draft capital only until Week 1 wraps up.";
-    renderPowerRankings(finalScores, {});
-    return;
-  }
+  status.textContent = asOfWeek === 0
+    ? "Preseason power lines \u2014 based on roster strength, dynasty value, and draft capital only until Week 1 wraps up."
+    : "Through Week " + asOfWeek + " \u2014 updates automatically as new weeks are played.";
 
-  safeStorageGet("power_rankings_wk" + (asOfWeek - 1), true).then(function(res){
-    let prevOrder = [];
-    try{ if(res && res.value) prevOrder = JSON.parse(res.value); }catch(e){}
-    const movement = {};
-    order.forEach(function(rid, i){
-      const prevIdx = prevOrder.indexOf(rid);
-      movement[rid] = prevIdx === -1 ? null : (prevIdx - i);
-    });
-    status.textContent = "Through Week " + asOfWeek + " \u2014 updates automatically as new weeks are played.";
-    renderPowerRankings(finalScores, movement);
-  }).catch(function(){
-    status.textContent = "Through Week " + asOfWeek + " \u2014 updates automatically as new weeks are played.";
-    renderPowerRankings(finalScores, {});
-  });
-
-  safeStorageSet("power_rankings_wk" + asOfWeek, JSON.stringify(order), true).catch(function(){});
-}
-
-function renderPowerRankings(finalScores, movement){
-  const grid = document.getElementById("powerGrid");
-  document.getElementById("powerMethodNote").style.display = "block";
-
-  const catLabels = {
-    production:["Current Production","30%"], roster:["Roster Strength","25%"], dynasty:["Dynasty Value","20%"],
-    draft:["Draft Capital","10%"], recent:["Recent Performance","10%"], record:["Record","5%"]
-  };
-  const trendHtml = {
-    up: '<span class="trend-arrow trend-up">\u2191</span>',
-    flat: '<span class="trend-arrow trend-flat">\u2192</span>',
-    down: '<span class="trend-arrow trend-down">\u2193</span>'
-  };
-  const trendLabel = {up:"Rising", flat:"Steady", down:"Falling"};
-
-  const rows = finalScores.map(function(f, i){
-    const t = f.team;
-    const mv = movement[t.rosterId];
-    const mvHtml = mv === null || mv === undefined ? '<span class="power-move flat">NEW</span>'
-      : mv > 0 ? '<span class="power-move up">\u25B2' + mv + '</span>'
-      : mv < 0 ? '<span class="power-move down">\u25BC' + Math.abs(mv) + '</span>'
-      : '<span class="power-move flat">\u2013</span>';
-
-    const breakdownRows = Object.keys(catLabels).map(function(key){
-      const val = f.cats[key];
-      return '<div class="power-cat-row">' +
-        '<div class="power-cat-label">' + catLabels[key][0] + ' (' + catLabels[key][1] + ')</div>' +
-        '<div class="power-cat-bar-wrap"><div class="power-cat-bar" style="width:' + Math.max(0,Math.min(100,val)).toFixed(0) + '%"></div></div>' +
-        '<div class="power-cat-val">' + val.toFixed(0) + '</div>' +
-      '</div>';
-    }).join("");
-
-    const rec = t.wins + "-" + t.losses + (t.ties ? ("-"+t.ties) : "");
-
-    return '<tr class="power-row" data-idx="' + i + '">' +
-        '<td class="power-rank">' + (i+1) + '<div>' + mvHtml + '</div></td>' +
-        '<td><div class="power-team"><img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/><span class="power-team-name">' + t.team + '</span><span class="power-chevron">&#9660;</span></div></td>' +
-        '<td class="power-score">' + f.score.toFixed(1) + '</td>' +
-        '<td>' + rec + '</td>' +
-        '<td>' + (f.pfRank || "\u2013") + '</td>' +
-        '<td>' + (f.maxPfRank || "\u2013") + '</td>' +
-        '<td>' + f.cats.roster.toFixed(0) + '</td>' +
-        '<td>' + f.cats.draft.toFixed(0) + '</td>' +
-        '<td>' + trendHtml[f.trend] + '</td>' +
-      '</tr>' +
-      '<tr class="power-breakdown-row"><td colspan="9"><div class="power-breakdown">' +
-        '<div class="power-cat-row"><div class="power-cat-label">Trajectory</div><div style="flex:1; font-size:12px; color:var(--chalk-dim);">' + trendLabel[f.trend] + ' \u2014 blends recent scoring trend, roster youth, and future draft capital.</div></div>' +
-        breakdownRows +
-      '</div></td></tr>';
-  }).join("");
-
-  grid.innerHTML =
-    '<div class="power-table-scroll"><table class="power-table">' +
-      '<thead><tr><th>Rank</th><th>Team</th><th>Score</th><th>Record</th><th>PF Rank</th><th>Max PF Rank</th><th>Roster</th><th>Picks</th><th>Trend</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody>' +
-    '</table></div>';
-
-  grid.querySelectorAll(".power-row").forEach(function(row){
-    row.addEventListener("click", function(){
-      row.classList.toggle("expanded");
-      row.nextElementSibling.classList.toggle("open");
-    });
-  });
+  renderPowerLines(finalScores, buildPowerLinesData());
 }
 
 function safeStorageGet(key, shared){
