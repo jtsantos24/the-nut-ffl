@@ -61,39 +61,64 @@
   ::-webkit-scrollbar-thumb:hover{background:var(--gold-dark);}
   :focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:3px;}
 
-  /* ---------- LIVE TICKER ---------- */
+  /* ---------- LIVE TICKER (SportsCenter bottom-line style) ---------- */
   .ticker-bar{
     position:sticky; top:0; z-index:60; height:var(--ticker-h);
     background:#000000; border-bottom:1px solid var(--line);
-    display:flex; align-items:center; overflow:hidden;
+    display:flex; align-items:stretch; overflow:hidden;
   }
-  .ticker-bar::before{
+  .ticker-flag{
+    flex-shrink:0; display:flex; align-items:center; gap:6px;
+    padding:0 20px 0 14px; position:relative; z-index:3;
+    background:linear-gradient(135deg, #ED2939, #8C0F22);
+    clip-path:polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+    font-family:'Teko', sans-serif; font-size:15px; font-weight:700; letter-spacing:1.2px;
+    color:#fff; text-transform:uppercase; white-space:nowrap;
+    box-shadow:2px 0 10px -2px rgba(0,0,0,0.6);
+  }
+  .ticker-flag-dot{width:6px; height:6px; border-radius:50%; background:#fff; flex-shrink:0; animation:tickerPulse 1.4s ease-in-out infinite;}
+  @keyframes tickerPulse{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+  .ticker-scroll-wrap{flex:1; min-width:0; position:relative; overflow:hidden;}
+  .ticker-scroll-wrap::before{
     content:''; position:absolute; inset:0; z-index:2; pointer-events:none;
-    background:linear-gradient(90deg, #000 0%, transparent 5%, transparent 95%, #000 100%);
+    background:linear-gradient(90deg, #000 0%, transparent 4%, transparent 96%, #000 100%);
   }
   .ticker-track{
-    display:inline-flex; align-items:center; white-space:nowrap; will-change:transform;
+    display:inline-flex; align-items:center; height:100%; white-space:nowrap; will-change:transform;
   }
   .ticker-bar:hover .ticker-track{animation-play-state:paused;}
   @keyframes tickerScroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
   .ticker-item{
-    display:inline-flex; align-items:center; gap:6px; padding:0 4px;
-    font-size:12px; font-weight:600; letter-spacing:0.2px; color:var(--chalk);
+    display:inline-flex; align-items:center; gap:8px; height:100%; padding:0 18px;
+    font-size:12px; font-weight:700; letter-spacing:0.2px; color:var(--chalk);
+    text-transform:uppercase; border-right:1px solid rgba(255,255,255,0.14);
   }
-  .ticker-sep{color:var(--chalk-faint); opacity:0.4; padding:0 14px;}
-  .ticker-tag-trade{color:var(--teal);}
-  .ticker-tag-add{color:var(--green);}
-  .ticker-tag-drop{color:var(--red);}
-  .ticker-tag-news{color:var(--chalk-dim);}
-  .ticker-tag-nfltrade{color:var(--gold-bright);}
-  .ticker-tag-score{color:var(--gold);}
-  .ticker-tag-empty{color:var(--chalk-faint); font-style:italic; padding:0 16px; font-weight:400;}
+  .ticker-sep{display:none;}
+  .tk-badge{
+    display:inline-block; flex-shrink:0; font-family:'Inter', sans-serif; font-size:9px; font-weight:800;
+    letter-spacing:0.6px; padding:3px 6px; border-radius:3px; line-height:1;
+  }
+  .tk-badge-trade{background:var(--teal-dark); color:#DFFBF6;}
+  .tk-badge-add{background:#0F3D2E; color:var(--green);}
+  .tk-badge-drop{background:var(--red-soft); color:var(--red);}
+  .tk-badge-news{background:var(--surface-3); color:var(--chalk-dim);}
+  .tk-badge-nfltrade{background:var(--gold-soft); color:var(--gold-bright);}
+  .tk-score-bug{display:inline-flex; align-items:center; gap:6px;}
+  .tk-score-bug .tk-team{font-family:'Teko', sans-serif; font-size:16px; font-weight:700; color:var(--chalk); letter-spacing:0.5px;}
+  .tk-score-bug .tk-num{font-family:'Teko', sans-serif; font-size:17px; font-weight:700; color:var(--gold-bright); min-width:14px; text-align:center;}
+  .tk-score-bug .tk-status{
+    font-family:'Inter', sans-serif; font-size:9px; font-weight:800; letter-spacing:0.5px;
+    padding:3px 6px; border-radius:3px; background:var(--surface-3); color:var(--chalk-dim); white-space:nowrap;
+  }
+  .tk-score-bug .tk-status.tk-status-live{background:#B3102A; color:#fff; animation:tickerPulse 1.4s ease-in-out infinite;}
+  .ticker-tag-empty{color:var(--chalk-faint); font-style:italic; padding:0 16px; font-weight:400; text-transform:none;}
   @media (max-width:640px){
-    .ticker-item{font-size:11px;}
+    .ticker-item{font-size:11px; padding:0 12px;}
+    .ticker-flag{font-size:12px; padding:0 14px 0 10px;}
   }
   @media (prefers-reduced-motion: reduce){
     .ticker-track{animation:none !important;}
-    .ticker-bar{overflow-x:auto;}
+    .ticker-scroll-wrap{overflow-x:auto;}
   }
 
   /* ---------- NAV ---------- */
@@ -863,8 +888,11 @@
 <body>
 
 <div class="ticker-bar" id="tickerBar" role="marquee" aria-label="Live league and NFL news ticker">
-  <div class="ticker-track" id="tickerTrack">
-    <span class="ticker-item ticker-tag-empty">Loading live ticker&hellip;</span>
+  <div class="ticker-flag"><span class="ticker-flag-dot"></span>Live</div>
+  <div class="ticker-scroll-wrap">
+    <div class="ticker-track" id="tickerTrack">
+      <span class="ticker-item ticker-tag-empty">Loading live ticker&hellip;</span>
+    </div>
   </div>
 </div>
 
@@ -4288,20 +4316,20 @@ function buildLeagueTickerItems(tx){
       const got = received[rid];
       return rosterTeamName(rid) + (got.length ? " get " + got.join(", ") : "");
     });
-    items.push({cat:"trade", html:"🔁 LEAGUE TRADE: " + parts.join("  ⇄  "), ts: ts});
+    items.push({cat:"trade", html:'<span class="tk-badge tk-badge-trade">Trade</span>' + parts.join("  ⇄  "), ts: ts});
   } else if(tx.type === "waiver" || tx.type === "free_agent"){
     if(tx.adds){
       Object.keys(tx.adds).forEach(function(pid){
         const lbl = tickerPlayerLabel(pid);
         if(!lbl) return;
-        items.push({cat:"add", html:"➕ " + rosterTeamName(tx.adds[pid]) + " added " + lbl, ts: ts});
+        items.push({cat:"add", html:'<span class="tk-badge tk-badge-add">Add</span>' + rosterTeamName(tx.adds[pid]) + " signs " + lbl, ts: ts});
       });
     }
     if(tx.drops){
       Object.keys(tx.drops).forEach(function(pid){
         const lbl = tickerPlayerLabel(pid);
         if(!lbl) return;
-        items.push({cat:"drop", html:"➖ " + rosterTeamName(tx.drops[pid]) + " dropped " + lbl, ts: ts});
+        items.push({cat:"drop", html:'<span class="tk-badge tk-badge-drop">Cut</span>' + rosterTeamName(tx.drops[pid]) + " drops " + lbl, ts: ts});
       });
     }
   }
@@ -4354,12 +4382,17 @@ function loadNflTickerData(){
           if(!home || !away) return;
           const state = ev.status && ev.status.type && ev.status.type.state;
           const detail = (ev.status && ev.status.type && ev.status.type.shortDetail) || "";
-          const tag = state === "in" ? "🔴 LIVE" : (state === "post" ? "FINAL" : detail || "UPCOMING");
+          const isLive = state === "in";
+          const statusLabel = isLive ? (detail || "Live") : (state === "post" ? "Final" : (detail || "Upcoming"));
           const awayName = (away.team && (away.team.abbreviation || away.team.shortDisplayName)) || "Away";
           const homeName = (home.team && (home.team.abbreviation || home.team.shortDisplayName)) || "Home";
           items.push({
             cat:"score",
-            html: tag + ": " + awayName + " " + (away.score||"0") + " &ndash; " + homeName + " " + (home.score||"0"),
+            html: '<span class="tk-score-bug">' +
+              '<span class="tk-team">' + awayName + '</span><span class="tk-num">' + (away.score||"0") + '</span>' +
+              '<span class="tk-status' + (isLive ? ' tk-status-live' : '') + '">' + statusLabel + '</span>' +
+              '<span class="tk-num">' + (home.score||"0") + '</span><span class="tk-team">' + homeName + '</span>' +
+            '</span>',
             ts: Date.now()
           });
         } catch(e){ /* skip malformed event */ }
@@ -4372,7 +4405,8 @@ function loadNflTickerData(){
         const isTrade = /trade/i.test(a.headline);
         items.push({
           cat: isTrade ? "nfltrade" : "news",
-          html: (isTrade ? "🔁 NFL TRADE" : "🏈 NFL") + ": " + a.headline,
+          html: '<span class="tk-badge ' + (isTrade ? "tk-badge-nfltrade" : "tk-badge-news") + '">' +
+            (isTrade ? "NFL Trade" : "NFL") + '</span>' + a.headline,
           ts: a.published ? new Date(a.published).getTime() : Date.now()
         });
       });
@@ -4400,7 +4434,7 @@ function renderTicker(){
 
   all.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
   const html = all.map(function(it){
-    return '<span class="ticker-item ticker-tag-' + it.cat + '">' + it.html + '</span><span class="ticker-sep">&bull;</span>';
+    return '<span class="ticker-item ticker-tag-' + it.cat + '">' + it.html + '</span>';
   }).join("");
   // Duplicate the content back-to-back so translateX(-50%) loops seamlessly into
   // what looks like the same feed continuing, instead of snapping/jumping.
