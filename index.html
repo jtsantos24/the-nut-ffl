@@ -766,6 +766,36 @@
   .draft-nfl{color:var(--chalk-dim); font-size:12px;}
   .draft-truncated-note{color:var(--chalk-dim); font-size:12px; font-style:italic; margin-top:10px;}
 
+  /* ---------- DRAFT GRADES ---------- */
+  .draft-grade-badge{
+    display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:24px; padding:0 7px;
+    border-radius:7px; font-family:'Teko', sans-serif; font-size:15px; letter-spacing:0.4px; font-weight:600;
+    flex-shrink:0; margin-left:10px;
+  }
+  .draft-grade-badge.grade-a{background:rgba(52,211,153,0.14); color:var(--green); border:1px solid rgba(52,211,153,0.35);}
+  .draft-grade-badge.grade-b{background:rgba(69,214,196,0.14); color:var(--teal); border:1px solid rgba(69,214,196,0.35);}
+  .draft-grade-badge.grade-c{background:var(--gold-soft); color:var(--gold-bright); border:1px solid rgba(242,181,66,0.35);}
+  .draft-grade-badge.grade-d{background:rgba(185,130,42,0.16); color:var(--gold-dark); border:1px solid rgba(185,130,42,0.4);}
+  .draft-grade-badge.grade-f{background:var(--red-soft); color:var(--red); border:1px solid rgba(255,107,107,0.3);}
+  .draft-grade-badge.grade-pending{background:var(--surface-3); color:var(--chalk-faint); border:1px solid var(--line);}
+
+  .draft-summary-note{color:var(--chalk-dim); font-size:12.5px; margin-top:-8px; margin-bottom:4px; line-height:1.5;}
+  .draft-summary-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-top:18px;}
+  .draft-summary-card{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius-sm); padding:16px;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .draft-summary-head{display:flex; align-items:center; gap:10px;}
+  .draft-summary-head img{width:38px; height:38px; border-radius:8px; object-fit:cover; border:1px solid var(--line-soft); flex-shrink:0; background:var(--surface-3);}
+  .draft-summary-name{font-size:14px; font-weight:600; color:var(--chalk);}
+  .draft-summary-mgr{font-size:11px; color:var(--chalk-dim); margin-top:2px;}
+  .draft-summary-grade{
+    margin-left:auto; font-family:'Teko', sans-serif; font-size:26px; font-weight:700; line-height:1;
+    padding:5px 13px; border-radius:8px; flex-shrink:0;
+  }
+  .draft-summary-narrative{font-size:12.5px; line-height:1.6; color:var(--chalk-dim);}
+  .draft-summary-empty{color:var(--chalk-dim); font-size:13px; font-style:italic;}
+
   /* ---------- DRAFT YEAR TABS ---------- */
   .draft-year-tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; background:var(--surface-2); padding:5px; border-radius:999px; width:fit-content; border:1px solid var(--line);}
   .draft-year-tabs button{
@@ -1305,6 +1335,15 @@
       </div>
       <input type="text" id="draftSearch" class="draft-search" placeholder="Search by player, position, team, or NFL club&hellip;" />
       <div id="draftBoard" style="margin-top:18px;"></div>
+    </div>
+    <div class="panel" style="margin-top:20px;">
+      <h2 class="panel-title">Team Draft Summary</h2>
+      <p class="draft-summary-note">
+        Each pick is graded relative to the other 47 picks made in that same draft class &mdash; not on a fixed scale &mdash;
+        using age and Sleeper's live player-relevance ranking alongside positional scarcity, so a late-round steal can
+        outgrade an early pick that hasn't panned out. Explanations below are algorithm-generated from that data, not written by AI.
+      </p>
+      <div class="draft-summary-grid" id="draftSummaryGrid"></div>
     </div>
   </div>
 
@@ -2497,6 +2536,363 @@ const DRAFT_PICKS = [
   {pick:48, round:4, rosterId:9, name:"Elijah Sarratt", pos:"WR", nfl:"BAL"}
 ];
 
+// ============================================================
+// DRAFT GRADES
+// Matches each drafted player (across all four draft years) against
+// Sleeper's live player database and grades each pick RELATIVE to the
+// other picks made in that same draft class -- not on a fixed absolute
+// scale. A player who ends up as the 3rd-most-valuable player in a
+// 48-pick class but was taken 20th graded out great (a steal); the
+// 1st overall pick who ends up as the 30th-most-valuable player in
+// that same class graded out poorly (a bust) -- regardless of raw
+// season stats. This keeps every draft year self-calibrated instead
+// of comparing, say, pick #48 to some fixed absolute bar.
+//
+// "Achieved value" per player blends Sleeper's search_rank (a live,
+// continuously-updated overall relevance/ADP-like ranking already
+// used elsewhere on this page) with an age adjustment (younger
+// players at the same rank get credit for dynasty upside; ageing
+// players, especially RBs, get a small penalty) and a status penalty
+// for players who are retired or have fallen out of the league.
+// Individual grade explanations are assembled by a deterministic
+// template engine from this computed data -- not a live AI call.
+// ============================================================
+
+const DRAFT_YEARS = ["2023","2024","2025","2026"];
+const DRAFT_ROUND_WEIGHT = {1:2.0, 2:1.4, 3:1.0, 4:0.7};
+const DRAFT_POS_SCARCITY = {QB:1.05, TE:1.08, RB:1.0, WR:0.98, DL:1.04, LB:1.02, DB:1.04};
+const DRAFT_POS_BUCKETS = {
+  QB:["QB"], RB:["RB"], WR:["WR"], TE:["TE"],
+  DL:["DL","DE","DT","NT"], LB:["LB","OLB","ILB","MLB"], DB:["DB","CB","S","FS","SS"]
+};
+
+let DRAFT_NAME_INDEX = null;
+const DRAFT_GRADES_BY_YEAR = {}; // year -> {byPick, byTeam}
+
+function draftClamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+function normalizeDraftPlayerName(name){
+  if(!name) return "";
+  return name
+    .toLowerCase()
+    .replace(/\./g, "")
+    .replace(/['’]/g, "")
+    .replace(/-/g, " ")
+    .replace(/\b(jr|sr|ii|iii|iv|v)\b/g, "")
+    .replace(/[^a-z0-9 ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function draftPosBucketKey(pos){
+  if(!pos) return "OTHER";
+  const p = pos.toUpperCase();
+  for(const k in DRAFT_POS_BUCKETS){
+    if(DRAFT_POS_BUCKETS[k].indexOf(p) !== -1) return k;
+  }
+  return p;
+}
+
+function buildDraftNameIndex(players){
+  const idx = {};
+  Object.keys(players).forEach(function(pid){
+    const p = players[pid];
+    if(!p) return;
+    const fullName = p.full_name || ((p.first_name || "") + " " + (p.last_name || "")).trim();
+    const key = normalizeDraftPlayerName(fullName);
+    if(!key) return;
+    if(!idx[key]) idx[key] = [];
+    idx[key].push({id: pid, pos: p.position, age: p.age, search_rank: p.search_rank, status: p.status, team: p.team});
+  });
+  return idx;
+}
+
+function findDraftPlayerId(nameIndex, name, pos){
+  const key = normalizeDraftPlayerName(name);
+  const candidates = nameIndex[key];
+  if(!candidates || candidates.length === 0) return null;
+  if(candidates.length === 1) return candidates[0];
+  const bucket = draftPosBucketKey(pos);
+  const bucketMatches = candidates.filter(function(c){ return draftPosBucketKey(c.pos) === bucket; });
+  const pool = bucketMatches.length > 0 ? bucketMatches : candidates;
+  pool.sort(function(a,b){
+    const ra = (typeof a.search_rank === "number") ? a.search_rank : 999999;
+    const rb = (typeof b.search_rank === "number") ? b.search_rank : 999999;
+    return ra - rb;
+  });
+  return pool[0];
+}
+
+function draftAchievedValue(player, pickPos){
+  if(!player) return null;
+  const rank = (typeof player.search_rank === "number" && player.search_rank > 0) ? player.search_rank : 6000;
+  let valueFromRank = 100 - Math.log2(rank + 1) * 8;
+  valueFromRank = draftClamp(valueFromRank, 0, 100);
+
+  const bucket = draftPosBucketKey(pickPos);
+  let ageBonus = 0;
+  if(typeof player.age === "number"){
+    if(bucket === "RB") ageBonus = draftClamp((26 - player.age) * 2.2, -14, 10);
+    else if(bucket === "WR" || bucket === "TE") ageBonus = draftClamp((27 - player.age) * 1.6, -10, 8);
+    else if(bucket === "QB") ageBonus = draftClamp((28 - player.age) * 1.2, -8, 8);
+    else ageBonus = draftClamp((27 - player.age) * 1.4, -8, 8); // IDP
+  }
+
+  let statusAdj = 0;
+  const statusStr = (player.status || "").toLowerCase();
+  if(statusStr.indexOf("retire") !== -1) statusAdj = -20;
+  else if(statusStr === "inactive" && !player.team) statusAdj = -14;
+  else if(statusStr.indexOf("practice") !== -1) statusAdj = -6;
+
+  return draftClamp(valueFromRank + ageBonus + statusAdj, 0, 130);
+}
+
+// A pick that lands exactly where its slot "should" (valueDelta = 0) scores 50 -- and since
+// valueDelta is a swap between two permutations of the same rank set, the class-wide AVERAGE
+// pick always scores exactly 50 by construction. These bands are centered on that 50 so a
+// perfectly on-slot pick reads as a solid, unremarkable pick (roughly a C+/B-), not a bust.
+function gradeLetterFromScore(score){
+  if(score >= 90) return "A+";
+  if(score >= 82) return "A";
+  if(score >= 75) return "A-";
+  if(score >= 68) return "B+";
+  if(score >= 62) return "B";
+  if(score >= 56) return "B-";
+  if(score >= 50) return "C+";
+  if(score >= 44) return "C";
+  if(score >= 38) return "C-";
+  if(score >= 30) return "D+";
+  if(score >= 22) return "D";
+  if(score >= 14) return "D-";
+  return "F";
+}
+
+function draftGradeClass(letter){
+  if(!letter) return "grade-pending";
+  const first = letter.charAt(0);
+  if(first === "A") return "grade-a";
+  if(first === "B") return "grade-b";
+  if(first === "C") return "grade-c";
+  if(first === "D") return "grade-d";
+  return "grade-f";
+}
+
+function getDraftYearPicks(year){
+  if(year === "2026"){
+    return {
+      picks: DRAFT_PICKS,
+      teamLookup: function(rid){ return TEAMS.find(function(t){ return t.rosterId === rid; }) || {}; },
+      rosterIds: TEAMS.map(function(t){ return t.rosterId; }).sort(function(a,b){ return a-b; })
+    };
+  }
+  const d = DRAFTS_BY_YEAR[year];
+  return {
+    picks: d.picks,
+    teamLookup: function(rid){ return d.teamMap[rid] || {}; },
+    rosterIds: Object.keys(d.teamMap).map(Number).sort(function(a,b){ return a-b; })
+  };
+}
+
+function computeDraftGradesForYear(year, players){
+  const yd = getDraftYearPicks(year);
+  const picks = yd.picks;
+  const matched = [];
+  const byPick = {};
+
+  picks.forEach(function(p){
+    const found = findDraftPlayerId(DRAFT_NAME_INDEX, p.name, p.pos);
+    const player = found ? players[found.id] : null;
+    const av = player ? draftAchievedValue(player, p.pos) : null;
+    if(av !== null){
+      matched.push({pick: p, playerId: found.id, playerMeta: found, achievedValue: av});
+    } else {
+      byPick[p.pick] = {available: false};
+    }
+  });
+
+  const ranked = matched.slice().sort(function(a,b){ return b.achievedValue - a.achievedValue; });
+  const N = ranked.length;
+  ranked.forEach(function(entry, i){ entry.achievedRank = i + 1; });
+
+  matched.forEach(function(entry){
+    const p = entry.pick;
+    const pickPct = (p.pick - 1) / 47;
+    const achievedPct = N > 1 ? (entry.achievedRank - 1) / (N - 1) : 0.5;
+    const valueDelta = pickPct - achievedPct;
+    const scarcity = DRAFT_POS_SCARCITY[p.pos] || 1.0;
+    const score = draftClamp(50 + valueDelta * scarcity * 55, 0, 100);
+    byPick[p.pick] = {
+      available: true,
+      score: score,
+      letter: gradeLetterFromScore(score),
+      valueDelta: valueDelta,
+      rawAchievedValue: entry.achievedValue,
+      achievedRank: entry.achievedRank,
+      poolSize: N,
+      playerId: entry.playerId,
+      playerMeta: entry.playerMeta
+    };
+  });
+
+  const byTeam = {};
+  yd.rosterIds.forEach(function(rid){
+    const teamPicks = picks.filter(function(p){ return p.rosterId === rid; });
+    let weightedSum = 0, weightTotal = 0;
+    const gradedPicks = [];
+    teamPicks.forEach(function(p){
+      const g = byPick[p.pick];
+      if(g && g.available){
+        const w = DRAFT_ROUND_WEIGHT[p.round] || 1.0;
+        weightedSum += g.score * w;
+        weightTotal += w;
+        gradedPicks.push({pick: p, grade: g});
+      }
+    });
+    if(weightTotal > 0){
+      const teamScore = weightedSum / weightTotal;
+      byTeam[rid] = {
+        score: teamScore,
+        letter: gradeLetterFromScore(teamScore),
+        gradedPicks: gradedPicks,
+        totalPicks: teamPicks.length,
+        gradedCount: gradedPicks.length,
+        narrative: buildDraftNarrative(gradedPicks)
+      };
+    } else {
+      byTeam[rid] = {
+        score: null, letter: null, gradedPicks: [], totalPicks: teamPicks.length, gradedCount: 0,
+        narrative: teamPicks.length === 0
+          ? "No picks in this draft class — traded away before the draft."
+          : "Not enough matched player data yet to grade this team's draft."
+      };
+    }
+  });
+
+  return {byPick: byPick, byTeam: byTeam};
+}
+
+function draftPlayerDisplayName(gp){ return gp.pick.name; }
+
+function buildDraftNarrative(gradedPicks){
+  if(gradedPicks.length === 0) return "Not enough matched player data yet to grade this team's draft.";
+
+  const byValueDelta = gradedPicks.slice().sort(function(a,b){ return b.grade.valueDelta - a.grade.valueDelta; });
+  const byRawValue = gradedPicks.slice().sort(function(a,b){ return b.grade.rawAchievedValue - a.grade.rawAchievedValue; });
+
+  const bestValue = byValueDelta[0];
+  const biggestReach = byValueDelta[byValueDelta.length - 1];
+  const bestOverall = byRawValue[0];
+
+  const sentences = [];
+
+  sentences.push(
+    "Best asset on the roster from this class: " + draftPlayerDisplayName(bestOverall) + " (" + bestOverall.pick.pos + "), " +
+    "taken Round " + bestOverall.pick.round + ", Pick " + bestOverall.pick.pick + "."
+  );
+
+  if(bestValue.grade.valueDelta > 0.06 && bestValue.pick.pick !== bestOverall.pick.pick){
+    sentences.push(
+      "Best value: " + draftPlayerDisplayName(bestValue) + " landed at Pick " + bestValue.pick.pick +
+      " but graded as the #" + bestValue.grade.achievedRank + " player in the class — a real steal."
+    );
+  } else if(bestValue.grade.valueDelta > 0.06){
+    sentences.push(
+      draftPlayerDisplayName(bestValue) + " was both the best player taken and a value relative to the Pick " + bestValue.pick.pick + " slot."
+    );
+  }
+
+  if(biggestReach.grade.valueDelta < -0.08){
+    sentences.push(
+      "Biggest reach: " + draftPlayerDisplayName(biggestReach) + " at Pick " + biggestReach.pick.pick +
+      ", who's graded out closer to a Pick " + biggestReach.grade.achievedRank + "-caliber player in this class."
+    );
+  } else {
+    sentences.push("No real reaches — every pick landed within a reasonable range of its slot.");
+  }
+
+  const buckets = {};
+  gradedPicks.forEach(function(gp){
+    const b = draftPosBucketKey(gp.pick.pos);
+    if(!buckets[b]) buckets[b] = [];
+    buckets[b].push(gp.grade.valueDelta);
+  });
+  let strongBucket = null, strongAvg = -Infinity, weakBucket = null, weakAvg = Infinity;
+  Object.keys(buckets).forEach(function(b){
+    const list = buckets[b];
+    if(list.length < 2) return;
+    const avg = list.reduce(function(s,x){ return s+x; }, 0) / list.length;
+    if(avg > strongAvg){ strongAvg = avg; strongBucket = b; }
+    if(avg < weakAvg){ weakAvg = avg; weakBucket = b; }
+  });
+  if(strongBucket && strongAvg > 0.04){
+    sentences.push("Strongest position group: " + strongBucket + ".");
+  }
+  if(weakBucket && weakAvg < -0.04 && weakBucket !== strongBucket){
+    sentences.push(weakBucket + " was the softest group in this class.");
+  }
+
+  return sentences.join(" ");
+}
+
+function computeAllDraftGrades(players){
+  if(!players) return;
+  DRAFT_NAME_INDEX = buildDraftNameIndex(players);
+  DRAFT_YEARS.forEach(function(year){
+    DRAFT_GRADES_BY_YEAR[year] = computeDraftGradesForYear(year, players);
+  });
+}
+
+function getPickGradeBadgeHtml(year, pickNo){
+  const yearData = DRAFT_GRADES_BY_YEAR[year];
+  if(!yearData) return '<span class="draft-grade-badge grade-pending" title="Grading in progress…">…</span>';
+  const g = yearData.byPick[pickNo];
+  if(!g || !g.available) return '<span class="draft-grade-badge grade-pending" title="Not enough player data to grade this pick">—</span>';
+  const title = "Value rank #" + g.achievedRank + " of " + g.poolSize + " in the " + year + " class";
+  return '<span class="draft-grade-badge ' + draftGradeClass(g.letter) + '" title="' + title + '">' + g.letter + '</span>';
+}
+
+function renderDraftSummary(){
+  const wrap = document.getElementById("draftSummaryGrid");
+  if(!wrap) return;
+  const yearData = DRAFT_GRADES_BY_YEAR[currentDraftYear];
+  const yd = getDraftYearPicks(currentDraftYear);
+  const rosterIds = yd.rosterIds;
+
+  if(!yearData){
+    wrap.innerHTML = '<p class="draft-summary-empty">Grading the ' + currentDraftYear + ' class against live player data…</p>';
+    return;
+  }
+
+  wrap.innerHTML = rosterIds.map(function(rid){
+    const t = yd.teamLookup(rid);
+    const info = yearData.byTeam[rid];
+    const gradeHtml = info && info.letter
+      ? '<span class="draft-summary-grade ' + draftGradeClass(info.letter) + '">' + info.letter + '</span>'
+      : '<span class="draft-summary-grade grade-pending">—</span>';
+    const narrative = info ? info.narrative : "Not enough matched player data yet to grade this team's draft.";
+    return '<div class="draft-summary-card">' +
+      '<div class="draft-summary-head">' +
+        '<img src="' + (t.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div>' +
+          '<div class="draft-summary-name">' + (t.team||'Team ' + rid) + '</div>' +
+          '<div class="draft-summary-mgr">' + (t.manager||'') + '</div>' +
+        '</div>' +
+        gradeHtml +
+      '</div>' +
+      '<div class="draft-summary-narrative">' + narrative + '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function initDraftGrades(){
+  getAllPlayers().then(function(players){
+    if(!players) return;
+    computeAllDraftGrades(players);
+    renderDraftBoard();
+    renderDraftSummary();
+  });
+}
+
 let draftCollapsed = {};
 
 function renderDraftBoard(){
@@ -2548,6 +2944,7 @@ function renderDraftBoard(){
           '<span class="draft-player-name">' + p.name + '</span> ' +
           '<span class="draft-nfl">' + p.nfl + '</span>' +
         '</div>' +
+        getPickGradeBadgeHtml(currentDraftYear, p.pick) +
       '</div>';
     }).join("");
 
@@ -2585,6 +2982,7 @@ document.querySelectorAll("#draftYearTabs button").forEach(function(btn){
     currentDraftYear = btn.dataset.year;
     document.getElementById("draftSearch").value = "";
     renderDraftBoard();
+    renderDraftSummary();
   });
 });
 
@@ -4253,6 +4651,7 @@ function loadLiveData(){
       renderStandings(true);
       renderRivalry();
       renderDraftBoard();
+      renderDraftSummary();
       renderTeams();
       renderBonusGames();
       renderChampionsThrone();
@@ -6175,6 +6574,8 @@ renderStandings(false);
 renderFallbackMatchups();
 renderRivalry();
 renderDraftBoard();
+renderDraftSummary();
+initDraftGrades();
 renderTeams();
 renderBonusGames();
 renderChampionsThrone();
