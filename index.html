@@ -5236,18 +5236,29 @@ function formatSpread(v){
   return (v > 0 ? "+" : "") + v.toFixed(1);
 }
 
-// Season points-per-game as the projection input for auto lines. Before a team has played
-// a game this season (early Week 1), falls back to their Power Score (0-100 composite,
-// mapped onto a rough 65-125 point range) so lines aren't just flat pick'ems in preseason;
-// if that's not available yet either, a neutral league-average default keeps things sane.
+// Season points-per-game as the projection input for auto lines, blended with each team's
+// Power Score (0-100 composite, mapped onto a rough 65-125 point range) rather than used raw.
+// Using the raw season average alone breaks badly early in the season: after just one game,
+// "average PPG" IS that one score, so the full gap between two teams' single-game totals was
+// being used as the actual point spread -- producing real lines like -71.5 or -99.5 in Week 2,
+// nowhere near a believable fantasy spread (that one big or bad week is variance, not a 70-100
+// point skill gap). The blend below weights the Power Score baseline heavily at first and lets
+// real performance take over gradually as more games accumulate -- by REGRESSION_GAMES games
+// in, the two are weighted evenly; it keeps mattering somewhat for the rest of the season too,
+// so one blowout week late in the year still can't swing a line as wildly as the raw average did.
+const FAAB_SPREAD_REGRESSION_GAMES = 3;
+const FAAB_SPREAD_MAX_MARGIN = 29.5; // hard safety cap regardless of the blend above -- already a half-point, so it can't reintroduce a whole-number line
+
 function teamAvgPPG(t){
   if(!t) return 105;
+  const powerEstimate = (POWER_SCORES && typeof POWER_SCORES[t.rosterId] === "number")
+    ? 95 + (POWER_SCORES[t.rosterId] - 50) * 0.6
+    : 105;
   const gp = (t.wins || 0) + (t.losses || 0) + (t.ties || 0);
-  if(gp > 0) return t.fpts / gp;
-  if(POWER_SCORES && typeof POWER_SCORES[t.rosterId] === "number"){
-    return 95 + (POWER_SCORES[t.rosterId] - 50) * 0.6;
-  }
-  return 105;
+  if(gp === 0) return powerEstimate;
+  const actualAvg = t.fpts / gp;
+  const weight = gp / (gp + FAAB_SPREAD_REGRESSION_GAMES);
+  return powerEstimate + (actualAvg - powerEstimate) * weight;
 }
 
 // Spreads are always keyed by the lower rosterId of the pair ("lo"), independent of which
@@ -5267,6 +5278,8 @@ function getMatchupSpread(week, pair){
   // Force every line to end in .5 -- half-point spreads by design so a push is structurally
   // impossible (an integer margin would otherwise occasionally tie a final score exactly).
   if(Math.abs(margin % 1) < 0.001) margin += (margin >= 0 ? 0.5 : -0.5);
+  if(margin > FAAB_SPREAD_MAX_MARGIN) margin = FAAB_SPREAD_MAX_MARGIN;
+  if(margin < -FAAB_SPREAD_MAX_MARGIN) margin = -FAAB_SPREAD_MAX_MARGIN;
   return {key: key, spreadLow: -margin, isOverride: false};
 }
 
