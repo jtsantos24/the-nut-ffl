@@ -558,6 +558,8 @@
   table.season-history td{padding:7px 8px; border-bottom:1px solid var(--line-soft);}
   table.season-history tr:last-child td{border-bottom:none;}
   .new-team-note{color:var(--chalk-dim); font-size:13px; font-style:italic;}
+  .bl-pos{color:var(--green); font-weight:600;}
+  .bl-neg{color:var(--red); font-weight:600;}
   .h2h-opp{display:flex; align-items:center; gap:8px;}
   .h2h-opp img{width:22px; height:22px; border-radius:5px; object-fit:cover;}
 
@@ -1460,6 +1462,7 @@
         <div class="alltime" id="tdPlayoffs"></div>
         <div class="alltime" id="tdHeadToHead"></div>
         <div class="alltime" id="tdTransactions"></div>
+        <div class="alltime" id="tdBettingLedger"></div>
       </div>
     </div>
   </div>
@@ -2954,6 +2957,79 @@ function renderTransactions(rosterId){
     '</div>';
 }
 
+// A per-team FAAB betting ledger for the Teams tab -- every wager that team has placed, week
+// by week, with its result and net FAAB effect. Reads straight from FAAB_WAGERS (the same
+// live data source the Bonus Games betting panel uses), so it reflects whatever this browser
+// currently knows: the full shared ledger in Firebase mode, or just this browser's own bets
+// in local mode -- called out explicitly below so it's never mistaken for the other.
+function renderBettingLedger(ownerId){
+  const el = document.getElementById("tdBettingLedger");
+  if(!el) return;
+  if(FAAB_FIREBASE_ENABLED === null){
+    el.innerHTML = '<div class="alltime-title">FAAB betting ledger</div>' +
+      '<div class="new-team-note">Loading betting activity&hellip;</div>';
+    return;
+  }
+  const scopeNote = FAAB_FIREBASE_ENABLED
+    ? "Shared league-wide ledger."
+    : "Local to this browser only -- bets placed on other devices won't show up here.";
+
+  const mine = FAAB_WAGERS.filter(function(w){ return w.ownerId === ownerId; })
+    .slice().sort(function(a, b){ return (b.week - a.week) || (new Date(b.placedAt) - new Date(a.placedAt)); });
+
+  if(mine.length === 0){
+    el.innerHTML = '<div class="alltime-title">FAAB betting ledger</div>' +
+      '<p class="panel-sub" style="margin:-4px 0 12px;">' + scopeNote + '</p>' +
+      '<div class="new-team-note">No FAAB bets placed yet.</div>';
+    return;
+  }
+
+  let wins = 0, losses = 0, pending = 0, net = 0;
+  mine.forEach(function(w){
+    if(w.status === "won"){ wins++; net += (w.potentialPayout - w.amount); }
+    else if(w.status === "lost"){ losses++; net -= w.amount; }
+    else pending++;
+  });
+  const netTotalLabel = (net > 0 ? "+" : "") + net;
+  const netTotalClass = net > 0 ? "bl-pos" : (net < 0 ? "bl-neg" : "");
+
+  const rows = mine.map(function(w){
+    const rowNet = w.status === "won" ? (w.potentialPayout - w.amount) : (w.status === "lost" ? -w.amount : null);
+    const rowLabel = rowNet === null ? "&mdash;" : ((rowNet > 0 ? "+" : "") + rowNet);
+    const rowClass = rowNet === null ? "" : (rowNet > 0 ? "bl-pos" : "bl-neg");
+    return '<tr>' +
+      '<td>Wk ' + w.week + '</td>' +
+      '<td>' + throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread) + '</td>' +
+      '<td>' + throneEscAttr(w.oppTeamName) + '</td>' +
+      '<td>' + w.amount + '</td>' +
+      '<td><span class="betting-status-badge ' + w.status + '">' + w.status + '</span></td>' +
+      '<td class="' + rowClass + '">' + rowLabel + '</td>' +
+    '</tr>';
+  }).join("");
+
+  el.innerHTML =
+    '<div class="alltime-title">FAAB betting ledger</div>' +
+    '<p class="panel-sub" style="margin:-4px 0 12px;">' + scopeNote + '</p>' +
+    '<div class="alltime-summary">' +
+      '<div><div class="num">' + mine.length + '</div><div class="lbl">Bets placed</div></div>' +
+      '<div><div class="num">' + wins + '-' + losses + '</div><div class="lbl">Won-Lost</div></div>' +
+      '<div><div class="num">' + pending + '</div><div class="lbl">Pending</div></div>' +
+      '<div><div class="num ' + netTotalClass + '">' + netTotalLabel + '</div><div class="lbl">Net FAAB</div></div>' +
+    '</div>' +
+    '<table class="season-history"><thead><tr><th>Week</th><th>Pick</th><th>Opponent</th><th>Wager</th><th>Result</th><th>Net</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+// Keeps an already-open team page's ledger current when FAAB_WAGERS changes underneath it
+// (a settlement running, or -- in Firebase mode -- another visitor's bet arriving live),
+// the same pattern loadTransactionStats() already uses to refresh tdTransactions in place.
+function refreshBettingLedgerIfShowing(){
+  const detail = document.getElementById("teamDetail");
+  if(!detail || !detail.classList.contains("active")) return;
+  const name = document.getElementById("tdName").textContent;
+  const t = TEAMS.find(function(x){ return x.team === name; });
+  if(t) renderBettingLedger(t.ownerId);
+}
+
 // ---------- DYNASTY GAME OF THE WEEK ----------
 function getCurrentStreak(rosterId){
   if(!Array.isArray(RIVALRY_HISTORY)) return null;
@@ -3948,6 +4024,7 @@ function showTeamDetail(teamName){
   renderPlayoffHistory(t.ownerId);
   renderHeadToHead(t.ownerId);
   renderTransactions(t.rosterId);
+  renderBettingLedger(t.ownerId);
 }
 
 function renderAllTime(ownerId){
@@ -5236,36 +5313,30 @@ function getAvailableFaab(ownerId){
 
 // Real starting FAAB budget + actual waiver spend, straight from Sleeper -- this is the
 // honest "existing FAAB" the feature is meant to let people bet, not a fictional number.
+// Sleeper already tracks each roster's spend itself (settings.waiver_budget_used on the
+// /rosters response) -- reading that directly is both simpler and authoritative, instead of
+// reconstructing it by hand from transaction history (which this used to do, and which drifted
+// from Sleeper's own number -- e.g. missed transaction shapes, wrong league-specific bid
+// scale). One request instead of eighteen, and it can never disagree with what Sleeper itself
+// would show.
 function loadFaabBudgets(){
-  fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID).then(function(league){
+  Promise.all([
+    fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID),
+    fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/rosters")
+  ]).then(function(results){
+    const league = results[0], rosters = results[1];
     if(league && league.settings && typeof league.settings.waiver_budget === "number" && league.settings.waiver_budget > 0){
       FAAB_STARTING_BUDGET = league.settings.waiver_budget;
     }
-    const requests = [];
-    for(let w = 1; w <= 18; w++){
-      requests.push(fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/transactions/" + w).catch(function(){ return []; }));
-    }
-    return Promise.all(requests).then(function(weeks){
-      const spent = {};
-      weeks.forEach(function(txns){
-        if(!Array.isArray(txns)) return;
-        txns.forEach(function(tx){
-          if(tx.status !== "complete" || tx.type !== "waiver") return;
-          const bid = (tx.settings && typeof tx.settings.waiver_bid === "number") ? tx.settings.waiver_bid : 0;
-          if(bid <= 0) return;
-          const addedByRoster = {};
-          if(tx.adds){ Object.keys(tx.adds).forEach(function(pid){ addedByRoster[tx.adds[pid]] = true; }); }
-          (tx.roster_ids || []).forEach(function(rid){
-            if(!addedByRoster[rid]) return;
-            spent[rid] = (spent[rid] || 0) + bid;
-          });
-        });
+    const remaining = {};
+    if(Array.isArray(rosters)){
+      rosters.forEach(function(r){
+        const used = (r.settings && typeof r.settings.waiver_budget_used === "number") ? r.settings.waiver_budget_used : 0;
+        remaining[r.roster_id] = Math.max(0, FAAB_STARTING_BUDGET - used);
       });
-      const remaining = {};
-      TEAMS.forEach(function(t){ remaining[t.rosterId] = Math.max(0, FAAB_STARTING_BUDGET - (spent[t.rosterId] || 0)); });
-      FAAB_REAL_REMAINING = remaining;
-      renderBettingPanel();
-    });
+    }
+    FAAB_REAL_REMAINING = remaining;
+    renderBettingPanel();
   }).catch(function(){ /* keep the flat FAAB_STARTING_BUDGET fallback -- betting still works, balances just won't reflect real waiver spend yet */ });
 }
 
@@ -5771,6 +5842,8 @@ function renderBettingPanel(){
     histToggle.style.display = "none";
     histList.style.display = "none";
   }
+
+  refreshBettingLedgerIfShowing();
 }
 
 // Decides LOCAL vs FIREBASE mode and wires up whichever one applies. The Firebase bootstrap
