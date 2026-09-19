@@ -801,6 +801,141 @@
     padding:4px 11px; border-radius:999px; box-shadow:0 4px 10px -2px rgba(242,181,66,0.5);
   }
 
+  /* ---------- FAAB BETTING LINES ---------- */
+  .betting-toolbar{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:-6px 0 16px;}
+  .betting-identity{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .betting-identity label{font-size:11px; letter-spacing:0.8px; text-transform:uppercase; color:var(--chalk-faint);}
+  .betting-identity select{
+    background:var(--surface-3); border:1px solid var(--line); color:var(--chalk); font:inherit; font-size:13px;
+    padding:8px 10px; border-radius:var(--radius-sm); cursor:pointer;
+  }
+  .betting-balance{
+    display:flex; align-items:center; gap:8px; background:var(--gold-soft); border:1px solid rgba(242,181,66,0.3);
+    border-radius:999px; padding:6px 16px 6px 10px;
+  }
+  .betting-balance .bb-icon{font-size:16px;}
+  .betting-balance .bb-num{font-family:'Teko', sans-serif; font-size:21px; color:var(--gold-bright); line-height:1;}
+  .betting-balance .bb-lbl{font-size:9px; letter-spacing:0.8px; text-transform:uppercase; color:var(--chalk-dim);}
+  .betting-noident{
+    background:var(--surface-2); border:1px dashed var(--line); border-radius:var(--radius-sm);
+    padding:16px; text-align:center; color:var(--chalk-dim); font-size:13px; margin-bottom:16px;
+  }
+  .betting-sync-status{margin:-4px 0 14px;}
+  .betting-sync-badge{
+    display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600; letter-spacing:0.3px;
+    padding:5px 12px; border-radius:999px; background:var(--surface-3); border:1px solid var(--line); color:var(--chalk-dim);
+  }
+  .betting-sync-badge.live{background:rgba(52,211,153,0.14); border-color:rgba(52,211,153,0.35); color:var(--green);}
+  .betting-sync-badge.local{background:var(--surface-3); border-color:var(--line); color:var(--chalk-faint);}
+  .betting-passcode-label{display:block; font-size:11px; letter-spacing:0.4px; color:var(--chalk-dim); margin-bottom:6px;}
+  .betting-passcode-input{
+    width:100%; box-sizing:border-box; background:var(--surface-3); border:1px solid var(--line); color:var(--chalk); font:inherit; font-size:14px;
+    padding:9px 11px; border-radius:var(--radius-sm); margin-bottom:6px; letter-spacing:2px;
+  }
+  .betting-passcode-error{color:var(--red); font-size:12px; margin:0 0 12px;}
+
+  .betting-card{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px 20px; margin-bottom:14px; box-shadow:var(--shadow-soft);
+  }
+  .betting-card-head{display:flex; align-items:center; justify-content:space-between; gap:10px 16px; margin-bottom:14px; flex-wrap:wrap;}
+  .betting-card-label{font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--gold-dark); font-weight:700;}
+  .betting-lock-time{font-size:11px; color:var(--chalk-faint);}
+  .betting-lock-time.is-locked{color:var(--red);}
+  .betting-sides{display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom:6px;}
+  .betting-side{display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; min-width:130px; text-align:center;}
+  .betting-side img{width:44px; height:44px; border-radius:9px; object-fit:cover; border:1px solid var(--line-soft);}
+  .betting-side-name{font-size:13px; font-weight:600;}
+  .betting-line{font-family:'Teko', sans-serif; font-size:27px; line-height:1;}
+  .betting-line.fav{color:var(--gold-bright);}
+  .betting-line.dog{color:var(--teal);}
+  .betting-vs-mid{font-family:'Teko', sans-serif; font-size:15px; color:var(--chalk-faint);}
+  .betting-line-edit{font-size:10px; color:var(--chalk-faint); cursor:pointer; text-decoration:underline; text-underline-offset:2px; border:none; background:none; padding:0; font-family:inherit;}
+  .betting-line-edit:hover{color:var(--gold);}
+  .betting-line-editor{display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:10px 0 4px;}
+  .betting-line-editor input{width:70px; background:var(--surface-3); border:1px solid var(--line); color:var(--chalk); border-radius:6px; padding:5px 8px; font:inherit; font-size:13px;}
+  .betting-line-editor button{font-size:11px; padding:5px 10px; border-radius:6px; border:1px solid var(--line); background:var(--surface-3); color:var(--chalk-dim); cursor:pointer; font-family:inherit;}
+  .betting-line-editor button.primary{background:var(--gold); color:#1A1304; border-color:var(--gold); font-weight:600;}
+
+  .betting-wager-row{display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; padding-top:14px; margin-top:8px; border-top:1px solid var(--line-soft);}
+  .betting-field{display:flex; flex-direction:column; gap:4px;}
+  .betting-field label{font-size:10px; letter-spacing:0.6px; text-transform:uppercase; color:var(--chalk-faint);}
+  .betting-field input{
+    width:90px; background:var(--surface-3); border:1px solid var(--line); color:var(--chalk); font:inherit; font-size:15px;
+    padding:7px 10px; border-radius:var(--radius-sm);
+  }
+  .betting-field input:disabled{opacity:0.5;}
+  .betting-preview{display:flex; gap:18px; flex-wrap:wrap;}
+  .betting-preview .bp-num{font-family:'Teko', sans-serif; font-size:19px; color:var(--gold); line-height:1;}
+  .betting-preview .bp-lbl{font-size:10px; letter-spacing:0.6px; text-transform:uppercase; color:var(--chalk-faint);}
+  .betting-actions{display:flex; gap:10px; flex-wrap:wrap; margin-left:auto;}
+  .betting-bet-btn{
+    font:inherit; font-size:12px; font-weight:700; letter-spacing:0.3px; padding:10px 16px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--gold-dark); background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;
+    transition:transform 0.15s, box-shadow 0.15s;
+  }
+  .betting-bet-btn:hover:not(:disabled){transform:translateY(-2px); box-shadow:0 8px 18px -6px rgba(242,181,66,0.5);}
+  .betting-bet-btn:disabled{opacity:0.4; cursor:not-allowed; background:var(--surface-3); color:var(--chalk-faint); border-color:var(--line);}
+  .betting-bet-btn.dog-btn{background:linear-gradient(135deg, var(--teal), var(--teal-dark)); border-color:var(--teal-dark); color:#08201c;}
+  .betting-bet-btn.dog-btn:hover:not(:disabled){box-shadow:0 8px 18px -6px rgba(69,214,196,0.4);}
+
+  .betting-locked-note{
+    text-align:center; font-size:12px; color:var(--chalk-dim); background:var(--surface-3); border:1px dashed var(--line);
+    border-radius:var(--radius-sm); padding:12px; margin-top:10px;
+  }
+
+  .betting-mybets{margin-top:14px; padding-top:14px; border-top:1px solid var(--line-soft);}
+  .betting-mybets-title{font-size:11px; letter-spacing:0.6px; text-transform:uppercase; color:var(--chalk-faint); margin-bottom:8px;}
+  .betting-bet-row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; padding:7px 0; border-bottom:1px solid var(--line-soft);}
+  .betting-bet-row:last-child{border-bottom:none;}
+  .betting-bet-pick{font-weight:600; color:var(--chalk);}
+  .betting-bet-meta{color:var(--chalk-dim);}
+  .betting-status-badge{
+    font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; padding:3px 9px; border-radius:999px;
+    margin-left:auto;
+  }
+  .betting-status-badge.pending{background:var(--gold-soft); color:var(--gold-bright); border:1px solid rgba(242,181,66,0.35);}
+  .betting-status-badge.won{background:rgba(52,211,153,0.14); color:var(--green); border:1px solid rgba(52,211,153,0.35);}
+  .betting-status-badge.lost{background:var(--red-soft); color:var(--red); border:1px solid rgba(255,107,107,0.3);}
+
+  .betting-history-toggle{
+    display:block; width:100%; text-align:center; font-size:12px; color:var(--gold-dark); background:none; border:1px dashed var(--line);
+    border-radius:var(--radius-sm); padding:10px; cursor:pointer; margin-top:4px; font-family:inherit;
+  }
+  .betting-history-toggle:hover{color:var(--gold); border-color:var(--gold-dark);}
+  .betting-history-list{margin-top:12px;}
+
+  .betting-modal-backdrop{
+    position:fixed; inset:0; background:rgba(6,8,14,0.72); z-index:300;
+    display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity 0.18s;
+  }
+  .betting-modal-backdrop.show{opacity:1; pointer-events:auto;}
+  .betting-modal{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px; max-width:380px; width:100%;
+    box-shadow:var(--shadow-pop); transform:translateY(10px) scale(0.97); transition:transform 0.18s;
+  }
+  .betting-modal-backdrop.show .betting-modal{transform:translateY(0) scale(1);}
+  .betting-modal h3{margin:0 0 10px; font-size:17px; color:var(--chalk);}
+  .betting-modal p{margin:0 0 18px; font-size:13px; color:var(--chalk-dim); line-height:1.6;}
+  .betting-modal-actions{display:flex; gap:10px; justify-content:flex-end;}
+  .betting-modal-actions button{font:inherit; font-size:13px; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid var(--line);}
+  .betting-modal-actions .cancel{background:var(--surface-3); color:var(--chalk-dim);}
+  .betting-modal-actions .confirm{background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304; border-color:var(--gold-dark); font-weight:700;}
+
+  .betting-toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(10px); z-index:310;
+    background:var(--surface-2); border:1px solid var(--gold-dark); border-radius:999px; padding:11px 20px; font-size:13px;
+    box-shadow:var(--shadow-pop); opacity:0; pointer-events:none; transition:opacity 0.2s, transform 0.2s; max-width:88vw; text-align:center;
+  }
+  .betting-toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:640px){
+    .betting-wager-row{align-items:stretch;}
+    .betting-actions{margin-left:0; width:100%;}
+    .betting-bet-btn{flex:1;}
+    .betting-preview{gap:14px;}
+  }
+
   /* ---------- GAME OF THE WEEK HERO ---------- */
   .gotw-hero{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
   .gotw-side{display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; min-width:120px;}
@@ -1042,6 +1177,27 @@
       <h2 class="panel-title" id="matchupsTitle">This Week's Matchups</h2>
       <div class="status-banner" id="matchupsStatus">Loading live matchups from Sleeper&hellip;</div>
       <div id="matchupsGrid"></div>
+    </div>
+    <div class="panel betting-panel" id="bettingPanel" style="display:none;">
+      <h2 class="panel-title">🎲 FAAB Betting Lines</h2>
+      <p class="panel-sub">Wager your league FAAB on this week's matchups &mdash; every line pays even 1:1. The league is the sportsbook; you don't need anyone to take the other side.</p>
+      <div class="betting-sync-status" id="bettingSyncStatus"></div>
+      <div class="betting-toolbar">
+        <div class="betting-identity">
+          <label for="bettingIdentitySelect">Betting as</label>
+          <select id="bettingIdentitySelect"><option value="">Loading teams&hellip;</option></select>
+        </div>
+        <div class="betting-balance" id="bettingBalanceChip" style="display:none;">
+          <span class="bb-icon">💰</span>
+          <div><div class="bb-num" id="bettingBalanceNum">--</div><div class="bb-lbl">Available FAAB</div></div>
+        </div>
+      </div>
+      <div id="bettingNoIdentity" class="betting-noident">Pick your team above to start betting your FAAB.</div>
+      <div id="bettingMemberSetupNote" class="betting-noident" style="display:none;">Betting access for this team hasn't been set up yet &mdash; ask your commissioner to run the one-time setup step, then refresh.</div>
+      <div id="bettingCardsGrid"></div>
+      <button type="button" class="betting-history-toggle" id="bettingHistoryToggle" style="display:none;">Show my full wager history</button>
+      <div class="betting-history-list" id="bettingHistoryList" style="display:none;"></div>
+      <p class="const-note" style="margin-top:14px;" id="bettingConstNote">In-league FAAB game only &mdash; no real money involved. Your balance and bets are saved in this browser, so they won't follow you to a different device. Lines are auto-generated from each team's season scoring average; the commissioner can hand-edit any line before it locks (also saved locally). Betting on a matchup locks at that week's estimated kickoff and settles automatically once Sleeper shows a final score.</p>
     </div>
     <div class="panel">
       <h2 class="panel-title" id="recapTitle">Weekly Recap</h2>
@@ -1312,6 +1468,65 @@
 
 </div>
 
+<script>
+// ---------- FAAB BETTING SYNC CONFIG (OPTIONAL) ----------
+// Fill these in with your own free Firebase project's config (Firebase Console -> Project
+// settings -> your web app -> SDK setup and configuration) to turn the FAAB Betting Lines
+// feature below into a SHARED, real-time ledger that every visitor sees -- see the setup
+// guide delivered alongside this file for exact steps and the Firestore security rules to
+// paste in. Leave these as the "YOUR_..." placeholders and the site keeps working exactly
+// as it does today: FAAB betting just stays local to each visitor's own browser.
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDZPSS5foAWBuoAGkiqWa2eO-boLDaogaE",
+  authDomain: "nut-league-faab.firebaseapp.com",
+  projectId: "nut-league-faab",
+  storageBucket: "nut-league-faab.firebasestorage.app",
+  messagingSenderId: "647781551960",
+  appId: "1:647781551960:web:bf518edd9b373692155f2d"
+};
+</script>
+<script type="module">
+// Loads the Firebase SDK and hands a small function bridge to the classic script below via
+// window.__FAAB_FB, so the FAAB Betting Lines module can use it without itself being a module.
+// A test hook (window.__FAAB_TEST_MOCK_FB) lets automated tests substitute a fake in-memory
+// Firestore instead of reaching the real network -- it is never set in normal page loads.
+(function(){
+  if(window.__FAAB_TEST_MOCK_FB){
+    window.__FAAB_FB = window.__FAAB_TEST_MOCK_FB;
+    window.dispatchEvent(new Event("faab-firebase-ready"));
+    return;
+  }
+  const cfg = window.FIREBASE_CONFIG;
+  const looksConfigured = !!(cfg && cfg.apiKey && cfg.apiKey.indexOf("YOUR_") !== 0 &&
+    cfg.projectId && cfg.projectId.indexOf("YOUR_") !== 0);
+  if(!looksConfigured){
+    window.dispatchEvent(new Event("faab-firebase-unavailable"));
+    return;
+  }
+  Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js")
+  ]).then(function(mods){
+    const appMod = mods[0], fsMod = mods[1];
+    const app = appMod.initializeApp(cfg);
+    const db = fsMod.getFirestore(app);
+    window.__FAAB_FB = {
+      db: db,
+      collection: fsMod.collection,
+      doc: fsMod.doc,
+      addDoc: fsMod.addDoc,
+      setDoc: fsMod.setDoc,
+      updateDoc: fsMod.updateDoc,
+      getDoc: fsMod.getDoc,
+      onSnapshot: fsMod.onSnapshot
+    };
+    window.dispatchEvent(new Event("faab-firebase-ready"));
+  }).catch(function(err){
+    console.warn("FAAB betting sync unavailable, falling back to per-browser mode:", err);
+    window.dispatchEvent(new Event("faab-firebase-unavailable"));
+  });
+})();
+</script>
 <script>
 const LEAGUE_ID = "1333691133745704960";
 
@@ -1809,6 +2024,7 @@ function renderMatchups(week, pairsWithScores, usedLive){
   }).join("");
 
   maybeComputeGameOfWeek();
+  renderBettingPanel();
 }
 
 function renderFallbackMatchups(){
@@ -1993,6 +2209,7 @@ function loadHomeData(){
   fetchJSON("https://api.sleeper.app/v1/state/nfl").then(function(state){
     const week = Math.max(1, state.week || 1);
     CURRENT_NFL_WEEK = week;
+    settleAllPendingWagers();
 
     fetchMatchupPairs(week).then(function(pairs){
       if(pairs.length === 0) throw new Error("no matchups yet");
@@ -4817,6 +5034,793 @@ function loadDynastyHistory(){
   });
 }
 
+// ---------- FAAB BETTING LINES ----------
+// Two modes, chosen automatically at load time based on whether FIREBASE_CONFIG (top of
+// file) has been filled in:
+//  - LOCAL mode (default, zero setup): wagers/lines live only in localStorage, exactly like
+//    the original version of this feature -- per-browser, not shared with anyone else.
+//  - FIREBASE mode (opt-in): wagers/lines live in a shared Firestore database, synced to
+//    every visitor in real time via onSnapshot listeners. "Who I am" (the identity dropdown)
+//    always stays local to the device -- there's no login system -- but a lightweight
+//    per-team passcode (hashed with SHA-256, checked by Firestore's security rules, not by
+//    this JS) stops someone from placing a bet as a teammate. See the setup guide delivered
+//    alongside this file for exact Firebase Console steps and the security rules to paste in.
+// "Available FAAB" is still computed fresh on every render, in both modes, as:
+//   (real FAAB remaining per Sleeper's waiver_budget minus actual waiver spend, live-fetched)
+//   + (this identity's betting ledger: -pending, -lost, +profit-on-won)
+// so it stays honest as real waiver spending happens, without ever double-counting bets.
+const FAAB_BOOK_KEY = "nutLeagueFaabBook_v1"; // local-mode wagers + line overrides
+const FAAB_IDENTITY_KEY = "nutLeagueFaabIdentity_v1"; // "who am I" -- always local, both modes
+const FAAB_PASSCODE_CACHE_PREFIX = "nutLeagueFaabPasscodeHash_v1_"; // per-owner, Firebase mode only
+let FAAB_FIREBASE_ENABLED = null; // null = still deciding, true/false once resolved
+let FAAB_FB = null; // {db, collection, doc, addDoc, setDoc, updateDoc, getDoc, onSnapshot}, Firebase mode only
+let FAAB_LOCAL_IDENTITY = null;
+let FAAB_WAGERS = [];
+let FAAB_LINE_OVERRIDES = {};
+let FAAB_MEMBERS = {}; // ownerId -> {team, passcodeHash}, Firebase mode only
+const FAAB_UNLOCKED_HASH_CACHE = {};
+let FAAB_STARTING_BUDGET = 100;
+let FAAB_REAL_REMAINING = null; // {rosterId: number}, filled in once loadFaabBudgets() resolves
+const FAAB_SETTLED_WEEK_CACHE = {};
+let FAAB_PENDING_BET = null;
+let FAAB_TOAST_TIMER = null;
+
+// Thursday-night kickoff of Week 1, 2026 season -- anchors a simple weekly-cadence formula
+// used to estimate every other week's lock time (validated against the four real kickoff
+// dates already hardcoded for the Key Dates countdowns: adding whole weeks from this anchor
+// lands exactly on Oct 8, Nov 12, Dec 3, and Dec 17 -- this season's actual Weeks 5/10/13/15).
+const NFL_SEASON_2026_WEEK1_THU = new Date("2026-09-10T20:20:00-04:00");
+
+function faabLoadLocalBook(){
+  try{
+    const raw = localStorage.getItem(FAAB_BOOK_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && typeof parsed === "object"){
+        FAAB_WAGERS = Array.isArray(parsed.wagers) ? parsed.wagers : [];
+        FAAB_LINE_OVERRIDES = (parsed.lineOverrides && typeof parsed.lineOverrides === "object") ? parsed.lineOverrides : {};
+        return;
+      }
+    }
+  }catch(e){ /* localStorage unavailable (private browsing, quota, etc.) -- fall back to a fresh in-memory book */ }
+  FAAB_WAGERS = [];
+  FAAB_LINE_OVERRIDES = {};
+}
+
+function faabSaveLocalBook(){
+  try{ localStorage.setItem(FAAB_BOOK_KEY, JSON.stringify({wagers: FAAB_WAGERS, lineOverrides: FAAB_LINE_OVERRIDES})); }catch(e){ /* ignore -- state still works for the rest of this session */ }
+}
+
+// Read-only compatibility shim -- most of this module was written against a single "book"
+// object and stays that way; only the actual mutation call sites (placing a bet, editing a
+// line) need to know which mode they're in.
+function ensureFaabBook(){
+  return {identityOwnerId: FAAB_LOCAL_IDENTITY, wagers: FAAB_WAGERS, lineOverrides: FAAB_LINE_OVERRIDES};
+}
+
+function faabHashPasscode(raw){
+  if(!(window.crypto && window.crypto.subtle)) return Promise.reject(new Error("crypto-unavailable"));
+  const enc = new TextEncoder().encode(String(raw || "").trim());
+  return crypto.subtle.digest("SHA-256", enc).then(function(buf){
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2, "0"); }).join("");
+  });
+}
+
+function faabCachedPasscodeHash(ownerId){
+  if(FAAB_UNLOCKED_HASH_CACHE[ownerId]) return FAAB_UNLOCKED_HASH_CACHE[ownerId];
+  try{
+    const h = localStorage.getItem(FAAB_PASSCODE_CACHE_PREFIX + ownerId);
+    if(h) FAAB_UNLOCKED_HASH_CACHE[ownerId] = h;
+    return h || null;
+  }catch(e){ return null; }
+}
+function faabRememberPasscodeHash(ownerId, hash){
+  FAAB_UNLOCKED_HASH_CACHE[ownerId] = hash;
+  try{ localStorage.setItem(FAAB_PASSCODE_CACHE_PREFIX + ownerId, hash); }catch(e){ /* still works for the rest of this session */ }
+}
+function faabForgetPasscodeHash(ownerId){
+  delete FAAB_UNLOCKED_HASH_CACHE[ownerId];
+  try{ localStorage.removeItem(FAAB_PASSCODE_CACHE_PREFIX + ownerId); }catch(e){}
+}
+
+// One-time setup helper for the commissioner: once Firebase is configured and this page is
+// open on the real site (so TEAMS has loaded from Sleeper), open the browser console and run
+// faabSeedMembers() to create every team's shared betting identity with a random passcode.
+// Firestore's security rules make faab_members immutable after creation, so this only ever
+// sets a code once per team -- logs (and returns) the codes so they can be copied out and
+// sent to each manager privately; they are never shown again after this. Pass a
+// {ownerId: "CODE"} map instead to choose your own codes for some or all teams.
+window.faabSeedMembers = function(customCodes){
+  if(!FAAB_FIREBASE_ENABLED){ console.warn("Firebase betting sync isn't configured -- nothing to seed. Fill in FIREBASE_CONFIG at the top of the file first."); return Promise.resolve({}); }
+  if(!Array.isArray(TEAMS) || TEAMS.length === 0){ console.warn("Teams haven't loaded yet -- wait a few seconds and try again."); return Promise.resolve({}); }
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous 0/O/1/I
+  function randomCode(){
+    const arr = new Uint32Array(6);
+    crypto.getRandomValues(arr);
+    return Array.from(arr).map(function(n){ return chars[n % chars.length]; }).join("");
+  }
+  const results = {};
+  const jobs = TEAMS.map(function(t){
+    const code = (customCodes && customCodes[t.ownerId]) || randomCode();
+    return faabHashPasscode(code).then(function(hash){
+      return FAAB_FB.setDoc(FAAB_FB.doc(FAAB_FB.db, "faab_members", t.ownerId), {team: t.team, passcodeHash: hash})
+        .then(function(){ results[t.team] = code; })
+        .catch(function(err){ results[t.team] = (err && err.code === "permission-denied") ? "(already set up -- unchanged)" : "ERROR: " + err.message; });
+    });
+  });
+  return Promise.all(jobs).then(function(){
+    console.table(results);
+    console.log("Save these somewhere safe and send each manager their own code privately -- they won't be shown again.");
+    return results;
+  });
+};
+
+function formatSpread(v){
+  return (v > 0 ? "+" : "") + v.toFixed(1);
+}
+
+// Season points-per-game as the projection input for auto lines. Before a team has played
+// a game this season (early Week 1), falls back to their Power Score (0-100 composite,
+// mapped onto a rough 65-125 point range) so lines aren't just flat pick'ems in preseason;
+// if that's not available yet either, a neutral league-average default keeps things sane.
+function teamAvgPPG(t){
+  if(!t) return 105;
+  const gp = (t.wins || 0) + (t.losses || 0) + (t.ties || 0);
+  if(gp > 0) return t.fpts / gp;
+  if(POWER_SCORES && typeof POWER_SCORES[t.rosterId] === "number"){
+    return 95 + (POWER_SCORES[t.rosterId] - 50) * 0.6;
+  }
+  return 105;
+}
+
+// Spreads are always keyed by the lower rosterId of the pair ("lo"), independent of which
+// side is listed as .a/.b in a given matchup pair, so a commissioner override and the
+// auto-generated line always agree on which number belongs to which team.
+function getMatchupSpread(week, pair){
+  const lo = Math.min(pair.a, pair.b), hi = Math.max(pair.a, pair.b);
+  const key = week + ":" + lo + ":" + hi;
+  const book = ensureFaabBook();
+  if(typeof book.lineOverrides[key] === "number"){
+    return {key: key, spreadLow: book.lineOverrides[key], isOverride: true};
+  }
+  const teamLo = TEAMS.find(function(t){ return t.rosterId === lo; });
+  const teamHi = TEAMS.find(function(t){ return t.rosterId === hi; });
+  const diff = teamAvgPPG(teamLo) - teamAvgPPG(teamHi);
+  let margin = Math.round(diff * 2) / 2;
+  // Force every line to end in .5 -- half-point spreads by design so a push is structurally
+  // impossible (an integer margin would otherwise occasionally tie a final score exactly).
+  if(Math.abs(margin % 1) < 0.001) margin += (margin >= 0 ? 0.5 : -0.5);
+  return {key: key, spreadLow: -margin, isOverride: false};
+}
+
+function spreadForSide(week, pair, rosterId){
+  const info = getMatchupSpread(week, pair);
+  const lo = Math.min(pair.a, pair.b);
+  return rosterId === lo ? info.spreadLow : -info.spreadLow;
+}
+
+function getWeekLockTime(week){
+  return new Date(NFL_SEASON_2026_WEEK1_THU.getTime() + (week - 1) * 7 * 24 * 60 * 60 * 1000);
+}
+function isWeekLocked(week){
+  return Date.now() >= getWeekLockTime(week).getTime();
+}
+function formatLockTime(week){
+  return getWeekLockTime(week).toLocaleString("en-US", {weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit"});
+}
+
+function faabRealRemainingForRoster(rosterId){
+  if(FAAB_REAL_REMAINING && typeof FAAB_REAL_REMAINING[rosterId] === "number") return FAAB_REAL_REMAINING[rosterId];
+  return FAAB_STARTING_BUDGET;
+}
+
+// Net effect of this browser's own bets on top of the real Sleeper waiver balance:
+// pending and lost wagers are locked away (never returned), won wagers add their profit
+// (the payout minus the original wager, since the wager itself is already excluded here).
+function computeNetBettingEffect(ownerId){
+  const book = ensureFaabBook();
+  let net = 0;
+  book.wagers.forEach(function(w){
+    if(w.ownerId !== ownerId) return;
+    if(w.status === "pending" || w.status === "lost") net -= w.amount;
+    else if(w.status === "won") net += (w.potentialPayout - w.amount);
+  });
+  return net;
+}
+
+function getAvailableFaab(ownerId){
+  const team = TEAMS.find(function(t){ return t.ownerId === ownerId; });
+  if(!team) return 0;
+  return faabRealRemainingForRoster(team.rosterId) + computeNetBettingEffect(ownerId);
+}
+
+// Real starting FAAB budget + actual waiver spend, straight from Sleeper -- this is the
+// honest "existing FAAB" the feature is meant to let people bet, not a fictional number.
+function loadFaabBudgets(){
+  fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID).then(function(league){
+    if(league && league.settings && typeof league.settings.waiver_budget === "number" && league.settings.waiver_budget > 0){
+      FAAB_STARTING_BUDGET = league.settings.waiver_budget;
+    }
+    const requests = [];
+    for(let w = 1; w <= 18; w++){
+      requests.push(fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/transactions/" + w).catch(function(){ return []; }));
+    }
+    return Promise.all(requests).then(function(weeks){
+      const spent = {};
+      weeks.forEach(function(txns){
+        if(!Array.isArray(txns)) return;
+        txns.forEach(function(tx){
+          if(tx.status !== "complete" || tx.type !== "waiver") return;
+          const bid = (tx.settings && typeof tx.settings.waiver_bid === "number") ? tx.settings.waiver_bid : 0;
+          if(bid <= 0) return;
+          const addedByRoster = {};
+          if(tx.adds){ Object.keys(tx.adds).forEach(function(pid){ addedByRoster[tx.adds[pid]] = true; }); }
+          (tx.roster_ids || []).forEach(function(rid){
+            if(!addedByRoster[rid]) return;
+            spent[rid] = (spent[rid] || 0) + bid;
+          });
+        });
+      });
+      const remaining = {};
+      TEAMS.forEach(function(t){ remaining[t.rosterId] = Math.max(0, FAAB_STARTING_BUDGET - (spent[t.rosterId] || 0)); });
+      FAAB_REAL_REMAINING = remaining;
+      renderBettingPanel();
+    });
+  }).catch(function(){ /* keep the flat FAAB_STARTING_BUDGET fallback -- betting still works, balances just won't reflect real waiver spend yet */ });
+}
+
+// A week's wagers only get checked once the site considers that week fully in the past
+// (the same rule the Weekly Recap panel already uses), then settled against real final
+// scores fetched fresh for that week. Results are cached per week since a final score
+// never changes once the site treats the week as over. Settlement is still driven entirely
+// by whichever visitor's browser happens to be open (no server), same trust model as before
+// -- in Firebase mode the write just goes to the shared ledger instead of localStorage, so
+// it only has to happen once, from any one browser, for everyone to see it. Always resolves
+// to a boolean (or a Promise of one in Firebase mode) so settleAllPendingWagers() can treat
+// both modes the same way.
+function settlePendingWagersForWeek(week, pairs){
+  const targets = FAAB_WAGERS.filter(function(w){ return w.status === "pending" && w.week === week; });
+  const localChanges = [];
+  const remoteUpdates = [];
+  targets.forEach(function(w){
+    const pair = pairs.find(function(p){
+      return (p.a === w.pickRosterId && p.b === w.oppRosterId) || (p.b === w.pickRosterId && p.a === w.oppRosterId);
+    });
+    if(!pair) return;
+    const myScore = pair.a === w.pickRosterId ? pair.aPoints : pair.bPoints;
+    const oppScore = pair.a === w.pickRosterId ? pair.bPoints : pair.aPoints;
+    if(typeof myScore !== "number" || typeof oppScore !== "number") return;
+    const covered = (myScore + w.spread) > oppScore;
+    const patch = {status: covered ? "won" : "lost", settledAt: new Date().toISOString(), finalPickScore: myScore, finalOppScore: oppScore};
+    if(FAAB_FIREBASE_ENABLED){
+      remoteUpdates.push(FAAB_FB.updateDoc(FAAB_FB.doc(FAAB_FB.db, "faab_wagers", w.id), patch).catch(function(){ /* likely already settled by another browser -- fine */ }));
+    } else {
+      Object.assign(w, patch);
+      localChanges.push(w);
+    }
+  });
+  if(!FAAB_FIREBASE_ENABLED){
+    if(localChanges.length > 0) faabSaveLocalBook();
+    return Promise.resolve(localChanges.length > 0);
+  }
+  return Promise.all(remoteUpdates).then(function(){ return remoteUpdates.length > 0; });
+}
+
+function settleAllPendingWagers(){
+  const currentWk = CURRENT_NFL_WEEK || (LAST_MATCHUPS ? LAST_MATCHUPS.week : null);
+  if(currentWk == null) return;
+  const pendingWeeks = [];
+  FAAB_WAGERS.forEach(function(w){
+    if(w.status === "pending" && w.week < currentWk && pendingWeeks.indexOf(w.week) === -1) pendingWeeks.push(w.week);
+  });
+  if(pendingWeeks.length === 0) return;
+  Promise.all(pendingWeeks.map(function(wk){
+    if(FAAB_SETTLED_WEEK_CACHE[wk]) return Promise.resolve(FAAB_SETTLED_WEEK_CACHE[wk]);
+    return fetchMatchupPairs(wk).then(function(pairs){
+      if(pairs && pairs.length > 0) FAAB_SETTLED_WEEK_CACHE[wk] = pairs;
+      return pairs;
+    }).catch(function(){ return null; });
+  })).then(function(results){
+    const settlePromises = [];
+    pendingWeeks.forEach(function(wk, i){
+      const pairs = results[i];
+      if(pairs && pairs.length > 0) settlePromises.push(settlePendingWagersForWeek(wk, pairs));
+    });
+    return Promise.all(settlePromises);
+  }).then(function(changedFlags){
+    // Local mode needs an explicit re-render here; Firebase mode's own onSnapshot listener
+    // will also re-render once the write round-trips -- a harmless extra render either way.
+    if(changedFlags.some(function(c){ return c; })) renderBettingPanel();
+  });
+}
+
+function bettingModalEl(){
+  let el = document.getElementById("bettingModalBackdrop");
+  if(!el){
+    el = document.createElement("div");
+    el.className = "betting-modal-backdrop";
+    el.id = "bettingModalBackdrop";
+    el.innerHTML = '<div class="betting-modal">' +
+      '<h3>Confirm wager</h3>' +
+      '<div id="bettingModalPasscodeWrap" style="display:none;">' +
+        '<label for="bettingModalPasscode" class="betting-passcode-label">Enter your team\'s passcode to place this bet (ask your commissioner if you don\'t have it)</label>' +
+        '<input type="password" id="bettingModalPasscode" autocomplete="off" class="betting-passcode-input"/>' +
+        '<div class="betting-passcode-error" id="bettingModalPasscodeError" style="display:none;"></div>' +
+      '</div>' +
+      '<p id="bettingModalBody"></p>' +
+      '<div class="betting-modal-actions">' +
+        '<button type="button" class="cancel" id="bettingModalCancel">Cancel</button>' +
+        '<button type="button" class="confirm" id="bettingModalConfirm">Confirm Bet</button>' +
+      '</div>' +
+    '</div>';
+    document.body.appendChild(el);
+    el.addEventListener("click", function(e){ if(e.target === el) hideBettingModal(); });
+    document.getElementById("bettingModalCancel").addEventListener("click", hideBettingModal);
+    document.getElementById("bettingModalConfirm").addEventListener("click", function(){
+      const ctx = FAAB_PENDING_BET;
+      if(!ctx) return;
+      if(ctx.needsPasscode){
+        const pcInput = document.getElementById("bettingModalPasscode");
+        const raw = pcInput ? pcInput.value : "";
+        if(!raw){
+          const err = document.getElementById("bettingModalPasscodeError");
+          err.textContent = "Enter your team's passcode.";
+          err.style.display = "block";
+          return;
+        }
+        ctx.rawPasscode = raw;
+      }
+      hideBettingModal();
+      executeWager(ctx);
+    });
+    const pcInputEl = document.getElementById("bettingModalPasscode");
+    if(pcInputEl){
+      pcInputEl.addEventListener("keydown", function(e){
+        if(e.key === "Enter") document.getElementById("bettingModalConfirm").click();
+      });
+    }
+  }
+  return el;
+}
+
+function showBettingConfirm(ctx){
+  ctx.needsPasscode = !!FAAB_FIREBASE_ENABLED && !faabCachedPasscodeHash(ctx.ownerId);
+  FAAB_PENDING_BET = ctx;
+  const el = bettingModalEl();
+  const wrap = document.getElementById("bettingModalPasscodeWrap");
+  const err = document.getElementById("bettingModalPasscodeError");
+  const pcInput = document.getElementById("bettingModalPasscode");
+  wrap.style.display = ctx.needsPasscode ? "block" : "none";
+  err.style.display = "none";
+  if(pcInput) pcInput.value = "";
+  document.getElementById("bettingModalBody").textContent =
+    "Confirm " + ctx.amount + " FAAB wager on " + ctx.pickTeamName + " " + formatSpread(ctx.spread) +
+    "? If this bet loses, the " + ctx.amount + " FAAB wager will be permanently deducted from your waiver budget.";
+  el.classList.add("show");
+  if(ctx.needsPasscode && pcInput) setTimeout(function(){ pcInput.focus(); }, 50);
+}
+
+function hideBettingModal(){
+  const el = document.getElementById("bettingModalBackdrop");
+  if(el) el.classList.remove("show");
+  FAAB_PENDING_BET = null;
+}
+
+function bettingToastEl(){
+  let el = document.getElementById("bettingToast");
+  if(!el){
+    el = document.createElement("div");
+    el.className = "betting-toast";
+    el.id = "bettingToast";
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+function showBettingToast(msg){
+  const el = bettingToastEl();
+  el.textContent = msg;
+  el.classList.add("show");
+  if(FAAB_TOAST_TIMER) clearTimeout(FAAB_TOAST_TIMER);
+  FAAB_TOAST_TIMER = setTimeout(function(){ el.classList.remove("show"); }, 2600);
+}
+
+function executeWager(ctx){
+  const available = getAvailableFaab(ctx.ownerId);
+  if(isWeekLocked(ctx.week)){
+    showBettingToast("Betting for Week " + ctx.week + " is locked.");
+    renderBettingPanel();
+    return;
+  }
+  if(!(ctx.amount > 0) || ctx.amount > available){
+    showBettingToast("That bet is no longer valid — check your available FAAB.");
+    renderBettingPanel();
+    return;
+  }
+  const wager = {
+    ownerId: ctx.ownerId,
+    week: ctx.week,
+    pickRosterId: ctx.pickRosterId,
+    pickTeamName: ctx.pickTeamName,
+    oppRosterId: ctx.oppRosterId,
+    oppTeamName: ctx.oppTeamName,
+    spread: ctx.spread,
+    amount: ctx.amount,
+    potentialPayout: ctx.amount * 2,
+    status: "pending",
+    placedAt: new Date().toISOString(),
+    settledAt: null,
+    finalPickScore: null,
+    finalOppScore: null
+  };
+  if(!FAAB_FIREBASE_ENABLED){
+    wager.id = "w" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    FAAB_WAGERS.push(wager);
+    faabSaveLocalBook();
+    showBettingToast("Bet placed: " + ctx.amount + " FAAB on " + ctx.pickTeamName + " " + formatSpread(ctx.spread) + ".");
+    renderBettingPanel();
+    return;
+  }
+  // Firebase mode: the passcode hash is the actual gate -- Firestore's security rules check
+  // it server-side against the stored faab_members hash, not this JS, so a stale/wrong cached
+  // hash just fails the write cleanly rather than silently letting a bad bet through.
+  const hashPromise = ctx.rawPasscode ? faabHashPasscode(ctx.rawPasscode) : Promise.resolve(faabCachedPasscodeHash(ctx.ownerId));
+  hashPromise.then(function(hash){
+    if(!hash) return Promise.reject({code: "no-passcode"});
+    wager.passcodeHash = hash;
+    return FAAB_FB.addDoc(FAAB_FB.collection(FAAB_FB.db, "faab_wagers"), wager).then(function(){ return hash; });
+  }).then(function(hash){
+    faabRememberPasscodeHash(ctx.ownerId, hash);
+    showBettingToast("Bet placed: " + ctx.amount + " FAAB on " + ctx.pickTeamName + " " + formatSpread(ctx.spread) + ".");
+    renderBettingPanel();
+  }).catch(function(err){
+    if(err && err.code === "permission-denied"){
+      faabForgetPasscodeHash(ctx.ownerId);
+      showBettingToast("Incorrect passcode — bet not placed.");
+    } else if(err && err.code === "no-passcode"){
+      showBettingToast("Enter your passcode first.");
+    } else if(err && err.message === "crypto-unavailable"){
+      showBettingToast("Your browser can't verify a passcode on this connection.");
+    } else {
+      showBettingToast("Couldn't reach the shared betting ledger — check your connection and try again.");
+    }
+    renderBettingPanel();
+  });
+}
+
+function buildBettingCardHtml(week, pair, identityTeam, locked, book){
+  const a = TEAMS.find(function(t){ return t.rosterId === pair.a; }) || {};
+  const b = TEAMS.find(function(t){ return t.rosterId === pair.b; }) || {};
+  const spreadA = spreadForSide(week, pair, pair.a);
+  const spreadB = spreadForSide(week, pair, pair.b);
+  const aFav = spreadA < 0, bFav = spreadB < 0;
+
+  const lockNote = locked
+    ? '<span class="betting-lock-time is-locked">🔒 Locked at kickoff (' + formatLockTime(week) + ')</span>'
+    : '<span class="betting-lock-time">Betting closes at kickoff, ' + formatLockTime(week) + '</span>';
+
+  const editHtml = locked ? '' :
+    '<div style="text-align:center;margin:2px 0 4px;">' +
+    '<button type="button" class="betting-line-edit" data-edit-toggle="1">edit line</button>' +
+    '<div class="betting-line-editor" data-editor="1" style="display:none;">' +
+      '<span style="font-size:11px;color:var(--chalk-faint);">Line for ' + throneEscAttr(a.team || "Team A") + ':</span>' +
+      '<input type="number" step="0.5" data-line-input="1" value="' + spreadA.toFixed(1) + '"/>' +
+      '<button type="button" class="primary" data-line-save="1">Save</button>' +
+      '<button type="button" data-line-cancel="1">Cancel</button>' +
+    '</div>' +
+    '</div>';
+
+  const myBets = book.wagers.filter(function(w){
+    return w.week === week &&
+      ((w.pickRosterId === pair.a && w.oppRosterId === pair.b) || (w.pickRosterId === pair.b && w.oppRosterId === pair.a)) &&
+      identityTeam && w.ownerId === identityTeam.ownerId;
+  });
+  const myBetsHtml = myBets.length === 0 ? '' :
+    '<div class="betting-mybets"><div class="betting-mybets-title">Your bets on this matchup</div>' +
+    myBets.map(function(w){
+      return '<div class="betting-bet-row">' +
+        '<span class="betting-bet-pick">' + throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread) + '</span>' +
+        '<span class="betting-bet-meta">' + w.amount + ' FAAB wagered → ' + w.potentialPayout + ' if won</span>' +
+        '<span class="betting-status-badge ' + w.status + '">' + w.status + '</span>' +
+      '</div>';
+    }).join("") + '</div>';
+
+  const bettingControlsHtml = locked
+    ? '<div class="betting-locked-note">Betting for this matchup is closed for Week ' + week + '.</div>'
+    : ('<div class="betting-wager-row">' +
+        '<div class="betting-field"><label>Bet Amount</label><input type="number" min="1" step="1" value="10" data-amount-input="1"' + (identityTeam ? '' : ' disabled') + '/></div>' +
+        '<div class="betting-preview">' +
+          '<div><div class="bp-num" data-preview-profit="1">+10</div><div class="bp-lbl">Potential Profit</div></div>' +
+          '<div><div class="bp-num" data-preview-return="1">20</div><div class="bp-lbl">Potential Return</div></div>' +
+        '</div>' +
+        '<div class="betting-actions">' +
+          '<button type="button" class="betting-bet-btn" data-bet-side="a"' + (identityTeam ? '' : ' disabled') + '>BET ' + throneEscAttr(a.team || "A") + ' ' + formatSpread(spreadA) + '</button>' +
+          '<button type="button" class="betting-bet-btn dog-btn" data-bet-side="b"' + (identityTeam ? '' : ' disabled') + '>BET ' + throneEscAttr(b.team || "B") + ' ' + formatSpread(spreadB) + '</button>' +
+        '</div>' +
+      '</div>');
+
+  return '<div class="betting-card" data-roster-a="' + pair.a + '" data-roster-b="' + pair.b + '" data-week="' + week + '">' +
+    '<div class="betting-card-head"><span class="betting-card-label">Week ' + week + ' &mdash; Betting Line</span>' + lockNote + '</div>' +
+    '<div class="betting-sides">' +
+      '<div class="betting-side"><img src="' + (a.avatar || '') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div class="betting-side-name">' + throneEscAttr(a.team || "Team A") + '</div>' +
+        '<div class="betting-line ' + (aFav ? 'fav' : 'dog') + '">' + formatSpread(spreadA) + '</div></div>' +
+      '<div class="betting-vs-mid">VS</div>' +
+      '<div class="betting-side"><img src="' + (b.avatar || '') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div class="betting-side-name">' + throneEscAttr(b.team || "Team B") + '</div>' +
+        '<div class="betting-line ' + (bFav ? 'fav' : 'dog') + '">' + formatSpread(spreadB) + '</div></div>' +
+    '</div>' +
+    editHtml +
+    bettingControlsHtml +
+    myBetsHtml +
+  '</div>';
+}
+
+function wireBettingCard(cardEl, week, identityTeam, locked){
+  const rosterA = parseInt(cardEl.getAttribute("data-roster-a"), 10);
+  const rosterB = parseInt(cardEl.getAttribute("data-roster-b"), 10);
+  const a = TEAMS.find(function(t){ return t.rosterId === rosterA; }) || {};
+  const b = TEAMS.find(function(t){ return t.rosterId === rosterB; }) || {};
+  const pairShape = {a: rosterA, b: rosterB};
+  const spreadA = spreadForSide(week, pairShape, rosterA);
+  const spreadB = spreadForSide(week, pairShape, rosterB);
+
+  const amountInput = cardEl.querySelector("[data-amount-input]");
+  const profitEl = cardEl.querySelector("[data-preview-profit]");
+  const returnEl = cardEl.querySelector("[data-preview-return]");
+  const betBtnA = cardEl.querySelector('[data-bet-side="a"]');
+  const betBtnB = cardEl.querySelector('[data-bet-side="b"]');
+
+  function currentAmount(){
+    const v = amountInput ? parseFloat(amountInput.value) : NaN;
+    return (typeof v === "number" && isFinite(v) && v > 0) ? v : 0;
+  }
+
+  function refreshPreview(){
+    const amt = currentAmount();
+    if(profitEl) profitEl.textContent = "+" + (Math.round(amt * 100) / 100);
+    if(returnEl) returnEl.textContent = Math.round(amt * 2 * 100) / 100;
+    const available = identityTeam ? getAvailableFaab(identityTeam.ownerId) : 0;
+    const valid = !!identityTeam && amt > 0 && amt <= available && !locked;
+    if(betBtnA) betBtnA.disabled = !valid;
+    if(betBtnB) betBtnB.disabled = !valid;
+  }
+
+  if(amountInput){
+    amountInput.addEventListener("input", refreshPreview);
+  }
+  refreshPreview();
+
+  function onBet(side){
+    if(!identityTeam) return;
+    const amt = currentAmount();
+    const available = getAvailableFaab(identityTeam.ownerId);
+    if(!(amt > 0)){ showBettingToast("Enter a bet amount first."); return; }
+    if(amt > available){ showBettingToast("That's more than your available FAAB (" + available + ")."); return; }
+    if(isWeekLocked(week)){ showBettingToast("Betting for this matchup has closed."); renderBettingPanel(); return; }
+    if(FAAB_FIREBASE_ENABLED && !FAAB_MEMBERS[identityTeam.ownerId]){
+      showBettingToast("This team hasn't been set up for betting yet — ask your commissioner.");
+      return;
+    }
+    const pickRoster = side === "a" ? rosterA : rosterB;
+    const oppRoster = side === "a" ? rosterB : rosterA;
+    const pickTeam = side === "a" ? a : b;
+    const oppTeam = side === "a" ? b : a;
+    const spread = side === "a" ? spreadA : spreadB;
+    showBettingConfirm({
+      ownerId: identityTeam.ownerId, week: week,
+      pickRosterId: pickRoster, pickTeamName: pickTeam.team || "Team",
+      oppRosterId: oppRoster, oppTeamName: oppTeam.team || "Team",
+      spread: spread, amount: amt
+    });
+  }
+  if(betBtnA) betBtnA.addEventListener("click", function(){ onBet("a"); });
+  if(betBtnB) betBtnB.addEventListener("click", function(){ onBet("b"); });
+
+  const editToggle = cardEl.querySelector("[data-edit-toggle]");
+  const editor = cardEl.querySelector("[data-editor]");
+  if(editToggle && editor){
+    editToggle.addEventListener("click", function(){
+      editor.style.display = editor.style.display === "none" ? "flex" : "none";
+    });
+    const cancelBtn = editor.querySelector("[data-line-cancel]");
+    const saveBtn = editor.querySelector("[data-line-save]");
+    const lineInput = editor.querySelector("[data-line-input]");
+    if(cancelBtn) cancelBtn.addEventListener("click", function(){ editor.style.display = "none"; });
+    if(saveBtn) saveBtn.addEventListener("click", function(){
+      const v = parseFloat(lineInput.value);
+      if(!isFinite(v)){ showBettingToast("Enter a valid number."); return; }
+      let rounded = Math.round(v * 2) / 2;
+      if(Math.abs(rounded % 1) < 0.001) rounded += (rounded >= 0 ? 0.5 : -0.5);
+      const lo = Math.min(rosterA, rosterB);
+      const key = week + ":" + lo + ":" + Math.max(rosterA, rosterB);
+      // The editor is always labeled/entered as Team A's own line -- convert to the
+      // lo-rosterId storage convention shared with the auto-generated line.
+      const signedForLo = (rosterA === lo) ? rounded : -rounded;
+      if(FAAB_FIREBASE_ENABLED){
+        FAAB_FB.setDoc(FAAB_FB.doc(FAAB_FB.db, "faab_line_overrides", key), {value: signedForLo, updatedAt: new Date().toISOString()})
+          .then(function(){ showBettingToast("Line updated for everyone."); })
+          .catch(function(){ showBettingToast("Couldn't save the line — check your connection."); });
+      } else {
+        FAAB_LINE_OVERRIDES[key] = signedForLo;
+        faabSaveLocalBook();
+        showBettingToast("Line updated.");
+        renderBettingPanel();
+      }
+    });
+  }
+}
+
+function renderBettingHistory(ownerId){
+  const el = document.getElementById("bettingHistoryList");
+  if(!el) return;
+  const book = ensureFaabBook();
+  const mine = book.wagers.filter(function(w){ return w.ownerId === ownerId; })
+    .slice().sort(function(x, y){ return new Date(y.placedAt) - new Date(x.placedAt); });
+  if(mine.length === 0){
+    el.innerHTML = '<p class="rec-empty">No wagers placed yet.</p>';
+    return;
+  }
+  el.innerHTML = mine.map(function(w){
+    const scoreNote = (w.status !== "pending" && typeof w.finalPickScore === "number")
+      ? ' <span class="betting-bet-meta">(' + w.finalPickScore.toFixed(1) + '–' + w.finalOppScore.toFixed(1) + ')</span>'
+      : '';
+    return '<div class="betting-bet-row">' +
+      '<span class="betting-bet-meta">Wk ' + w.week + '</span>' +
+      '<span class="betting-bet-pick">' + throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread) + '</span>' +
+      '<span class="betting-bet-meta">vs ' + throneEscAttr(w.oppTeamName) + '</span>' +
+      '<span class="betting-bet-meta">' + w.amount + ' FAAB → ' + w.potentialPayout + '</span>' +
+      scoreNote +
+      '<span class="betting-status-badge ' + w.status + '">' + w.status + '</span>' +
+    '</div>';
+  }).join("");
+}
+
+function renderBettingPanel(){
+  const panel = document.getElementById("bettingPanel");
+  if(!panel) return;
+  if(!Array.isArray(TEAMS) || TEAMS.length < 2 || !LAST_MATCHUPS || !Array.isArray(LAST_MATCHUPS.pairs) || LAST_MATCHUPS.pairs.length === 0){
+    panel.style.display = "none";
+    return;
+  }
+  panel.style.display = "";
+  const book = ensureFaabBook();
+  const week = LAST_MATCHUPS.week;
+
+  const syncEl = document.getElementById("bettingSyncStatus");
+  if(syncEl){
+    if(FAAB_FIREBASE_ENABLED === true){
+      syncEl.innerHTML = '<span class="betting-sync-badge live">🔥 Live sync &mdash; everyone in the league sees these bets</span>';
+    } else if(FAAB_FIREBASE_ENABLED === false){
+      syncEl.innerHTML = '<span class="betting-sync-badge local">📍 This browser only &mdash; not synced across devices</span>';
+    } else {
+      syncEl.innerHTML = '<span class="betting-sync-badge">Connecting&hellip;</span>';
+    }
+  }
+  const constNoteEl = document.getElementById("bettingConstNote");
+  if(constNoteEl){
+    constNoteEl.innerHTML = "In-league FAAB game only &mdash; no real money involved. " +
+      (FAAB_FIREBASE_ENABLED
+        ? "Bets, balances, and lines are shared live with everyone in the league. The first time you bet on a new device you'll be asked for your team's passcode (ask your commissioner) &mdash; after that it's remembered on that device. "
+        : "Your balance and bets are saved only in this browser, so they won't follow you to a different device. ") +
+      "Lines are auto-generated from each team's season scoring average; the commissioner can hand-edit any line before it locks. Betting on a matchup locks at that week's estimated kickoff and settles automatically once Sleeper shows a final score.";
+  }
+
+  const idSel = document.getElementById("bettingIdentitySelect");
+  if(idSel){
+    // Rebuilt every render (cheap, 12 options) so a team-name change in live data shows up;
+    // the change listener itself is only attached once.
+    const sorted = TEAMS.slice().sort(function(a, b){ return a.team.localeCompare(b.team); });
+    let optsHtml = '<option value="">Select your team&hellip;</option>';
+    sorted.forEach(function(t){
+      optsHtml += '<option value="' + throneEscAttr(t.ownerId) + '">' + throneEscAttr(t.team) + '</option>';
+    });
+    idSel.innerHTML = optsHtml;
+    idSel.value = book.identityOwnerId || "";
+    if(idSel.dataset.wired !== "1"){
+      idSel.dataset.wired = "1";
+      idSel.addEventListener("change", function(){
+        FAAB_LOCAL_IDENTITY = idSel.value || null;
+        try{ localStorage.setItem(FAAB_IDENTITY_KEY, FAAB_LOCAL_IDENTITY || ""); }catch(e){}
+        renderBettingPanel();
+      });
+    }
+  }
+
+  const identityTeam = book.identityOwnerId ? (TEAMS.find(function(t){ return t.ownerId === book.identityOwnerId; }) || null) : null;
+
+  const balanceChip = document.getElementById("bettingBalanceChip");
+  const noIdentEl = document.getElementById("bettingNoIdentity");
+  const memberNote = document.getElementById("bettingMemberSetupNote");
+  if(identityTeam){
+    const avail = Math.round(getAvailableFaab(identityTeam.ownerId) * 100) / 100;
+    balanceChip.style.display = "flex";
+    document.getElementById("bettingBalanceNum").textContent = avail;
+    noIdentEl.style.display = "none";
+  } else {
+    balanceChip.style.display = "none";
+    noIdentEl.style.display = "block";
+  }
+  if(memberNote) memberNote.style.display = (FAAB_FIREBASE_ENABLED && identityTeam && !FAAB_MEMBERS[identityTeam.ownerId]) ? "block" : "none";
+
+  const grid = document.getElementById("bettingCardsGrid");
+  const locked = isWeekLocked(week);
+  grid.innerHTML = LAST_MATCHUPS.pairs.map(function(pair){
+    return buildBettingCardHtml(week, pair, identityTeam, locked, book);
+  }).join("");
+  grid.querySelectorAll(".betting-card").forEach(function(cardEl){
+    wireBettingCard(cardEl, week, identityTeam, locked);
+  });
+
+  const histToggle = document.getElementById("bettingHistoryToggle");
+  const histList = document.getElementById("bettingHistoryList");
+  if(identityTeam){
+    const myWagers = book.wagers.filter(function(w){ return w.ownerId === identityTeam.ownerId; });
+    histToggle.style.display = myWagers.length > 0 ? "block" : "none";
+    if(histToggle.dataset.wired !== "1"){
+      histToggle.dataset.wired = "1";
+      histToggle.addEventListener("click", function(){
+        const showing = histList.style.display !== "none";
+        histList.style.display = showing ? "none" : "block";
+        histToggle.textContent = showing ? "Show my full wager history" : "Hide my full wager history";
+        if(!showing) renderBettingHistory(identityTeam.ownerId);
+      });
+    }
+    if(histList.style.display !== "none") renderBettingHistory(identityTeam.ownerId);
+  } else {
+    histToggle.style.display = "none";
+    histList.style.display = "none";
+  }
+}
+
+// Decides LOCAL vs FIREBASE mode and wires up whichever one applies. The Firebase bootstrap
+// module (top of file, before the main script) resolves independently and asynchronously --
+// this listens for its outcome rather than assuming any particular order, and falls back to
+// local mode on its own after a few seconds if neither outcome ever arrives (offline, ad
+// blocker, etc.), so betting always ends up usable one way or the other.
+function initFaabBettingSystem(){
+  try{ FAAB_LOCAL_IDENTITY = localStorage.getItem(FAAB_IDENTITY_KEY) || null; }catch(e){ FAAB_LOCAL_IDENTITY = null; }
+  faabLoadLocalBook(); // local-mode cache; Firebase mode replaces this the instant its first snapshot arrives
+
+  function goLocal(){
+    if(FAAB_FIREBASE_ENABLED !== null) return; // already resolved the other way -- ignore a late/duplicate event
+    FAAB_FIREBASE_ENABLED = false;
+    renderBettingPanel();
+    settleAllPendingWagers();
+  }
+
+  function goFirebase(){
+    if(FAAB_FIREBASE_ENABLED === false) return; // already fell back to local -- ignore a late ready event
+    FAAB_FIREBASE_ENABLED = true;
+    FAAB_FB = window.__FAAB_FB;
+    FAAB_WAGERS = [];
+    FAAB_LINE_OVERRIDES = {}; // Firebase is now the source of truth; drop the local-mode cache
+    FAAB_FB.onSnapshot(FAAB_FB.collection(FAAB_FB.db, "faab_wagers"), function(snap){
+      FAAB_WAGERS = snap.docs.map(function(d){ return Object.assign({id: d.id}, d.data()); });
+      renderBettingPanel();
+      settleAllPendingWagers();
+    }, function(){ showBettingToast("Betting sync connection issue — retrying…"); });
+    FAAB_FB.onSnapshot(FAAB_FB.collection(FAAB_FB.db, "faab_line_overrides"), function(snap){
+      const obj = {};
+      snap.docs.forEach(function(d){ obj[d.id] = d.data().value; });
+      FAAB_LINE_OVERRIDES = obj;
+      renderBettingPanel();
+    });
+    FAAB_FB.onSnapshot(FAAB_FB.collection(FAAB_FB.db, "faab_members"), function(snap){
+      const obj = {};
+      snap.docs.forEach(function(d){ obj[d.id] = d.data(); });
+      FAAB_MEMBERS = obj;
+      renderBettingPanel();
+    });
+    renderBettingPanel();
+  }
+
+  window.addEventListener("faab-firebase-ready", goFirebase, {once: true});
+  window.addEventListener("faab-firebase-unavailable", goLocal, {once: true});
+  setTimeout(goLocal, 4000);
+  renderBettingPanel(); // render immediately in whatever state we're in so the panel isn't blank
+}
+
 // ---------- LIVE TICKER ----------
 // Stock-ticker-style marquee combining our own league activity (Sleeper transactions --
 // same API and player-name lookup the rest of the page uses, so this half is reliable)
@@ -5094,6 +6098,8 @@ loadHomeData();
 loadRivalryHistory();
 loadTransactionStats();
 loadCurrentSeasonChampionStatus();
+initFaabBettingSystem();
+loadFaabBudgets();
 startTicker();
 startKeyDateCountdowns();
 </script>
