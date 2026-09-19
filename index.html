@@ -103,6 +103,21 @@
   .tk-badge-drop{background:var(--red-soft); color:var(--red);}
   .tk-badge-news{background:var(--surface-3); color:var(--chalk-dim);}
   .tk-badge-nfltrade{background:var(--gold-soft); color:var(--gold-bright);}
+  .tk-badge-live{background:#B3102A; color:#fff; animation:tickerPulse 1.4s ease-in-out infinite;}
+  .tk-badge-final{background:var(--surface-3); color:var(--chalk-dim);}
+  .tk-badge-breaking{
+    background:linear-gradient(135deg, #FFD46B, #ED2939); color:#2A0400; font-weight:800;
+    animation:tickerBreakingPulse 1s ease-in-out infinite;
+  }
+  .tk-badge-betting{background:#332560; color:#D9CCFF;}
+  .tk-badge-record{background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;}
+  .tk-badge-power{background:#0F3350; color:#8FD3FF;}
+  .tk-badge-gotw{background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;}
+  .tk-badge-rivalry{background:#5A1620; color:#FFB3BE;}
+  .tk-badge-bank{background:#0F3D2E; color:var(--green);}
+  .tk-badge-audio{background:#332560; color:#D9CCFF;}
+  .tk-badge-standings{background:var(--surface-3); color:var(--chalk-dim);}
+  @keyframes tickerBreakingPulse{ 0%,100%{opacity:1;} 50%{opacity:0.6;} }
   .tk-score-bug{display:inline-flex; align-items:center; gap:6px;}
   .tk-score-bug .tk-team{font-family:'Teko', sans-serif; font-size:16px; font-weight:700; color:var(--chalk); letter-spacing:0.5px;}
   .tk-score-bug .tk-num{font-family:'Teko', sans-serif; font-size:17px; font-weight:700; color:var(--gold-bright); min-width:14px; text-align:center;}
@@ -111,6 +126,11 @@
     padding:3px 6px; border-radius:3px; background:var(--surface-3); color:var(--chalk-dim); white-space:nowrap;
   }
   .tk-score-bug .tk-status.tk-status-live{background:#B3102A; color:#fff; animation:tickerPulse 1.4s ease-in-out infinite;}
+  .tk-remaining{
+    font-family:'Inter', sans-serif; font-size:9px; font-weight:700; letter-spacing:0.3px;
+    color:var(--chalk-faint); background:var(--surface-3); padding:2px 6px; border-radius:3px; white-space:nowrap;
+  }
+  .ticker-item.is-breaking{background:rgba(237,41,57,0.14); border-right-color:rgba(237,41,57,0.35);}
   .ticker-tag-empty{color:var(--chalk-faint); font-style:italic; padding:0 16px; font-weight:400; text-transform:none;}
   @media (max-width:640px){
     .ticker-item{font-size:11px; padding:0 12px;}
@@ -837,6 +857,49 @@
     padding:4px 11px; border-radius:999px; box-shadow:0 4px 10px -2px rgba(242,181,66,0.5);
   }
 
+  /* ---------- PLAYOFF BRACKETS ---------- */
+  .bracket-section{margin-top:26px;}
+  .bracket-section + .bracket-section{margin-top:34px; padding-top:22px; border-top:1px solid var(--line-soft);}
+  .bracket-heading{font-size:16px; font-weight:700; letter-spacing:0.2px; margin:0 0 4px; display:flex; align-items:center; gap:8px; color:var(--chalk);}
+  .bracket-heading.toilet{color:var(--chalk-dim);}
+  .bracket-sub{font-size:12px; color:var(--chalk-faint); margin:0 0 14px;}
+  .bracket-empty{
+    background:var(--surface-2); border:1px dashed var(--line); border-radius:var(--radius-sm);
+    padding:20px; text-align:center; color:var(--chalk-dim); font-size:13px;
+  }
+  .bracket-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px;}
+  .bracket-rounds{display:flex; gap:30px; min-width:min-content; padding:14px 2px 4px;}
+  .bracket-round{display:flex; flex-direction:column; justify-content:space-around; gap:16px; min-width:200px;}
+  .bracket-round-label{
+    font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold-dark); font-weight:700;
+    text-align:center; margin-bottom:2px;
+  }
+  .bracket-match{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:9px 12px; box-shadow:var(--shadow-soft); position:relative;
+  }
+  .bracket-match::after{
+    content:''; position:absolute; top:50%; right:-30px; width:30px; height:1px; background:var(--line);
+  }
+  .bracket-round:last-child .bracket-match::after{display:none;}
+  .bracket-slot{display:flex; align-items:center; gap:8px; padding:5px 0;}
+  .bracket-slot + .bracket-slot{border-top:1px solid var(--line-soft);}
+  .bracket-slot img{width:24px; height:24px; border-radius:6px; object-fit:cover; border:1px solid var(--line-soft); flex-shrink:0; background:var(--surface-3);}
+  .bracket-slot-name{font-size:12.5px; font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--chalk);}
+  .bracket-slot-score{font-family:'Teko', sans-serif; font-size:18px; color:var(--chalk-dim); min-width:28px; text-align:right; flex-shrink:0;}
+  .bracket-slot.is-winner .bracket-slot-name{color:var(--gold-bright);}
+  .bracket-slot.is-winner .bracket-slot-score{color:var(--gold-bright); font-weight:700;}
+  .bracket-slot.is-tbd .bracket-slot-name{color:var(--chalk-faint); font-style:italic;}
+  .bracket-slot.is-tbd img{visibility:hidden;}
+  .bracket-match.is-final{border-color:rgba(242,181,66,0.45); box-shadow:0 0 0 1px rgba(242,181,66,0.3), var(--shadow-soft);}
+  .bracket-match.is-toilet-final{border-color:rgba(255,107,107,0.4); box-shadow:0 0 0 1px rgba(255,107,107,0.28), var(--shadow-soft);}
+  .bracket-match-badge{
+    position:absolute; top:-10px; left:10px; font-size:9px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;
+    padding:3px 9px; border-radius:999px; background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;
+    white-space:nowrap;
+  }
+  .bracket-match-badge.toilet{background:linear-gradient(135deg, #FF8B8B, var(--red-dark)); color:#2A0D0D;}
+
   /* ---------- FAAB BETTING LINES ---------- */
   .betting-toolbar{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin:-6px 0 16px;}
   .betting-identity{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
@@ -1122,8 +1185,8 @@
 </head>
 <body>
 
-<div class="ticker-bar" id="tickerBar" role="marquee" aria-label="Live league and NFL news ticker">
-  <div class="ticker-flag"><span class="ticker-flag-dot"></span>Live</div>
+<div class="ticker-bar" id="tickerBar" role="marquee" aria-label="Live league news ticker">
+  <div class="ticker-flag" id="tickerFlag"><span class="ticker-flag-dot" id="tickerFlagDot"></span><span id="tickerFlagLabel">The NUT Network</span></div>
   <div class="ticker-scroll-wrap">
     <div class="ticker-track" id="tickerTrack">
       <span class="ticker-item ticker-tag-empty">Loading live ticker&hellip;</span>
@@ -1259,6 +1322,18 @@
         <tbody id="standingsBody"></tbody>
       </table></div>
       <p class="const-note" style="margin-top:10px;">Playoff % is a live 1,500-run simulation of the remaining schedule using each team's season-average scoring as a strength estimate &mdash; a heuristic, not a guarantee.</p>
+
+      <div class="bracket-section">
+        <h3 class="bracket-heading">🏆 Championship Bracket</h3>
+        <p class="bracket-sub">Top 6 seeds, single elimination &mdash; the winner is crowned league champion.</p>
+        <div class="bracket-scroll" id="champBracketScroll"><div class="bracket-empty">Loading bracket&hellip;</div></div>
+      </div>
+
+      <div class="bracket-section">
+        <h3 class="bracket-heading toilet">🚽 Toilet Bowl Bracket</h3>
+        <p class="bracket-sub">Bottom 6 seeds &mdash; the "winner" here finishes dead last and sets next year's draft order.</p>
+        <div class="bracket-scroll" id="toiletBracketScroll"><div class="bracket-empty">Loading bracket&hellip;</div></div>
+      </div>
     </div>
   </div>
 
@@ -3207,8 +3282,10 @@ function computeH2HAvg(ownerA, ownerB){
 }
 
 let ALL_PAIR_GAMES = null;
+let LEAGUE_RECORDS = null; // exported for the ticker's RECORD-category items; set by buildAndRenderRecords()
 let POWER_SCORES = {};
 let POWER_TRENDS = {};
+let POWER_RANK_ORDER = []; // rosterIds sorted best-to-worst by current Power Score; used by the ticker
 let GOTW_PICK = null;
 let HEAD_TO_HEAD = null; // HEAD_TO_HEAD[ownerA][ownerB] = {wins, losses, ties}
 
@@ -3788,7 +3865,9 @@ function buildAndRenderRecords(results){
     longestLoseStreak: longestStreaks(allGames, false)
   };
 
+  LEAGUE_RECORDS = RECORDS;
   renderRecordsAccordion(RECORDS);
+  refreshTicker();
 }
 
 function rowTeam(season, rosterId){
@@ -4409,6 +4488,129 @@ function loadCurrentSeasonChampionStatus(){
   }).catch(function(){ /* keep standings-based projection */ });
 }
 
+// ---------- PLAYOFF BRACKETS (Standings tab) ----------
+let PLAYOFF_BRACKET_DATA = null;
+
+function weekScoreMap(week){
+  return fetchMatchupPairs(week).then(function(pairs){
+    const map = {};
+    pairs.forEach(function(p){
+      if(typeof p.aPoints === "number") map[p.a] = p.aPoints;
+      if(typeof p.bPoints === "number") map[p.b] = p.bPoints;
+    });
+    return map;
+  }).catch(function(){ return {}; });
+}
+
+function bracketTeam(rosterId){
+  return TEAMS.find(function(t){ return t.rosterId === rosterId; }) || null;
+}
+
+function bracketSlotHTML(rosterId, points, isWinner){
+  if(rosterId === null || rosterId === undefined){
+    return '<div class="bracket-slot is-tbd"><img src="" alt=""/><span class="bracket-slot-name">TBD</span></div>';
+  }
+  const t = bracketTeam(rosterId) || {team: "Team " + rosterId, avatar: ""};
+  const scoreHTML = (typeof points === "number") ? '<span class="bracket-slot-score">' + points.toFixed(1) + '</span>' : '';
+  return '<div class="bracket-slot' + (isWinner ? ' is-winner' : '') + '">' +
+      '<img src="' + t.avatar + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+      '<span class="bracket-slot-name">' + t.team + '</span>' +
+      scoreHTML +
+    '</div>';
+}
+
+function bracketRoundLabel(r, maxRound){
+  const dist = maxRound - r;
+  if(dist === 0) return "Final";
+  if(dist === 1) return "Semifinals";
+  if(dist === 2) return "Quarterfinals";
+  return "Round " + r;
+}
+
+function renderBracketGroup(matches, opts){
+  if(!Array.isArray(matches) || matches.length === 0){
+    return '<div class="bracket-empty">' + opts.emptyText + '</div>';
+  }
+  const maxRound = matches.reduce(function(m, x){ return Math.max(m, x.r || 1); }, 1);
+  const byRound = {};
+  matches.forEach(function(m){
+    const r = m.r || 1;
+    if(!byRound[r]) byRound[r] = [];
+    byRound[r].push(m);
+  });
+  const roundNums = Object.keys(byRound).map(Number).sort(function(a, b){ return a - b; });
+  const roundsHTML = roundNums.map(function(r){
+    const week = opts.playoffStart + (r - 1);
+    const scoreMap = opts.scoresByWeek[week] || {};
+    const matchesHTML = byRound[r].map(function(m){
+      const decided = m.w !== undefined && m.w !== null;
+      const aWin = decided && m.w === m.t1;
+      const bWin = decided && m.w === m.t2;
+      let badge = "";
+      if(m.p === 1) badge = '<span class="bracket-match-badge' + (opts.isToilet ? ' toilet' : '') + '">' + (opts.isToilet ? '🚽 Toilet Bowl' : '🏆 Championship') + '</span>';
+      else if(m.p === 3) badge = '<span class="bracket-match-badge' + (opts.isToilet ? ' toilet' : '') + '">' + (opts.isToilet ? '9th Place' : '3rd Place') + '</span>';
+      else if(m.p === 5) badge = '<span class="bracket-match-badge' + (opts.isToilet ? ' toilet' : '') + '">' + (opts.isToilet ? '11th Place' : '5th Place') + '</span>';
+      const cls = "bracket-match" + (m.p === 1 ? (opts.isToilet ? " is-toilet-final" : " is-final") : "");
+      return '<div class="' + cls + '">' + badge +
+          bracketSlotHTML(m.t1, scoreMap[m.t1], aWin) +
+          bracketSlotHTML(m.t2, scoreMap[m.t2], bWin) +
+        '</div>';
+    }).join("");
+    return '<div class="bracket-round"><div class="bracket-round-label">' + bracketRoundLabel(r, maxRound) + '</div>' + matchesHTML + '</div>';
+  }).join("");
+  return '<div class="bracket-rounds">' + roundsHTML + '</div>';
+}
+
+function renderPlayoffBrackets(){
+  if(!PLAYOFF_BRACKET_DATA) return;
+  const d = PLAYOFF_BRACKET_DATA;
+  const champEl = document.getElementById("champBracketScroll");
+  const toiletEl = document.getElementById("toiletBracketScroll");
+  if(champEl){
+    champEl.innerHTML = renderBracketGroup(d.winners, {
+      playoffStart: d.playoffStart, scoresByWeek: d.scoresByWeek, isToilet: false,
+      emptyText: "The Championship bracket will appear here once seeding is set (Week " + d.playoffStart + ")."
+    });
+  }
+  if(toiletEl){
+    toiletEl.innerHTML = renderBracketGroup(d.losers, {
+      playoffStart: d.playoffStart, scoresByWeek: d.scoresByWeek, isToilet: true,
+      emptyText: "The Toilet Bowl bracket will appear here once seeding is set (Week " + d.playoffStart + ")."
+    });
+  }
+}
+
+function loadPlayoffBrackets(){
+  Promise.all([
+    fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID),
+    fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/winners_bracket").catch(function(){ return []; }),
+    fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/losers_bracket").catch(function(){ return []; })
+  ]).then(function(res){
+    const league = res[0] || {}, winners = res[1] || [], losers = res[2] || [];
+    const playoffStart = (league.settings && league.settings.playoff_week_start) || 15;
+    const rounds = [];
+    winners.concat(losers).forEach(function(m){
+      const r = m.r || 1;
+      if(rounds.indexOf(r) === -1) rounds.push(r);
+    });
+    const weeks = rounds.map(function(r){ return playoffStart + (r - 1); });
+    const uniqueWeeks = weeks.filter(function(w, i){ return weeks.indexOf(w) === i; });
+    return Promise.all(uniqueWeeks.map(function(w){
+      return weekScoreMap(w).then(function(map){ return {week: w, map: map}; });
+    })).then(function(weekMaps){
+      const scoresByWeek = {};
+      weekMaps.forEach(function(wm){ scoresByWeek[wm.week] = wm.map; });
+      PLAYOFF_BRACKET_DATA = {winners: winners, losers: losers, playoffStart: playoffStart, scoresByWeek: scoresByWeek};
+      renderPlayoffBrackets();
+    });
+  }).catch(function(){
+    const champEl = document.getElementById("champBracketScroll");
+    const toiletEl = document.getElementById("toiletBracketScroll");
+    if(champEl) champEl.innerHTML = '<div class="bracket-empty">Bracket unavailable right now (live fetch was blocked by the browser).</div>';
+    if(toiletEl) toiletEl.innerHTML = '<div class="bracket-empty">Bracket unavailable right now (live fetch was blocked by the browser).</div>';
+  });
+}
+
 function showTeamDetail(teamName){
   const t = TEAMS.find(function(x){ return x.team === teamName; });
   if(!t) return;
@@ -4660,6 +4862,7 @@ function loadLiveData(){
       renderTeams();
       renderBonusGames();
       renderChampionsThrone();
+      renderPlayoffBrackets();
       if(LAST_MATCHUPS) renderMatchups(LAST_MATCHUPS.week, LAST_MATCHUPS.pairs, LAST_MATCHUPS.usedLive);
       if(LAST_RECAP) renderRecap(LAST_RECAP.week, LAST_RECAP.pairs, true);
       maybeComputePowerRankings();
@@ -5365,8 +5568,10 @@ function computePowerRankings(){
 
   POWER_SCORES = {};
   POWER_TRENDS = {};
+  POWER_RANK_ORDER = finalScores.map(function(f){ return f.team.rosterId; });
   finalScores.forEach(function(f){ POWER_SCORES[f.team.rosterId] = f.score; POWER_TRENDS[f.team.rosterId] = f.trend; });
   maybeComputeGameOfWeek();
+  refreshTicker();
 
   const asOfWeek = prAndRecent.asOfWeek;
 
@@ -6311,14 +6516,29 @@ function initFaabBettingSystem(){
   renderBettingPanel(); // render immediately in whatever state we're in so the panel isn't blank
 }
 
-// ---------- LIVE TICKER ----------
-// Stock-ticker-style marquee combining our own league activity (Sleeper transactions --
-// same API and player-name lookup the rest of the page uses, so this half is reliable)
-// with real NFL news/scores/trades (ESPN's public site API -- not something this page has
-// used before, so it's treated as best-effort: any failure here just quietly drops those
-// items rather than breaking the ticker or the page).
-let TICKER_ITEMS = { league: [], nfl: [] };
+// ---------- LEAGUE NEWS / BANK / AUDIO RECAP (hand-maintained ticker content) ----------
+// This is a static site with no backend, so these three categories can't be auto-detected --
+// edit this block directly (and redeploy) to push a new item into the live ticker.
+const LEAGUE_ANNOUNCEMENTS = [
+  // {text:"Draft night is set for Aug 30 @ 7pm ET.", breaking:false, expires:"2026-08-30"}
+];
+const LEAGUE_BANK_BALANCE = null; // e.g. 184 -- current $ balance from entry/transaction fees, or null to hide
+const LATEST_AUDIO_RECAP = null;  // e.g. {week:3, url:"https://..."} -- or null to hide
+
+// ---------- LIVE TICKER (fantasy-focused, ESPN BottomLine style) ----------
+// Self-contained: polls Sleeper directly for current-week scores and recent transactions on
+// its own short interval, and reads whatever the rest of the page has already computed
+// (TEAMS, POWER_SCORES, LEAGUE_RECORDS, GOTW_PICK, HEAD_TO_HEAD, FAAB_WAGERS, etc.) for
+// everything else. Every cycle rebuilds the full item pool from scratch and re-sorts it by a
+// priority that shifts with the point in the NFL week (see tickerPhase/TICKER_PHASE_BOOST),
+// so stale items naturally fall out and the mix of what's showing changes throughout the week.
 let LEAGUE_TX_RAW = [];
+let TICKER_LIVE_PAIRS = [];          // current week's fetchMatchupPairs() result
+let TICKER_LIVE_WEEK = null;
+let TICKER_PREV_LEADER = {};         // "loRosterId:hiRosterId" -> leading rosterId last cycle (session-scoped)
+let TICKER_PREV_STANDINGS_RANK = {}; // rosterId -> standings rank last cycle
+let TICKER_PREV_POWER_RANK = {};     // rosterId -> power rank last cycle
+let TICKER_REFRESH_TIMER = null;
 
 function rosterTeamName(rid){
   const t = TEAMS.find(function(x){ return x.rosterId === rid; });
@@ -6331,139 +6551,425 @@ function tickerPlayerLabel(pid){
   return (lbl.pos ? lbl.pos + " " : "") + lbl.name;
 }
 
-// Turns one Sleeper transaction into zero or more ticker items. Player-add/drop items
-// are skipped (not just shown blank) until ALL_PLAYERS is loaded and can name the player;
-// rebuildLeagueTickerItems() re-runs this once that data arrives so they backfill in.
-function buildLeagueTickerItems(tx){
-  if(!tx || tx.status !== "complete") return [];
-  const ts = tx.status_updated || tx.created || 0;
-  const items = [];
+function tickerTeam(rid){
+  return TEAMS.find(function(t){ return t.rosterId === rid; }) || {team: "Team " + rid, avatar: ""};
+}
 
-  if(tx.type === "trade"){
-    const rids = tx.roster_ids || [];
-    if(rids.length < 2) return [];
-    const received = {};
-    rids.forEach(function(rid){ received[rid] = []; });
-    if(tx.adds){
-      Object.keys(tx.adds).forEach(function(pid){
-        const rid = tx.adds[pid];
-        const lbl = tickerPlayerLabel(pid);
-        if(received[rid] && lbl) received[rid].push(lbl);
+function pairKey(a, b){ return Math.min(a, b) + ":" + Math.max(a, b); }
+
+function ordinal(n){
+  const s = ["th", "st", "nd", "rd"], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+function hoursUntilDowHour(fromDay, fromHour, targetDay, targetHour){
+  let hrs = ((targetDay - fromDay + 7) % 7) * 24 + (targetHour - fromHour);
+  if(hrs < 0) hrs += 7 * 24;
+  return hrs;
+}
+
+// Rough ET read on where we are in the weekly NFL cycle. There's no live per-game schedule
+// feed wired into this page, so this leans on day-of-week/time-of-day the same way the rest
+// of the site already estimates kickoff windows (see NFL_SEASON_2026_WEEK1_THU) rather than
+// trying to track each individual game's real status.
+function tickerPhase(){
+  let et;
+  try{ et = new Date(new Date().toLocaleString("en-US", {timeZone: "America/New_York"})); }
+  catch(e){ et = new Date(); }
+  const day = et.getDay(), hour = et.getHours() + et.getMinutes() / 60;
+  const inLiveWindow =
+    (day === 4 && hour >= 20.25 && hour < 24) || // Thursday Night Football
+    (day === 0 && hour >= 13 && hour < 24) ||    // Sunday slate
+    (day === 1 && hour >= 20.25 && hour < 24);   // Monday Night Football
+  if(inLiveWindow) return "live";
+  if(day === 2) return "post";                  // Tuesday: recap day
+  if(day === 1 && hour < 20.25) return "post";   // Monday daytime: recapping Sunday
+  const nextKickoffHrs = Math.min(
+    hoursUntilDowHour(day, hour, 4, 20.25),
+    hoursUntilDowHour(day, hour, 0, 13),
+    hoursUntilDowHour(day, hour, 1, 20.25)
+  );
+  if(nextKickoffHrs <= 20) return "pre";
+  return "midweek";
+}
+
+const TICKER_PHASE_BOOST = {
+  live:    {live:45, close:40, lead:42, upset:32, player:28, final:-30, betting:-5, standings:-10, power:-15, trade:-10, waiver:-10, gotw:-20, rivalry:-15, streak:-15, record:8,  bank:-25, audio:-25, news:-10},
+  post:    {final:42, upset:26, close:20, betting:26, standings:32, record:22, gotw:-30, live:-45, lead:-45, player:10, power:6,  trade:6,  waiver:6,  rivalry:0,  streak:6,  bank:0,   audio:18, news:6},
+  midweek: {trade:36, waiver:30, power:30, standings:14, record:14, rivalry:16, bank:20, news:22, betting:4,  gotw:2,   streak:10, live:-45, final:-30, lead:-45, upset:-30, player:-10, audio:12},
+  pre:     {gotw:36, betting:26, standings:14, streak:20, rivalry:26, record:10, trade:10, waiver:10, power:10, news:12, live:-45, final:-30, lead:-45, upset:-30, player:-15, bank:6,   audio:6}
+};
+
+function tickerScoreBugHTML(aName, aScore, bName, bScore, statusLabel, isLive, remainingHtml){
+  return '<span class="tk-score-bug">' +
+    '<span class="tk-team">' + aName + '</span><span class="tk-num">' + aScore + '</span>' +
+    '<span class="tk-status' + (isLive ? ' tk-status-live' : '') + '">' + statusLabel + '</span>' +
+    '<span class="tk-num">' + bScore + '</span><span class="tk-team">' + bName + '</span>' +
+    (remainingHtml || '') +
+  '</span>';
+}
+
+// Heuristic only -- this page has no live per-player NFL game-status feed, so a starter with
+// no recorded points yet is treated as "still to play." Occasionally undercounts a starter
+// who genuinely scored a real zero; same tradeoff the Playoff % and FAAB spread estimates
+// elsewhere on this page already make, and labeled as such wherever it's shown.
+function playersRemainingTag(starters, playerPoints){
+  if(!Array.isArray(starters) || starters.length === 0) return "";
+  const real = starters.filter(function(pid){ return pid && pid !== "0"; });
+  if(real.length === 0) return "";
+  const remaining = real.filter(function(pid){
+    const pts = playerPoints ? playerPoints[pid] : undefined;
+    return typeof pts !== "number" || pts === 0;
+  }).length;
+  if(remaining === 0) return "";
+  return '<span class="tk-remaining">' + remaining + ' left</span>';
+}
+
+// ---- Generators: each returns [{id, cat, html, ts, priority, breaking}] ----
+
+function genLiveAndFinalItems(){
+  const items = [];
+  const week = TICKER_LIVE_WEEK;
+  if(!week || !Array.isArray(TICKER_LIVE_PAIRS)) return items;
+  TICKER_LIVE_PAIRS.forEach(function(m){
+    if(typeof m.aPoints !== "number" || typeof m.bPoints !== "number") return;
+    if(m.aPoints === 0 && m.bPoints === 0) return; // week hasn't kicked off yet
+    const a = tickerTeam(m.a), b = tickerTeam(m.b);
+    const margin = Math.abs(m.aPoints - m.bPoints);
+    const leaderRid = m.aPoints === m.bPoints ? null : (m.aPoints > m.bPoints ? m.a : m.b);
+    const key = pairKey(m.a, m.b);
+    const remainingA = playersRemainingTag(m.aStarters, m.aPlayerPoints);
+    const remainingB = playersRemainingTag(m.bStarters, m.bPlayerPoints);
+    const isFinal = remainingA === "" && remainingB === "";
+
+    if(!isFinal){
+      items.push({
+        id: "live:" + week + ":" + key, cat: "live", ts: Date.now(), priority: 50,
+        html: tickerScoreBugHTML(a.team, m.aPoints.toFixed(1), b.team, m.bPoints.toFixed(1), "LIVE", true, remainingA || remainingB)
+      });
+      if(margin <= 8){
+        items.push({
+          id: "close:" + week + ":" + key, cat: "close", ts: Date.now(), priority: 55,
+          html: '<span class="tk-badge tk-badge-live">Close Game</span>' + a.team + ' ' + m.aPoints.toFixed(1) + ' &ndash; ' + b.team + ' ' + m.bPoints.toFixed(1) + ' (' + margin.toFixed(1) + ')'
+        });
+      }
+      const prevLeader = TICKER_PREV_LEADER[key];
+      if(leaderRid && prevLeader !== undefined && prevLeader !== null && prevLeader !== leaderRid){
+        const leaderTeam = tickerTeam(leaderRid), trailTeam = tickerTeam(leaderRid === m.a ? m.b : m.a);
+        items.push({
+          id: "lead:" + key + ":" + Date.now(), cat: "lead", ts: Date.now(), priority: 90, breaking: true,
+          html: '<span class="tk-badge tk-badge-breaking">Lead Change</span>🚨 ' + leaderTeam.team + ' takes a ' + margin.toFixed(1) + '-point lead over ' + trailTeam.team
+        });
+      }
+      if(leaderRid !== null) TICKER_PREV_LEADER[key] = leaderRid;
+    } else {
+      items.push({
+        id: "final:" + week + ":" + key, cat: "final", ts: Date.now(), priority: 45,
+        html: '<span class="tk-badge tk-badge-final">Final</span>' + tickerScoreBugHTML(a.team, m.aPoints.toFixed(1), b.team, m.bPoints.toFixed(1), "FINAL", false, "")
       });
     }
-    if(Array.isArray(tx.draft_picks)){
-      tx.draft_picks.forEach(function(dp){
-        if(received[dp.owner_id] !== undefined){
-          received[dp.owner_id].push(dp.season + " Rd " + dp.round + " pick");
+
+    // Upset alert, using the pre-game FAAB spread as the "expected" line.
+    if(leaderRid){
+      try{
+        const spreadA = spreadForSide(week, m, m.a), spreadB = spreadForSide(week, m, m.b);
+        const dogRid = spreadA > 0 ? m.a : (spreadB > 0 ? m.b : null);
+        const dogSpread = spreadA > 0 ? spreadA : spreadB;
+        if(dogRid && dogSpread > 0 && leaderRid === dogRid && margin > 3){
+          const dogTeam = tickerTeam(dogRid);
+          items.push({
+            id: "upset:" + week + ":" + key, cat: "upset", ts: Date.now(), priority: isFinal ? 70 : 60, breaking: !isFinal && margin > 10,
+            html: '<span class="tk-badge tk-badge-breaking">Upset Alert</span>👀 ' + dogTeam.team + ' +' + dogSpread.toFixed(1) + ' is ' + (isFinal ? 'winning' : 'currently leading') + ' by ' + margin.toFixed(1)
+          });
+        }
+      }catch(e){ /* spread not available yet -- skip upset detection for this matchup */ }
+    }
+
+    // Monster individual performances.
+    [{starters: m.aStarters, pts: m.aPlayerPoints}, {starters: m.bStarters, pts: m.bPlayerPoints}].forEach(function(side){
+      if(!Array.isArray(side.starters) || !side.pts) return;
+      side.starters.forEach(function(pid){
+        const p = side.pts[pid];
+        if(typeof p === "number" && p >= 35){
+          const lbl = tickerPlayerLabel(pid);
+          if(!lbl) return;
+          items.push({
+            id: "player:" + week + ":" + pid, cat: "player", ts: Date.now(), priority: 65, breaking: p >= 45,
+            html: '<span class="tk-badge tk-badge-breaking">Monster Game</span>🔥 ' + lbl + ' has ' + p.toFixed(1) + ' fantasy points'
+          });
         }
       });
-    }
-    const parts = rids.map(function(rid){
-      const got = received[rid];
-      return rosterTeamName(rid) + (got.length ? " get " + got.join(", ") : "");
     });
-    items.push({cat:"trade", html:'<span class="tk-badge tk-badge-trade">Trade</span>' + parts.join("  ⇄  "), ts: ts});
-  } else if(tx.type === "waiver" || tx.type === "free_agent"){
-    if(tx.adds){
-      Object.keys(tx.adds).forEach(function(pid){
-        const lbl = tickerPlayerLabel(pid);
-        if(!lbl) return;
-        items.push({cat:"add", html:'<span class="tk-badge tk-badge-add">Add</span>' + rosterTeamName(tx.adds[pid]) + " signs " + lbl, ts: ts});
-      });
-    }
-    if(tx.drops){
-      Object.keys(tx.drops).forEach(function(pid){
-        const lbl = tickerPlayerLabel(pid);
-        if(!lbl) return;
-        items.push({cat:"drop", html:'<span class="tk-badge tk-badge-drop">Cut</span>' + rosterTeamName(tx.drops[pid]) + " drops " + lbl, ts: ts});
-      });
-    }
+  });
+  return items;
+}
+
+function genWeekHighlightItems(){
+  const items = [];
+  if(!TICKER_LIVE_WEEK || !Array.isArray(TICKER_LIVE_PAIRS) || TICKER_LIVE_PAIRS.length === 0) return items;
+  const finals = TICKER_LIVE_PAIRS.filter(function(m){
+    if(typeof m.aPoints !== "number" || typeof m.bPoints !== "number") return false;
+    if(m.aPoints === 0 && m.bPoints === 0) return false;
+    const remA = playersRemainingTag(m.aStarters, m.aPlayerPoints), remB = playersRemainingTag(m.bStarters, m.bPlayerPoints);
+    return remA === "" && remB === "";
+  });
+  if(finals.length === 0) return items;
+  let highest = null, closest = null;
+  finals.forEach(function(m){
+    [{rid: m.a, pts: m.aPoints}, {rid: m.b, pts: m.bPoints}].forEach(function(side){
+      if(!highest || side.pts > highest.pts) highest = side;
+    });
+    const margin = Math.abs(m.aPoints - m.bPoints);
+    if(!closest || margin < closest.margin) closest = {m: m, margin: margin};
+  });
+  if(highest){
+    const t = tickerTeam(highest.rid);
+    items.push({id: "week-high:" + TICKER_LIVE_WEEK, cat: "record", ts: Date.now() - 1, priority: 38, html: '<span class="tk-badge tk-badge-record">Week ' + TICKER_LIVE_WEEK + '</span>' + t.team + ' put up the week’s highest score: ' + highest.pts.toFixed(1)});
+  }
+  if(closest){
+    const a = tickerTeam(closest.m.a), b = tickerTeam(closest.m.b);
+    items.push({id: "week-close:" + TICKER_LIVE_WEEK, cat: "final", ts: Date.now() - 1, priority: 38, html: '<span class="tk-badge tk-badge-final">Week ' + TICKER_LIVE_WEEK + '</span>Closest matchup: ' + a.team + ' ' + closest.m.aPoints.toFixed(1) + ' &ndash; ' + b.team + ' ' + closest.m.bPoints.toFixed(1) + ' (' + closest.margin.toFixed(1) + ')'});
   }
   return items;
 }
 
-function rebuildLeagueTickerItems(){
+function genRecordItems(){
   const items = [];
-  LEAGUE_TX_RAW.forEach(function(tx){ items.push.apply(items, buildLeagueTickerItems(tx)); });
-  items.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
-  TICKER_ITEMS.league = items.slice(0, 15);
-  renderTicker();
-}
-
-function loadLeagueTickerData(){
-  fetchJSON("https://api.sleeper.app/v1/state/nfl").then(function(state){
-    const week = Math.max(1, state.week || 1);
-    const weeks = [];
-    for(let w = Math.max(1, week - 1); w <= week; w++) weeks.push(w);
-    return Promise.all(weeks.map(function(w){
-      return fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/transactions/" + w).catch(function(){ return []; });
-    }));
-  }).then(function(weekResults){
-    LEAGUE_TX_RAW = [].concat.apply([], weekResults.filter(Array.isArray));
-    // Player-add/drop names need ALL_PLAYERS; getAllPlayers() shares one fetch with
-    // power rankings instead of downloading the (multi-MB) player database twice.
-    getAllPlayers().then(rebuildLeagueTickerItems);
-  }).catch(function(){
-    TICKER_ITEMS.league = [];
-    renderTicker();
+  if(!LEAGUE_RECORDS || !Array.isArray(LEAGUE_RECORDS.highestScore) || LEAGUE_RECORDS.highestScore.length === 0) return items;
+  const allTimeHigh = LEAGUE_RECORDS.highestScore[0];
+  const highTeam = teamForSeason(allTimeHigh.season, allTimeHigh.rosterId);
+  items.push({
+    id: "record:alltime-high", cat: "record", ts: Date.now() - 1, priority: 20,
+    html: '<span class="tk-badge tk-badge-record">League Record</span>🏆 Highest weekly score ever: ' + highTeam.team + ' with ' + allTimeHigh.points.toFixed(1) + ' (Week ' + allTimeHigh.week + ', ' + allTimeHigh.season + ')'
   });
-}
-
-function loadNflTickerData(){
-  Promise.all([
-    fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard").catch(function(){ return null; }),
-    fetchJSON("https://site.api.espn.com/apis/site/v2/sports/football/nfl/news").catch(function(){ return null; })
-  ]).then(function(res){
-    const scoreboard = res[0], news = res[1];
-    const items = [];
-
-    if(scoreboard && Array.isArray(scoreboard.events)){
-      scoreboard.events.forEach(function(ev){
-        try{
-          const comp = ev.competitions && ev.competitions[0];
-          const competitors = comp && comp.competitors;
-          if(!competitors) return;
-          const home = competitors.find(function(c){ return c.homeAway === "home"; });
-          const away = competitors.find(function(c){ return c.homeAway === "away"; });
-          if(!home || !away) return;
-          const state = ev.status && ev.status.type && ev.status.type.state;
-          const detail = (ev.status && ev.status.type && ev.status.type.shortDetail) || "";
-          const isLive = state === "in";
-          const statusLabel = isLive ? (detail || "Live") : (state === "post" ? "Final" : (detail || "Upcoming"));
-          const awayName = (away.team && (away.team.abbreviation || away.team.shortDisplayName)) || "Away";
-          const homeName = (home.team && (home.team.abbreviation || home.team.shortDisplayName)) || "Home";
+  const closest = LEAGUE_RECORDS.closestGame && LEAGUE_RECORDS.closestGame[0];
+  if(closest){
+    items.push({
+      id: "record:closest", cat: "record", ts: Date.now() - 1, priority: 15,
+      html: '<span class="tk-badge tk-badge-record">League Record</span>Closest game ever: a ' + Math.abs(closest.ptsA - closest.ptsB).toFixed(1) + '-point margin (Week ' + closest.week + ', ' + closest.season + ')'
+    });
+  }
+  if(TICKER_LIVE_WEEK && Array.isArray(TICKER_LIVE_PAIRS)){
+    TICKER_LIVE_PAIRS.forEach(function(m){
+      [{rid: m.a, pts: m.aPoints}, {rid: m.b, pts: m.bPoints}].forEach(function(side){
+        if(typeof side.pts !== "number" || side.pts === 0) return;
+        const team = tickerTeam(side.rid);
+        if(side.pts > allTimeHigh.points){
           items.push({
-            cat:"score",
-            html: '<span class="tk-score-bug">' +
-              '<span class="tk-team">' + awayName + '</span><span class="tk-num">' + (away.score||"0") + '</span>' +
-              '<span class="tk-status' + (isLive ? ' tk-status-live' : '') + '">' + statusLabel + '</span>' +
-              '<span class="tk-num">' + (home.score||"0") + '</span><span class="tk-team">' + homeName + '</span>' +
-            '</span>',
-            ts: Date.now()
+            id: "record:new:" + TICKER_LIVE_WEEK + ":" + side.rid, cat: "record", ts: Date.now(), priority: 95, breaking: true,
+            html: '<span class="tk-badge tk-badge-breaking">New Record</span>🏆 ' + team.team + ' just set the new all-time weekly scoring record with ' + side.pts.toFixed(1) + '!'
           });
-        } catch(e){ /* skip malformed event */ }
+        } else if(allTimeHigh.points - side.pts <= 10){
+          items.push({
+            id: "record:watch:" + TICKER_LIVE_WEEK + ":" + side.rid, cat: "record", ts: Date.now(), priority: 62,
+            html: '<span class="tk-badge tk-badge-breaking">Record Watch</span>' + team.team + ' is ' + (allTimeHigh.points - side.pts).toFixed(1) + ' points away from the league’s all-time weekly scoring record'
+          });
+        }
       });
-    }
+    });
+  }
+  return items;
+}
 
-    if(news && Array.isArray(news.articles)){
-      news.articles.slice(0, 12).forEach(function(a){
-        if(!a || !a.headline) return;
-        const isTrade = /trade/i.test(a.headline);
-        items.push({
-          cat: isTrade ? "nfltrade" : "news",
-          html: '<span class="tk-badge ' + (isTrade ? "tk-badge-nfltrade" : "tk-badge-news") + '">' +
-            (isTrade ? "NFL Trade" : "NFL") + '</span>' + a.headline,
-          ts: a.published ? new Date(a.published).getTime() : Date.now()
-        });
-      });
-    }
-
-    TICKER_ITEMS.nfl = items;
-    renderTicker();
-  }).catch(function(){
-    TICKER_ITEMS.nfl = [];
-    renderTicker();
+function genStandingsItems(){
+  const items = [];
+  if(!Array.isArray(TEAMS) || TEAMS.length === 0) return items;
+  const ranked = TEAMS.slice().sort(function(a, b){
+    return (b.wins - a.wins) || (b.fpts - a.fpts) || a.team.localeCompare(b.team);
   });
+  ranked.forEach(function(t, i){
+    const rank = i + 1;
+    const prev = TICKER_PREV_STANDINGS_RANK[t.rosterId];
+    if(prev !== undefined && prev !== rank){
+      const enteredPlayoffs = rank <= 6 && prev > 6, leftPlayoffs = rank > 6 && prev <= 6;
+      items.push({
+        id: "standings-move:" + t.rosterId + ":" + rank, cat: "standings", ts: Date.now(), priority: enteredPlayoffs ? 75 : 40, breaking: enteredPlayoffs,
+        html: '<span class="tk-badge tk-badge-standings">Standings</span>' + t.team + ' ' + (rank < prev ? 'climbs to' : 'slips to') + ' #' + rank +
+          (enteredPlayoffs ? ' — into a playoff spot!' : (leftPlayoffs ? ' — out of the playoff picture' : ''))
+      });
+    }
+    TICKER_PREV_STANDINGS_RANK[t.rosterId] = rank;
+  });
+  const top3 = ranked.slice(0, 3).map(function(t, i){ return (i + 1) + ') ' + t.team + ' ' + t.wins + '-' + t.losses; }).join("  ");
+  if(top3) items.push({id: "standings-top3", cat: "standings", ts: Date.now() - 1, priority: 18, html: '<span class="tk-badge tk-badge-standings">Standings</span>' + top3});
+  return items;
+}
+
+function genPowerRankingItems(){
+  const items = [];
+  if(!Array.isArray(POWER_RANK_ORDER) || POWER_RANK_ORDER.length === 0) return items;
+  POWER_RANK_ORDER.forEach(function(rid, i){
+    const rank = i + 1;
+    const prev = TICKER_PREV_POWER_RANK[rid];
+    if(prev !== undefined && prev !== rank && Math.abs(prev - rank) >= 2){
+      const team = tickerTeam(rid);
+      items.push({
+        id: "power-move:" + rid + ":" + rank, cat: "power", ts: Date.now(), priority: 35,
+        html: '<span class="tk-badge tk-badge-power">Power Rankings</span>' + team.team + ' ' + (rank < prev ? 'climbs to' : 'falls to') + ' #' + rank + ' in the Power Rankings'
+      });
+    }
+    TICKER_PREV_POWER_RANK[rid] = rank;
+  });
+  if(POWER_RANK_ORDER[0] !== undefined){
+    const top1 = tickerTeam(POWER_RANK_ORDER[0]);
+    items.push({id: "power-top1", cat: "power", ts: Date.now() - 1, priority: 14, html: '<span class="tk-badge tk-badge-power">Power Rankings</span>' + top1.team + ' sits at #1 this week'});
+  }
+  return items;
+}
+
+function genTradeAndWaiverItems(){
+  const items = [];
+  (LEAGUE_TX_RAW || []).forEach(function(tx){
+    if(!tx || tx.status !== "complete") return;
+    const ts = tx.status_updated || tx.created || 0;
+    if(tx.type === "trade"){
+      const rids = tx.roster_ids || [];
+      if(rids.length < 2) return;
+      const received = {};
+      rids.forEach(function(rid){ received[rid] = []; });
+      if(tx.adds){
+        Object.keys(tx.adds).forEach(function(pid){
+          const rid = tx.adds[pid], lbl = tickerPlayerLabel(pid);
+          if(received[rid] && lbl) received[rid].push(lbl);
+        });
+      }
+      if(Array.isArray(tx.draft_picks)){
+        tx.draft_picks.forEach(function(dp){
+          if(received[dp.owner_id] !== undefined) received[dp.owner_id].push(dp.season + " Rd " + dp.round + " pick");
+        });
+      }
+      const parts = rids.map(function(rid){
+        const got = received[rid];
+        return rosterTeamName(rid) + (got.length ? " get " + got.join(", ") : "");
+      });
+      items.push({id: "trade:" + tx.transaction_id, cat: "trade", ts: ts, priority: 32, html: '<span class="tk-badge tk-badge-trade">Trade</span>' + parts.join("  ⇄  ")});
+    } else if(tx.type === "waiver" || tx.type === "free_agent"){
+      const bid = (tx.settings && typeof tx.settings.waiver_bid === "number") ? tx.settings.waiver_bid : null;
+      if(tx.adds){
+        Object.keys(tx.adds).forEach(function(pid){
+          const lbl = tickerPlayerLabel(pid);
+          if(!lbl) return;
+          items.push({
+            id: "add:" + tx.transaction_id + ":" + pid, cat: "waiver", ts: ts, priority: 28,
+            html: '<span class="tk-badge tk-badge-add">Waiver</span>' + rosterTeamName(tx.adds[pid]) + " signs " + lbl + (bid !== null ? " ($" + bid + " FAAB)" : "")
+          });
+        });
+      }
+      if(tx.drops){
+        Object.keys(tx.drops).forEach(function(pid){
+          const lbl = tickerPlayerLabel(pid);
+          if(!lbl) return;
+          items.push({id: "drop:" + tx.transaction_id + ":" + pid, cat: "waiver", ts: ts, priority: 20, html: '<span class="tk-badge tk-badge-drop">Cut</span>' + rosterTeamName(tx.drops[pid]) + " drops " + lbl});
+        });
+      }
+    }
+  });
+  return items;
+}
+
+function genBettingItems(){
+  const items = [];
+  (FAAB_WAGERS || []).forEach(function(w){
+    const owner = TEAMS.find(function(t){ return t.ownerId === w.ownerId; });
+    const ownerName = owner ? owner.team : "A manager";
+    if(w.status === "pending"){
+      items.push({
+        id: "bet-placed:" + (w.id || w.placedAt), cat: "betting", ts: w.placedAt ? new Date(w.placedAt).getTime() : Date.now(), priority: 22,
+        html: '<span class="tk-badge tk-badge-betting">FAAB Bet</span>' + ownerName + ' wagers ' + w.amount + ' FAAB on ' + w.pickTeamName + ' ' + formatSpread(w.spread)
+      });
+    } else if(w.status === "won" || w.status === "lost"){
+      const won = w.status === "won";
+      items.push({
+        id: "bet-result:" + (w.id || w.settledAt), cat: "betting", ts: w.settledAt ? new Date(w.settledAt).getTime() : Date.now(), priority: won ? 34 : 24,
+        html: '<span class="tk-badge tk-badge-betting">Betting</span>' + ownerName + '’s bet on ' + w.pickTeamName + ' ' + formatSpread(w.spread) + ' ' + (won ? ('WON — +' + w.amount + ' FAAB') : ('LOST — -' + w.amount + ' FAAB'))
+      });
+    }
+  });
+  return items;
+}
+
+function genGotwItem(){
+  if(!GOTW_PICK) return [];
+  const a = tickerTeam(GOTW_PICK.a), b = tickerTeam(GOTW_PICK.b);
+  return [{id: "gotw", cat: "gotw", ts: Date.now() - 1, priority: 26, html: '<span class="tk-badge tk-badge-gotw">★ Game of the Week</span>' + a.team + ' vs ' + b.team}];
+}
+
+function genStreakItems(){
+  const items = [];
+  if(!Array.isArray(TEAMS)) return items;
+  TEAMS.forEach(function(t){
+    const s = getCurrentStreak(t.rosterId);
+    if(s && s.length >= 3){
+      items.push({
+        id: "streak:" + t.rosterId, cat: "streak", ts: Date.now() - 1, priority: 16 + Math.min(s.length, 10),
+        html: '<span class="tk-badge tk-badge-standings">Streak</span>' + t.team + ' is on a ' + s.length + '-game ' + (s.type === "W" ? "winning" : "losing") + ' streak'
+      });
+    }
+  });
+  return items;
+}
+
+function genRivalryItems(){
+  const items = [];
+  if(!HEAD_TO_HEAD || !TICKER_LIVE_WEEK || !Array.isArray(TICKER_LIVE_PAIRS)) return items;
+  TICKER_LIVE_PAIRS.forEach(function(m){
+    const a = tickerTeam(m.a), b = tickerTeam(m.b);
+    if(!a.ownerId || !b.ownerId) return;
+    const rec = HEAD_TO_HEAD[a.ownerId] && HEAD_TO_HEAD[a.ownerId][b.ownerId];
+    if(!rec) return;
+    const total = rec.wins + rec.losses + rec.ties;
+    if(total < 5) return;
+    const isDesignated = (typeof RIVALRIES !== "undefined") && RIVALRIES.some(function(p){
+      return (p[0] === a.ownerId && p[1] === b.ownerId) || (p[1] === a.ownerId && p[0] === b.ownerId);
+    });
+    const seriesText = rec.wins > rec.losses
+      ? (a.team + ' leads ' + rec.wins + '-' + rec.losses + (rec.ties ? ('-' + rec.ties) : ''))
+      : rec.losses > rec.wins
+        ? (b.team + ' leads ' + rec.losses + '-' + rec.wins + (rec.ties ? ('-' + rec.ties) : ''))
+        : ('series tied ' + rec.wins + '-' + rec.losses + (rec.ties ? ('-' + rec.ties) : ''));
+    items.push({
+      id: "rivalry:" + pairKey(m.a, m.b), cat: "rivalry", ts: Date.now() - 1, priority: isDesignated ? 30 : 20,
+      html: '<span class="tk-badge tk-badge-rivalry">⚔️ Rivalry</span>' + a.team + ' and ' + b.team + ' meet for the ' + ordinal(total + 1) + ' time (' + seriesText + ')'
+    });
+  });
+  return items;
+}
+
+function genAnnouncementItems(){
+  const items = [];
+  const today = new Date();
+  (LEAGUE_ANNOUNCEMENTS || []).forEach(function(a, i){
+    if(a.expires && new Date(a.expires) < today) return;
+    items.push({
+      id: "news:" + i, cat: "news", ts: Date.now() - 1, priority: a.breaking ? 60 : 18, breaking: !!a.breaking,
+      html: '<span class="tk-badge ' + (a.breaking ? 'tk-badge-breaking' : 'tk-badge-news') + '">League News</span>' + a.text
+    });
+  });
+  if(typeof LEAGUE_BANK_BALANCE === "number"){
+    items.push({id: "bank", cat: "bank", ts: Date.now() - 1, priority: 12, html: '<span class="tk-badge tk-badge-bank">League Bank</span>Current balance: $' + LEAGUE_BANK_BALANCE});
+  }
+  if(LATEST_AUDIO_RECAP && LATEST_AUDIO_RECAP.week){
+    const open = LATEST_AUDIO_RECAP.url ? ('<a href="' + LATEST_AUDIO_RECAP.url + '" target="_blank" rel="noopener" style="color:inherit;">') : '<span>';
+    const close = LATEST_AUDIO_RECAP.url ? '</a>' : '</span>';
+    items.push({id: "audio:" + LATEST_AUDIO_RECAP.week, cat: "audio", ts: Date.now() - 1, priority: 24, html: '<span class="tk-badge tk-badge-audio">🎧 Audio Recap</span>' + open + 'Week ' + LATEST_AUDIO_RECAP.week + ' audio recap is up' + close});
+  }
+  return items;
+}
+
+function buildTickerPool(){
+  const gens = [
+    genLiveAndFinalItems, genWeekHighlightItems, genRecordItems, genStandingsItems, genPowerRankingItems,
+    genTradeAndWaiverItems, genBettingItems, genGotwItem, genStreakItems, genRivalryItems, genAnnouncementItems
+  ];
+  let pool = [];
+  gens.forEach(function(fn){
+    try{ pool = pool.concat(fn()); }catch(e){ /* one bad generator shouldn't blank the whole ticker */ }
+  });
+  const byId = {};
+  pool.forEach(function(it){
+    if(!byId[it.id] || (it.ts || 0) >= (byId[it.id].ts || 0)) byId[it.id] = it;
+  });
+  return Object.values(byId);
 }
 
 function renderTicker(){
@@ -6471,16 +6977,30 @@ function renderTicker(){
   const track = document.getElementById("tickerTrack");
   if(!bar || !track) return;
 
-  const all = TICKER_ITEMS.league.concat(TICKER_ITEMS.nfl);
-  if(all.length === 0){
+  const phase = tickerPhase();
+  const flagLabel = document.getElementById("tickerFlagLabel");
+  const flagDot = document.getElementById("tickerFlagDot");
+  if(flagLabel){
+    flagLabel.textContent = phase === "live" ? "Live" : (phase === "post" ? "Recap" : (phase === "pre" ? "GAMEDAY LIVE" : "The NUT Network"));
+  }
+  if(flagDot) flagDot.style.display = phase === "live" ? "" : "none";
+
+  const boosts = TICKER_PHASE_BOOST[phase] || {};
+  let pool = buildTickerPool().map(function(it){
+    const boosted = Object.assign({}, it);
+    boosted.finalPriority = (it.priority || 0) + (it.breaking ? 100 : 0) + (boosts[it.cat] || 0);
+    return boosted;
+  }).sort(function(a, b){ return b.finalPriority - a.finalPriority; });
+
+  const shown = pool.slice(0, 24);
+  if(shown.length === 0){
     track.style.animation = "none";
     track.innerHTML = '<span class="ticker-item ticker-tag-empty">Live ticker unavailable right now.</span>';
     return;
   }
 
-  all.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
-  const html = all.map(function(it){
-    return '<span class="ticker-item ticker-tag-' + it.cat + '">' + it.html + '</span>';
+  const html = shown.map(function(it){
+    return '<span class="ticker-item' + (it.breaking ? ' is-breaking' : '') + '">' + it.html + '</span>';
   }).join("");
   // Duplicate the content back-to-back so translateX(-50%) loops seamlessly into
   // what looks like the same feed continuing, instead of snapping/jumping.
@@ -6494,11 +7014,44 @@ function renderTicker(){
   });
 }
 
+function refreshTicker(){ renderTicker(); }
+
+function loadTickerLiveScores(){
+  fetchJSON("https://api.sleeper.app/v1/state/nfl").then(function(state){
+    const week = Math.max(1, state.week || 1);
+    return fetchMatchupPairs(week).then(function(pairs){
+      TICKER_LIVE_WEEK = week;
+      TICKER_LIVE_PAIRS = pairs || [];
+      renderTicker();
+    });
+  }).catch(function(){ /* keep whatever the ticker already had */ });
+}
+
+function loadTickerTransactions(){
+  fetchJSON("https://api.sleeper.app/v1/state/nfl").then(function(state){
+    const week = Math.max(1, state.week || 1);
+    const weeks = [];
+    for(let w = Math.max(1, week - 1); w <= week; w++) weeks.push(w);
+    return Promise.all(weeks.map(function(w){
+      return fetchJSON("https://api.sleeper.app/v1/league/" + LEAGUE_ID + "/transactions/" + w).catch(function(){ return []; });
+    }));
+  }).then(function(weekResults){
+    LEAGUE_TX_RAW = [].concat.apply([], weekResults.filter(Array.isArray));
+    // Player-add/drop names need ALL_PLAYERS; getAllPlayers() shares one fetch with
+    // power rankings instead of downloading the (multi-MB) player database twice.
+    getAllPlayers().then(renderTicker);
+  }).catch(function(){ /* keep whatever the ticker already had */ });
+}
+
 function startTicker(){
-  loadLeagueTickerData();
-  loadNflTickerData();
-  setInterval(loadLeagueTickerData, 120000);
-  setInterval(loadNflTickerData, 120000);
+  loadTickerLiveScores();
+  loadTickerTransactions();
+  renderTicker();
+  if(TICKER_REFRESH_TIMER) clearInterval(TICKER_REFRESH_TIMER);
+  TICKER_REFRESH_TIMER = setInterval(function(){
+    loadTickerLiveScores();
+    loadTickerTransactions();
+  }, 40000);
 }
 
 // ---------- KEY DATE COUNTDOWNS ----------
@@ -6590,6 +7143,7 @@ loadHomeData();
 loadRivalryHistory();
 loadTransactionStats();
 loadCurrentSeasonChampionStatus();
+loadPlayoffBrackets();
 initFaabBettingSystem();
 loadFaabBudgets();
 startTicker();
