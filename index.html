@@ -86,8 +86,15 @@
   .ticker-track{
     display:inline-flex; align-items:center; height:100%; white-space:nowrap; will-change:transform;
   }
-  .ticker-bar:hover .ticker-track{animation-play-state:paused;}
-  @keyframes tickerScroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  /* Scroll position for both tickers is driven from JS (createTickerMarquee) rather than
+     a CSS @keyframes animation, so that periodic content refreshes (new scores, new
+     transactions every ~40s) update what's shown without snapping the scroll back to the
+     start -- both tracks just keep counting forward/backward continuously. Hover-to-pause
+     is implemented the same way, via a paused flag toggled on mouseenter/mouseleave. */
+  .ticker-bar-2{
+    position:sticky; top:var(--ticker-h); z-index:59; border-top:1px solid rgba(255,255,255,0.06);
+  }
+  .ticker-flag-alt{background:linear-gradient(135deg, var(--teal), var(--teal-dark)); box-shadow:2px 0 10px -2px rgba(0,0,0,0.6);}
   .ticker-item{
     display:inline-flex; align-items:center; gap:8px; height:100%; padding:0 18px;
     font-size:12px; font-weight:700; letter-spacing:0.2px; color:var(--chalk);
@@ -137,13 +144,12 @@
     .ticker-flag{font-size:12px; padding:0 14px 0 10px;}
   }
   @media (prefers-reduced-motion: reduce){
-    .ticker-track{animation:none !important;}
     .ticker-scroll-wrap{overflow-x:auto;}
   }
 
   /* ---------- NAV ---------- */
   .topnav{
-    position:sticky; top:var(--ticker-h); z-index:50;
+    position:sticky; top:calc(var(--ticker-h) * 2); z-index:50;
     background:rgba(13,15,22,0.94);
     border-bottom:1px solid var(--line);
     box-shadow:0 1px 0 rgba(242,181,66,0.25), 0 12px 28px -20px rgba(0,0,0,0.8);
@@ -1401,6 +1407,15 @@
   <div class="ticker-scroll-wrap">
     <div class="ticker-track" id="tickerTrack">
       <span class="ticker-item ticker-tag-empty">Loading live ticker&hellip;</span>
+    </div>
+  </div>
+</div>
+
+<div class="ticker-bar ticker-bar-2" id="tickerBar2" role="marquee" aria-label="More league news ticker">
+  <div class="ticker-flag ticker-flag-alt"><span id="tickerFlagLabel2">The Wire</span></div>
+  <div class="ticker-scroll-wrap">
+    <div class="ticker-track" id="tickerTrack2">
+      <span class="ticker-item ticker-tag-empty">Loading more headlines&hellip;</span>
     </div>
   </div>
 </div>
@@ -7474,9 +7489,69 @@ function buildTickerPool(){
   return Object.values(byId);
 }
 
+// Continuous marquee engine shared by both ticker bars. Position is driven by a
+// per-track requestAnimationFrame loop instead of a CSS @keyframes animation, so
+// that a periodic content refresh (new scores/transactions, every ~40s) can swap
+// in new items via setContent() without resetting the scroll position back to the
+// start -- the offset just keeps counting continuously, forward or backward.
+// direction: -1 scrolls leftward (offset counts down from 0, wraps at -singleWidth),
+// +1 scrolls rightward (offset counts up toward 0, wraps at -singleWidth).
+function createTickerMarquee(barEl, trackEl, direction, basePxPerSecond){
+  let offset = direction > 0 ? null : 0;
+  let singleWidth = 0;
+  let speed = basePxPerSecond;
+  let paused = false;
+  let lastTs = null;
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function measure(){
+    singleWidth = trackEl.scrollWidth / 2;
+    // Keep very short content from whipping by too fast -- same floor the old
+    // CSS-duration calc used (never faster than a full loop in ~20s).
+    speed = singleWidth > 0 ? Math.min(basePxPerSecond, singleWidth / 20) : basePxPerSecond;
+    if(direction > 0 && (offset === null || offset > 0)) offset = -singleWidth;
+    if(direction < 0 && offset === null) offset = 0;
+  }
+
+  function frame(ts){
+    if(!reduceMotion && !paused && singleWidth > 0){
+      if(lastTs === null) lastTs = ts;
+      const dt = Math.min(0.1, (ts - lastTs) / 1000);
+      lastTs = ts;
+      offset += direction * speed * dt;
+      if(direction < 0 && offset <= -singleWidth) offset += singleWidth;
+      if(direction > 0 && offset >= 0) offset -= singleWidth;
+      trackEl.style.transform = "translateX(" + offset.toFixed(2) + "px)";
+    } else {
+      lastTs = null;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  if(barEl){
+    barEl.addEventListener("mouseenter", function(){ paused = true; });
+    barEl.addEventListener("mouseleave", function(){ paused = false; });
+  }
+
+  measure();
+  requestAnimationFrame(frame);
+
+  return {
+    setContent: function(html){
+      trackEl.innerHTML = html + html;
+      measure();
+    }
+  };
+}
+
+let TICKER_MARQUEE_1 = null;
+let TICKER_MARQUEE_2 = null;
+
 function renderTicker(){
   const bar = document.getElementById("tickerBar");
   const track = document.getElementById("tickerTrack");
+  const bar2 = document.getElementById("tickerBar2");
+  const track2 = document.getElementById("tickerTrack2");
   if(!bar || !track) return;
 
   const phase = tickerPhase();
@@ -7494,26 +7569,32 @@ function renderTicker(){
     return boosted;
   }).sort(function(a, b){ return b.finalPriority - a.finalPriority; });
 
-  const shown = pool.slice(0, 24);
-  if(shown.length === 0){
-    track.style.animation = "none";
-    track.innerHTML = '<span class="ticker-item ticker-tag-empty">Live ticker unavailable right now.</span>';
-    return;
+  function itemsHtml(list){
+    return list.map(function(it){
+      return '<span class="ticker-item' + (it.breaking ? ' is-breaking' : '') + '">' + it.html + '</span>';
+    }).join("");
   }
 
-  const html = shown.map(function(it){
-    return '<span class="ticker-item' + (it.breaking ? ' is-breaking' : '') + '">' + it.html + '</span>';
-  }).join("");
-  // Duplicate the content back-to-back so translateX(-50%) loops seamlessly into
-  // what looks like the same feed continuing, instead of snapping/jumping.
-  track.style.animation = "none";
-  track.innerHTML = html + html;
-  requestAnimationFrame(function(){
-    const singleWidth = track.scrollWidth / 2;
-    const pxPerSecond = 55;
-    const duration = Math.max(20, singleWidth / pxPerSecond);
-    track.style.animation = "tickerScroll " + duration + "s linear infinite";
-  });
+  const CAP = 24;
+  const shown1 = pool.slice(0, CAP);
+  // The second ticker surfaces the *next* batch of stories the first one had no
+  // room for, so the pair together show up to twice as much league news. If the
+  // pool isn't deep enough yet it falls back to the same items scrolling the
+  // opposite way, rather than sitting empty.
+  let shown2 = pool.slice(CAP, CAP * 2);
+  if(shown2.length === 0) shown2 = shown1;
+
+  if(!TICKER_MARQUEE_1) TICKER_MARQUEE_1 = createTickerMarquee(bar, track, -1, 55);
+  TICKER_MARQUEE_1.setContent(shown1.length
+    ? itemsHtml(shown1)
+    : '<span class="ticker-item ticker-tag-empty">Live ticker unavailable right now.</span>');
+
+  if(bar2 && track2){
+    if(!TICKER_MARQUEE_2) TICKER_MARQUEE_2 = createTickerMarquee(bar2, track2, 1, 48);
+    TICKER_MARQUEE_2.setContent(shown2.length
+      ? itemsHtml(shown2)
+      : '<span class="ticker-item ticker-tag-empty">More headlines coming soon&hellip;</span>');
+  }
 }
 
 function refreshTicker(){ renderTicker(); }
