@@ -4688,49 +4688,35 @@ function renderChampionsThrone(){
     return (b.wins - a.wins) || (b.fpts - a.fpts) || a.team.localeCompare(b.team);
   });
 
-  let champion = null, isOfficial = false, isDefending = false;
+  // The trophy photo bakes in literal "2ND".."11TH" plates, so whoever sits in the
+  // CHAMPION/LAST PLACE seats has to match true current standings -- otherwise every
+  // peasant slot below is off by one. Only an official bracket result (once this
+  // season's playoffs actually decide it) is allowed to override current rank; the
+  // "defending champion/last place" flourish now only changes label text, never seating.
+  let champion = null, isOfficial = false;
   if(CURRENT_CHAMPION_DATA && CURRENT_CHAMPION_DATA.championRosterId){
     champion = TEAMS.find(function(t){ return t.rosterId === CURRENT_CHAMPION_DATA.championRosterId; }) || null;
     if(champion) isOfficial = true;
   }
-  // Until this season's champion is officially decided, seat last year's reigning
-  // champion on the throne as the placeholder (derived from CAREER_STATS' titles
-  // list rather than a hardcoded roster ID, so it keeps working as seasons roll over).
-  if(!champion){
-    const reigningOwnerId = Object.keys(CAREER_STATS).find(function(id){
-      return CAREER_STATS[id].titles && CAREER_STATS[id].titles.indexOf("2025") !== -1;
-    });
-    if(reigningOwnerId){
-      const reigning = TEAMS.find(function(t){ return t.ownerId === reigningOwnerId; }) || null;
-      if(reigning){ champion = reigning; isDefending = true; }
-    }
-  }
   if(!champion) champion = ranked[0];
 
-  let toiletTeam = null, isToiletOfficial = false, isToiletDefending = false;
+  const reigningOwnerId = Object.keys(CAREER_STATS).find(function(id){
+    return CAREER_STATS[id].titles && CAREER_STATS[id].titles.indexOf("2025") !== -1;
+  });
+  const isDefending = !isOfficial && !!reigningOwnerId && champion.ownerId === reigningOwnerId;
+
+  let toiletTeam = null, isToiletOfficial = false;
   if(CURRENT_CHAMPION_DATA && CURRENT_CHAMPION_DATA.toiletRosterId){
     toiletTeam = TEAMS.find(function(t){ return t.rosterId === CURRENT_CHAMPION_DATA.toiletRosterId; }) || null;
     if(toiletTeam) isToiletOfficial = true;
   }
-  // Same idea as the champion placeholder above: until this season's Toilet Bowl is
-  // decided, seat last year's Toilet Bowl "champion" (i.e. loser) there instead of just
-  // whoever currently sits last in the standings. Pulled from FALLBACK_HISTORY's 2025
-  // entry and matched by manager name, since that's the only place this league keeps
-  // last season's Toilet Bowl result on hand.
-  if(!toiletTeam){
-    const lastSeason = FALLBACK_HISTORY.find(function(h){ return h.season === "2025"; });
-    if(lastSeason && lastSeason.toiletBowlChamp){
-      const reigningToilet = TEAMS.find(function(t){ return t.manager === lastSeason.toiletBowlChamp.manager; }) || null;
-      if(reigningToilet && reigningToilet.rosterId !== champion.rosterId){
-        toiletTeam = reigningToilet;
-        isToiletDefending = true;
-      }
-    }
-  }
   if(!toiletTeam || toiletTeam.rosterId === champion.rosterId){
     toiletTeam = ranked[ranked.length - 1];
-    isToiletDefending = false;
+    isToiletOfficial = false;
   }
+
+  const lastSeason = FALLBACK_HISTORY.find(function(h){ return h.season === "2025"; });
+  const isToiletDefending = !isToiletOfficial && !!(lastSeason && lastSeason.toiletBowlChamp && lastSeason.toiletBowlChamp.manager === toiletTeam.manager);
 
   const peasants = ranked.filter(function(t){
     return t.rosterId !== champion.rosterId && t.rosterId !== toiletTeam.rosterId;
@@ -4743,10 +4729,10 @@ function renderChampionsThrone(){
     let msg = isOfficial
       ? "All hail this season's crowned champion — the throne is official."
       : (isDefending
-        ? "The 2026 crown is still up for grabs, so " + champion.team + " — last season's champion — is holding the throne down until someone takes it."
+        ? champion.team + " is both last season's champion and this week's #1 seed — still holding the throne."
         : "The throne is still up for grabs — shown here is the current #1 seed. It'll update the instant a champion is crowned.");
     if(!isToiletOfficial && isToiletDefending){
-      msg += " Down in the corner, " + toiletTeam.team + " is stuck there as a reminder of their 2025 Toilet Bowl finish until this year's cellar-dweller is decided.";
+      msg += " " + toiletTeam.team + " is also repeating as this week's cellar-dweller, right where they finished the 2025 Toilet Bowl.";
     }
     statusEl.textContent = msg;
   }
