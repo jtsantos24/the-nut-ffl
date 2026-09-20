@@ -1210,8 +1210,18 @@
     font-style:italic; margin-top:12px; letter-spacing:0.2px;
   }
   @media (max-width:640px){
-    .gotw-stage{margin:0 12px;}
+    .gotw-panel{
+      padding:0 0 20px !important; margin-left:-20px; margin-right:-20px; width:calc(100% + 40px);
+      border-left:0; border-right:0; border-radius:0;
+    }
+    .gotw-stage{margin:0 14px;}
     .gotw-scoreline .gotw-score{font-size:26px;}
+    .gotw-name{font-size:clamp(10.5px, 3.3cqw, 15px);}
+    .gotw-record{font-size:clamp(9px, 2.5cqw, 12px);}
+    .gotw-cardscore{font-size:clamp(20px, 7.2cqw, 44px);}
+    .gotw-why{font-size:14px;}
+    .gotw-details-label{font-size:13px;}
+    .gotw-hint{font-size:12px;}
   }
 
   /* ---------- NUTCAST (AI weekly audio recap) ---------- */
