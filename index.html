@@ -1614,6 +1614,12 @@
         using age and Sleeper's live player-relevance ranking alongside positional scarcity, so a late-round steal can
         outgrade an early pick that hasn't panned out. Explanations below are algorithm-generated from that data, not written by AI.
       </p>
+      <div class="draft-year-tabs" id="draftSummaryYearTabs">
+        <button data-year="2026" class="active">2026</button>
+        <button data-year="2025">2025</button>
+        <button data-year="2024">2024</button>
+        <button data-year="2023">2023</button>
+      </div>
       <div class="draft-summary-grid" id="draftSummaryGrid"></div>
     </div>
   </div>
@@ -3295,14 +3301,19 @@ function renderDraftBoard(){
 
 document.getElementById("draftSearch").addEventListener("input", renderDraftBoard);
 
-document.querySelectorAll("#draftYearTabs button").forEach(function(btn){
+function setDraftYear(year){
+  currentDraftYear = year;
+  document.querySelectorAll("#draftYearTabs button, #draftSummaryYearTabs button").forEach(function(b){
+    b.classList.toggle("active", b.dataset.year === year);
+  });
+  document.getElementById("draftSearch").value = "";
+  renderDraftBoard();
+  renderDraftSummary();
+}
+
+document.querySelectorAll("#draftYearTabs button, #draftSummaryYearTabs button").forEach(function(btn){
   btn.addEventListener("click", function(){
-    document.querySelectorAll("#draftYearTabs button").forEach(function(b){ b.classList.remove("active"); });
-    btn.classList.add("active");
-    currentDraftYear = btn.dataset.year;
-    document.getElementById("draftSearch").value = "";
-    renderDraftBoard();
-    renderDraftSummary();
+    setDraftYear(btn.dataset.year);
   });
 });
 
