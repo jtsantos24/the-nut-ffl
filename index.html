@@ -1758,6 +1758,11 @@
     <div class="panel">
       <h2 class="panel-title">Ledger Tracker</h2>
       <p class="panel-sub" id="ledgerStatus">Loading this season's financial ledger&hellip;</p>
+      <div class="alltime-summary" id="ledgerBankSummary" style="display:none;">
+        <div><div class="num" id="ledgerBankTotal">$0</div><div class="lbl">League Bank</div></div>
+        <div><div class="num" id="ledgerBankTrades">0</div><div class="lbl">Trades &times; $2</div></div>
+        <div><div class="num" id="ledgerBankWaivers">0</div><div class="lbl">Waiver/FA moves &times; $1</div></div>
+      </div>
       <div class="power-table-scroll"><table class="standings">
         <thead>
           <tr>
@@ -1773,7 +1778,7 @@
         <tbody id="ledgerBody"></tbody>
       </table></div>
       <p class="const-note" style="margin-top:10px;">
-        League Dues shows the standard $130 entry fee structure ($85 end-of-year, $20 championship, $25 weekly prizes) for every team, not individual payment status &mdash; this site has no payment system, so it can't confirm who has actually paid. Transaction Tax ($1/trade, $1/waiver move) and Weekly Bonus Total ($25 per bonus game won) are live from this season's real Sleeper data. Betting Ledger is each team's net FAAB from the FAAB Betting Lines game &mdash; play money, not real dollars. Projected Payout estimates the Championship-bracket prize (1st $780 &middot; 2nd $300 &middot; 3rd $130) from today's regular-season standing; it's a snapshot, not a playoff prediction, since the actual champion is decided by the bracket, not regular-season record.
+        League Dues shows the standard $130 entry fee structure ($85 end-of-year, $20 championship, $25 weekly prizes) for every team, not individual payment status &mdash; this site has no payment system, so it can't confirm who has actually paid. Transaction Tax ($2/trade, $1/waiver move) goes to the League Bank shown above, and Weekly Bonus Total ($25 per bonus game won) &mdash; both live from this season's real Sleeper data. Betting Ledger is each team's net FAAB from the FAAB Betting Lines game &mdash; play money, not real dollars. Projected Payout estimates the Championship-bracket prize (1st $780 &middot; 2nd $300 &middot; 3rd $130) from today's regular-season standing; it's a snapshot, not a playoff prediction, since the actual champion is decided by the bracket, not regular-season record.
       </p>
     </div>
   </div>
@@ -3592,8 +3597,16 @@ function renderHeadToHead(ownerId){
 }
 
 // ---------- SEASON TRANSACTIONS (trades + waiver/FA moves) ----------
-const TRANSACTION_FEE = 1; // $1 per trade, $1 per waiver/FA move
+// Rates match Constitution Article "League Fees": $2 per trade, $1 per waiver/free-agent
+// move. (Previously both were charged at $1 here, out of sync with the Constitution's own
+// stated $2/trade rate -- fixed so every trade/waiver count times its own rate.)
+const TRANSACTION_FEE_TRADE = 2;
+const TRANSACTION_FEE_WAIVER = 1;
 let TRANSACTION_STATS = null;
+
+function transactionTaxTotal(stats){
+  return stats.trades * TRANSACTION_FEE_TRADE + stats.waivers * TRANSACTION_FEE_WAIVER;
+}
 
 function loadTransactionStats(){
   const requests = [];
@@ -3662,11 +3675,11 @@ function renderTransactions(rosterId){
     return;
   }
   const s = TRANSACTION_STATS[rosterId] || {trades:0, waivers:0};
-  const total = (s.trades + s.waivers) * TRANSACTION_FEE;
+  const total = transactionTaxTotal(s);
 
   el.innerHTML =
     '<div class="alltime-title">2026 transaction tax</div>' +
-    '<p class="panel-sub" style="margin:-4px 0 12px;">$1 per trade, $1 per waiver/free-agent move.</p>' +
+    '<p class="panel-sub" style="margin:-4px 0 12px;">$2 per trade, $1 per waiver/free-agent move &mdash; goes to the League Bank.</p>' +
     '<div class="alltime-summary">' +
       '<div><div class="num">' + s.trades + '</div><div class="lbl">Trades</div></div>' +
       '<div><div class="num">' + s.waivers + '</div><div class="lbl">Waiver/FA moves</div></div>' +
@@ -3781,6 +3794,7 @@ function computeBonusTotalsAllTeams(){
 function renderLedger(){
   const statusEl = document.getElementById("ledgerStatus");
   const body = document.getElementById("ledgerBody");
+  const bankSummary = document.getElementById("ledgerBankSummary");
   if(!statusEl || !body) return;
 
   const txReady = TRANSACTION_STATS !== null;
@@ -3789,10 +3803,30 @@ function renderLedger(){
   if(!txReady || !bonusReady || !bettingReady){
     statusEl.textContent = "Loading this season's financial ledger…";
     body.innerHTML = "";
+    if(bankSummary) bankSummary.style.display = "none";
     return;
   }
 
   statusEl.textContent = "2026 season. Transaction Tax and Weekly Bonus Total are live from Sleeper; Betting Ledger is net FAAB (play money) from FAAB Betting Lines; Projected Payout reflects today's regular-season standing.";
+
+  // League Bank -- every dollar of Transaction Tax collected across every team so far this
+  // season, since that tax is what actually funds the bank (per the Constitution).
+  if(bankSummary){
+    if(TRANSACTION_STATS === "error"){
+      bankSummary.style.display = "none";
+    } else {
+      let bankTotal = 0, bankTrades = 0, bankWaivers = 0;
+      Object.values(TRANSACTION_STATS).forEach(function(s){
+        bankTotal += transactionTaxTotal(s);
+        bankTrades += s.trades;
+        bankWaivers += s.waivers;
+      });
+      document.getElementById("ledgerBankTotal").textContent = "$" + bankTotal.toFixed(0);
+      document.getElementById("ledgerBankTrades").textContent = bankTrades;
+      document.getElementById("ledgerBankWaivers").textContent = bankWaivers;
+      bankSummary.style.display = "";
+    }
+  }
 
   const bettingNet = computeBettingNetAllTeams();
   const bonusTotals = computeBonusTotalsAllTeams();
@@ -3803,7 +3837,7 @@ function renderLedger(){
   body.innerHTML = ranked.map(function(t, i){
     const rank = i + 1;
     const txStats = (TRANSACTION_STATS !== "error" && TRANSACTION_STATS[t.rosterId]) || {trades: 0, waivers: 0};
-    const txTotal = TRANSACTION_STATS === "error" ? null : (txStats.trades + txStats.waivers) * TRANSACTION_FEE;
+    const txTotal = TRANSACTION_STATS === "error" ? null : transactionTaxTotal(txStats);
     const net = bettingNet[t.ownerId] || 0;
     const netLabel = (net > 0 ? "+" : "") + net + " FAAB";
     const netClass = net > 0 ? "bl-pos" : (net < 0 ? "bl-neg" : "");
