@@ -684,7 +684,24 @@
   .team-detail-inner{display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;}
   .team-detail-inner #tdImg{width:112px; height:112px; border-radius:12px; object-fit:cover; border:1px solid var(--line);}
   .td-trophycase{width:100%; margin:22px 0 6px;}
-  .td-trophycase img{width:100%; height:auto; display:block; border-radius:var(--radius); border:1px solid var(--line-soft); box-shadow:var(--shadow-card);}
+  .td-trophycase-inner{position:relative;}
+  .td-trophycase-bg{width:100%; height:auto; display:block; border-radius:var(--radius); border:1px solid var(--line-soft); box-shadow:var(--shadow-card);}
+  /* Championship trophies dropped onto the two shelf ledges baked into the banner photo --
+     coordinates measured directly against owner-trophy-case.webp's native 1983x793 pixels. */
+  .td-trophy-shelf{
+    position:absolute; left:16%; right:16%; display:flex; justify-content:center; align-items:flex-end;
+    flex-wrap:nowrap; gap:1.2%; z-index:2; pointer-events:none;
+  }
+  .td-trophy-shelf-1{bottom:47.04%;}
+  .td-trophy-shelf-2{bottom:7.95%;}
+  .td-trophy{position:relative; width:6.6%; flex-shrink:0; aspect-ratio:1024/1536; container-type:inline-size;}
+  .td-trophy img{width:100%; height:100%; display:block; filter:drop-shadow(0 8px 10px rgba(0,0,0,0.6));}
+  .td-trophy-year{
+    position:absolute; left:21.5%; width:58.5%; top:82.6%; height:9.8%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel', serif; font-weight:700; letter-spacing:0.3px; color:#2a1a08;
+    font-size:clamp(6px, 19cqw, 30px);
+  }
   .td-back{background:var(--surface-2); border:1px solid var(--line); color:var(--chalk-dim); font-size:12px; padding:7px 14px; border-radius:999px; cursor:pointer; margin-bottom:16px; transition:color 0.15s, border-color 0.15s;}
   .td-back:hover{color:var(--chalk); border-color:var(--gold-dark);}
   .td-name{font-size:27px; color:var(--chalk);}
@@ -1878,7 +1895,11 @@
           </div>
         </div>
         <div class="td-trophycase">
-          <img src="owner-trophy-case.webp" alt="Owner Trophy Case" />
+          <div class="td-trophycase-inner">
+            <img class="td-trophycase-bg" src="owner-trophy-case.webp" alt="Owner Trophy Case" />
+            <div class="td-trophy-shelf td-trophy-shelf-1" id="tdTrophyShelf1"></div>
+            <div class="td-trophy-shelf td-trophy-shelf-2" id="tdTrophyShelf2"></div>
+          </div>
         </div>
         <div class="alltime" id="tdAllTime"></div>
         <div class="alltime" id="tdPlayoffs"></div>
@@ -4929,11 +4950,38 @@ function showTeamDetail(teamName){
     ? 'Rivalry Week opponent: <span>' + rival + '</span>'
     : "";
 
+  renderTrophyCase(t.ownerId);
   renderAllTime(t.ownerId);
   renderPlayoffHistory(t.ownerId);
   renderHeadToHead(t.ownerId);
   renderTransactions(t.rosterId);
   renderBettingLedger(t.ownerId);
+}
+
+// Drops one championship trophy per title year onto the trophy-case banner's shelf
+// ledges, reading straight from CAREER_STATS (the same source the All-time record
+// badges use) so new titles show up automatically once that record is updated --
+// no per-owner wiring needed. Up to 8 trophies per shelf before spilling to the
+// second shelf; multiple titles for the same owner render as separate trophies
+// side-by-side rather than being combined into one.
+function renderTrophyCase(ownerId){
+  const shelf1 = document.getElementById("tdTrophyShelf1");
+  const shelf2 = document.getElementById("tdTrophyShelf2");
+  if(!shelf1 || !shelf2) return;
+
+  const record = CAREER_STATS[ownerId];
+  const titles = (record && record.titles) ? record.titles.slice().sort() : [];
+  const MAX_PER_SHELF = 8;
+
+  function trophyHtml(year){
+    return '<div class="td-trophy" title="' + year + ' League Champion">' +
+      '<img src="championship-trophy.webp" alt="' + year + ' Championship Trophy">' +
+      '<div class="td-trophy-year">' + year + '</div>' +
+    '</div>';
+  }
+
+  shelf1.innerHTML = titles.slice(0, MAX_PER_SHELF).map(trophyHtml).join("");
+  shelf2.innerHTML = titles.slice(MAX_PER_SHELF, MAX_PER_SHELF * 2).map(trophyHtml).join("");
 }
 
 function renderAllTime(ownerId){
