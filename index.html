@@ -2249,12 +2249,16 @@ function computeBonusResults(){
     const entry = RIVALRY_HISTORY.find(function(e){ return String(e.season) === "2026" && e.week === b.week; });
     const weekData = (entry && Array.isArray(entry.data)) ? entry.data : null;
     const played = weekData && weekData.some(function(m){ return typeof m.points === "number" && m.points > 0; });
-    if(b.week === 14){
-      results[b.week] = BONUS_COMPUTE[14]();
-    } else if(played){
-      try{ results[b.week] = BONUS_COMPUTE[b.week](weekData); }catch(e){ results[b.week] = null; }
-    } else {
+    // Week 14 ("Points Against Champ") reads cumulative season points-against rather than
+    // that week's own matchup data, so it doesn't naturally gate itself the way the others
+    // do -- without this check it would declare a "winner" as early as Week 1. It still needs
+    // to wait for Week 14 itself to be played before showing a result, same as every other week.
+    if(!played){
       results[b.week] = null;
+    } else if(b.week === 14){
+      try{ results[b.week] = BONUS_COMPUTE[14](); }catch(e){ results[b.week] = null; }
+    } else {
+      try{ results[b.week] = BONUS_COMPUTE[b.week](weekData); }catch(e){ results[b.week] = null; }
     }
   });
   BONUS_RESULTS = results;
