@@ -563,8 +563,6 @@
   .throne-crowd-filler{pointer-events:none;}
   .throne-avatar-ring{stroke:rgba(255,212,107,0); stroke-width:3; transition:stroke 0.2s;}
   .throne-figure:hover .throne-avatar-ring, .throne-figure:focus-visible .throne-avatar-ring{stroke:rgba(255,212,107,0.85);}
-  .throne-toilet-hotspot{transition:fill 0.2s;}
-  .throne-figure:hover .throne-toilet-hotspot, .throne-figure:focus-visible .throne-toilet-hotspot{fill:rgba(255,212,107,0.12);}
   .throne-caption{margin-top:12px; font-size:12px; color:var(--chalk-faint); text-align:center; font-style:italic;}
   .throne-tooltip{
     position:fixed; z-index:200; background:var(--surface-2); border:1px solid var(--gold-dark);
@@ -4522,7 +4520,9 @@ const THRONE_PEASANT_SLOTS = [
   {cx:418, cy:911, r:46},  {cx:837, cy:911, r:46}    // 10TH, 11TH
 ];
 const THRONE_CHAMPION_SLOT = {cx:626, cy:156, r:50};
-const THRONE_TOILET_SLOT = {cx:627, cy:890, rx:88, ry:95};
+// The toilet's tank "mirror" is its own black circle placeholder too -- easy to miss
+// since it reads as a lid at a glance, but it takes an avatar exactly like the others.
+const THRONE_TOILET_SLOT = {cx:628, cy:878, r:44};
 
 function throneEscAttr(s){
   return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
@@ -4556,17 +4556,11 @@ function throneAvatarCircleSVG(t, slot, role, delay){
   '</g>';
 }
 
-// The toilet slot in the photo is already fully illustrated (bowl, tank, "LAST PLACE"
-// plate) -- there's no face to drop in, so this just wires up an invisible hover/focus
-// zone over that area so the loser's name/record still shows in the shared tooltip.
+// The toilet's tank has its own black circle placeholder (it reads as a "mirror" set
+// into the lid), so the loser gets an avatar dropped in there exactly like everyone
+// else -- same helper as the champion/peasant slots, just aimed at that circle.
 function throneToiletHotspotSVG(t, slot, delay){
-  return '<g class="tf-enter" style="animation-delay:' + delay + 's">' +
-    '<g class="throne-figure" tabindex="0" data-roster="' + throneEscAttr(t.rosterId) +
-      '" data-role="toilet" transform="translate(' + slot.cx + ',' + slot.cy + ')">' +
-      '<ellipse class="tf-scale throne-toilet-hotspot" cx="0" cy="0" rx="' + slot.rx + '" ry="' + slot.ry + '" fill="rgba(255,255,255,0.001)"></ellipse>' +
-      '<title>' + throneEscAttr(t.team || "") + '</title>' +
-    '</g>' +
-  '</g>';
+  return throneAvatarCircleSVG(t, slot, "toilet", delay);
 }
 
 function buildThroneSceneSVG(champion, toiletTeam, peasants, champLabelText, toiletLabelText){
