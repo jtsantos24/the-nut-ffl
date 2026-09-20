@@ -1158,67 +1158,57 @@
   }
 
   /* ---------- GAME OF THE WEEK HERO ---------- */
-  .gotw-hero{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
-  .gotw-side{display:flex; flex-direction:column; align-items:center; gap:7px; flex:1; min-width:120px;}
-  .gotw-side.right{align-items:center;}
-  .gotw-side img{width:58px; height:58px; border-radius:10px; object-fit:cover; border:1px solid var(--line);}
-  .gotw-team-name{font-weight:600; font-size:15px; text-align:center;}
-  .gotw-record{font-size:12px; color:var(--chalk-dim);}
-  .gotw-mid{display:flex; align-items:center; gap:12px; flex-direction:column;}
-  .gotw-mid .gotw-score{font-family:'Teko', sans-serif; font-size:35px; color:var(--gold); display:inline;}
-  .gotw-mid .gotw-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-faint); display:inline; margin:0 8px;}
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+
+  /* ---------- GAME OF THE WEEK: PHOTO BANNER (live avatars/names dropped onto the graphic's empty slots) ---------- */
+  .gotw-panel{position:relative; overflow:hidden; border-color:var(--gold-dark); padding:0 0 20px;}
+  .gotw-media{position:relative; width:100%; aspect-ratio:1916/596; overflow:hidden; background:#0a0704; container-type:inline-size;}
+  .gotw-header-img{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;}
+  .gotw-overlay{position:absolute; inset:0;}
+  .gotw-slot{position:absolute; overflow:hidden; border-radius:9%; background:#0a0704;}
+  .gotw-slot img{width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.25s ease;}
+  .gotw-slot:hover img{transform:scale(1.08);}
+  .gotw-slot-a{left:29.0%; top:53.7%; width:9.5%; height:23.8%;}
+  .gotw-slot-b{left:61.5%; top:53.7%; width:9.5%; height:23.8%;}
+  .gotw-name{
+    position:absolute; overflow:hidden; text-align:center; font-weight:600; color:var(--chalk);
+    letter-spacing:0.15px; padding:0 2px; white-space:nowrap; text-overflow:ellipsis; line-height:1.25;
+    font-size:clamp(7.5px, 1.35cqw, 15px);
+  }
+  .gotw-name-a{left:22%; width:23%; top:83.7%; transform:translateY(-50%);}
+  .gotw-name-b{left:55%; width:23%; top:83.7%; transform:translateY(-50%);}
+  .gotw-record{
+    position:absolute; overflow:hidden; text-align:center; white-space:nowrap; text-overflow:ellipsis;
+    color:var(--chalk-dim); line-height:1.2;
+    font-size:clamp(6.5px, 1.05cqw, 12px);
+  }
+  .gotw-record-a{left:21%; width:25%; top:94.6%; transform:translateY(-50%);}
+  .gotw-record-b{left:54%; width:25%; top:94.6%; transform:translateY(-50%);}
+  .gotw-scoreline{text-align:center; padding:16px 12px 0; position:relative; z-index:1;}
+  .gotw-scoreline .gotw-score{font-family:'Teko', sans-serif; font-size:34px; color:var(--gold); text-shadow:0 0 16px rgba(242,181,66,0.55);}
+  .gotw-scoreline .gotw-vs{font-family:'Teko', sans-serif; font-size:15px; color:var(--chalk-faint); margin:0 8px;}
   .gotw-total{font-size:11px; color:var(--chalk-dim); margin-top:2px;}
-  .gotw-why{font-size:13px; color:var(--chalk-dim); text-align:center; margin:16px 0 0; font-style:italic;}
-  .gotw-details{margin-top:10px;}
+  .gotw-why{font-size:13px; color:var(--chalk-dim); text-align:center; margin:14px 0 0; font-style:italic; position:relative; z-index:1;}
+  .gotw-details{margin-top:10px; position:relative; z-index:1; padding:0 16px;}
   .gotw-details summary{cursor:pointer; font-size:12px; color:var(--gold-dark); text-align:center; list-style:none;}
   .gotw-details summary::-webkit-details-marker{display:none;}
   .gotw-details summary:hover{color:var(--gold);}
-
-  /* ---------- GAME OF THE WEEK: FIREWORKS REDESIGN ---------- */
-  .gotw-panel{
-    position:relative; overflow:hidden; border-color:var(--gold-dark);
-    background:linear-gradient(165deg, rgba(242,181,66,0.07), var(--surface) 45%);
-    animation:gotwBorderPulse 3.2s ease-in-out infinite;
+  .gotw-stage{
+    position:relative; margin:0 20px; padding:16px 4px 4px;
+    background:linear-gradient(180deg, #14100a 0%, #0a0704 100%);
+    border-radius:0 0 var(--radius) var(--radius);
   }
-  @keyframes gotwBorderPulse{
-    0%,100%{ box-shadow:0 0 0 1px rgba(242,181,66,0.22), 0 0 28px -12px rgba(242,181,66,0.35); }
-    50%{ box-shadow:0 0 0 1px rgba(242,181,66,0.5), 0 0 44px -8px rgba(242,181,66,0.55); }
-  }
-  .gotw-panel::before{
-    content:''; position:absolute; inset:-45%; z-index:0; pointer-events:none;
-    background:conic-gradient(from 0deg, transparent 0deg, rgba(242,181,66,0.12) 55deg, transparent 130deg,
-      rgba(69,214,196,0.10) 210deg, transparent 290deg);
-    animation:gotwSpin 16s linear infinite;
-  }
-  @keyframes gotwSpin{ to{ transform:rotate(360deg); } }
-  .gotw-title{
-    position:relative; z-index:1; display:flex; align-items:center; gap:9px;
-    background:linear-gradient(90deg, var(--gold-bright), var(--gold), var(--teal), var(--gold-bright));
-    background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
-    animation:gotwTitleShine 5s linear infinite; width:fit-content;
-  }
-  @keyframes gotwTitleShine{ 0%{background-position:0% 50%;} 100%{background-position:300% 50%;} }
-  .gotw-title-badge{
-    display:inline-block; filter:drop-shadow(0 0 6px rgba(242,181,66,0.65));
-    animation:gotwBadgeBounce 1.6s ease-in-out infinite;
-  }
-  @keyframes gotwBadgeBounce{ 0%,100%{ transform:translateY(0) rotate(-8deg); } 50%{ transform:translateY(-3px) rotate(8deg); } }
-  .gotw-stage{position:relative; z-index:1; border-radius:var(--radius);}
   .gotw-fireworks{
     position:absolute; inset:0; z-index:3; width:100%; height:100%;
-    cursor:pointer; mix-blend-mode:screen; touch-action:none;
+    pointer-events:none; mix-blend-mode:screen;
   }
   .gotw-hint{
     position:relative; z-index:1; text-align:center; font-size:11px; color:var(--chalk-faint);
     font-style:italic; margin-top:12px; letter-spacing:0.2px;
   }
-  .gotw-hero{position:relative; z-index:1;}
-  .gotw-why, .gotw-details{position:relative; z-index:1;}
-  .gotw-mid .gotw-score{text-shadow:0 0 16px rgba(242,181,66,0.55);}
-  .gotw-side img{transition:transform 0.25s ease;}
-  .gotw-side:hover img{transform:scale(1.08) rotate(-2deg);}
-  @media (prefers-reduced-motion: reduce){
-    .gotw-panel, .gotw-panel::before, .gotw-title, .gotw-title-badge{animation:none;}
+  @media (max-width:640px){
+    .gotw-stage{margin:0 12px;}
+    .gotw-scoreline .gotw-score{font-size:26px;}
   }
 
   /* ---------- NUTCAST (AI weekly audio recap) ---------- */
@@ -1482,12 +1472,23 @@
       <p class="const-note" style="margin-top:14px;">TBA items will be confirmed by the commissioner &mdash; full rules for all of the above live in the Constitution tab.</p>
     </div>
     <div class="panel gotw-panel" id="gotwPanel" style="display:none;">
-      <h2 class="panel-title gotw-title"><span class="gotw-title-badge">🏆</span> Dynasty Game of the Week</h2>
+      <h2 class="panel-title sr-only">🏆 Dynasty Game of the Week</h2>
+      <div class="gotw-media">
+        <img class="gotw-header-img" src="gotw-header.webp" alt="Dynasty Game of the Week">
+        <div class="gotw-overlay">
+          <div class="gotw-slot gotw-slot-a"><img id="gotwAvatarA" alt=""></div>
+          <div class="gotw-slot gotw-slot-b"><img id="gotwAvatarB" alt=""></div>
+          <div class="gotw-name gotw-name-a" id="gotwNameA"></div>
+          <div class="gotw-name gotw-name-b" id="gotwNameB"></div>
+          <div class="gotw-record gotw-record-a" id="gotwRecordA"></div>
+          <div class="gotw-record gotw-record-b" id="gotwRecordB"></div>
+        </div>
+      </div>
       <div class="gotw-stage">
         <canvas class="gotw-fireworks" id="gotwFireworks"></canvas>
         <div id="gotwCard"></div>
+        <p class="gotw-hint">🎆 Click or tap anywhere in the box to set off fireworks</p>
       </div>
-      <p class="gotw-hint">🎆 Click or tap anywhere in the box to set off fireworks</p>
     </div>
     <div class="panel">
       <h2 class="panel-title" id="matchupsTitle">This Week's Matchups</h2>
@@ -4043,12 +4044,34 @@ function maybeComputeGameOfWeek(){
   const week = LAST_MATCHUPS.week;
   const scored = LAST_MATCHUPS.pairs.map(function(p){ return computeGameOfWeekScore(p, week); });
   scored.sort(function(x,y){ return y.total - x.total; });
+  function findScored(a, b){
+    return scored.find(function(s){ return (s.a===a && s.b===b) || (s.a===b && s.b===a); });
+  }
 
-  safeStorageGet("gotw_last_teams", true).then(function(res){
-    let lastTeams = [];
-    try{ if(res && res.value) lastTeams = JSON.parse(res.value); }catch(e){}
+  safeStorageGet("gotw_pick_week", true).then(function(res){
+    let saved = null;
+    try{ if(res && res.value) saved = JSON.parse(res.value); }catch(e){}
+
+    // Once a matchup is chosen for a given week, it stays the Game of the Week for the
+    // rest of that week -- its displayed score/breakdown still updates live as games
+    // play out, but this function (called from several independent async data loads)
+    // no longer reconsiders WHICH matchup to feature every time it reruns. Only a real
+    // week change is allowed to pick a fresh one.
+    if(saved && saved.week === week){
+      const existing = findScored(saved.a, saved.b);
+      if(existing){
+        GOTW_PICK = existing;
+        renderGameOfWeek(existing, week);
+        if(LAST_MATCHUPS) renderMatchups(LAST_MATCHUPS.week, LAST_MATCHUPS.pairs, LAST_MATCHUPS.usedLive);
+        return;
+      }
+      // last week's saved matchup isn't part of this week's pairs -- fall through and pick fresh
+    }
+
     let pick = scored[0];
-    // Avoid repeating the same franchise if a comparably-scored alternative exists
+    // Avoid repeating the same franchise as LAST week's featured matchup, if a
+    // comparably-scored alternative exists this week.
+    const lastTeams = saved ? [saved.a, saved.b] : [];
     for(let i=1; i<scored.length; i++){
       const candidate = scored[i];
       const gap = pick.total - candidate.total;
@@ -4057,7 +4080,7 @@ function maybeComputeGameOfWeek(){
       if(pickRepeats && !candidateRepeats && gap <= 6) pick = candidate;
     }
     GOTW_PICK = pick;
-    safeStorageSet("gotw_last_teams", JSON.stringify([pick.a, pick.b]), true).catch(function(){});
+    safeStorageSet("gotw_pick_week", JSON.stringify({week: week, a: pick.a, b: pick.b}), true).catch(function(){});
     renderGameOfWeek(pick, week);
     if(LAST_MATCHUPS) renderMatchups(LAST_MATCHUPS.week, LAST_MATCHUPS.pairs, LAST_MATCHUPS.usedLive);
   }).catch(function(){
@@ -4131,12 +4154,17 @@ function initGotwFireworks(){
   gotwFireworksResize();
   window.addEventListener("resize", gotwFireworksResize);
 
+  // The canvas is pointer-events:none (so clicks reach real controls like the "see
+  // breakdown" toggle underneath it), so the click/tap listener lives on the stage
+  // wrapper instead -- it still fires from anywhere in the box, fireworks just render
+  // on the canvas using coordinates translated into the canvas's own rect.
+  const stage = canvas.closest(".gotw-stage") || canvas.parentElement;
   function launchAt(clientX, clientY){
     const rect = canvas.getBoundingClientRect();
     gotwLaunchFirework(clientX - rect.left, clientY - rect.top);
   }
-  canvas.addEventListener("click", function(e){ launchAt(e.clientX, e.clientY); });
-  canvas.addEventListener("touchstart", function(e){
+  stage.addEventListener("click", function(e){ launchAt(e.clientX, e.clientY); });
+  stage.addEventListener("touchstart", function(e){
     if(e.touches && e.touches[0]) launchAt(e.touches[0].clientX, e.touches[0].clientY);
   }, {passive:true});
 
@@ -4167,6 +4195,20 @@ function renderGameOfWeek(pick, week){
   const aPts = pairData.a===pick.a ? pairData.aPoints : pairData.bPoints;
   const bPts = pairData.a===pick.a ? pairData.bPoints : pairData.aPoints;
 
+  // Live avatars/names/records drop into the graphic's own empty slots.
+  const avatarA = document.getElementById("gotwAvatarA");
+  const avatarB = document.getElementById("gotwAvatarB");
+  const nameA = document.getElementById("gotwNameA");
+  const nameB = document.getElementById("gotwNameB");
+  const recordA = document.getElementById("gotwRecordA");
+  const recordB = document.getElementById("gotwRecordB");
+  if(avatarA){ avatarA.onerror = function(){ this.style.visibility = "hidden"; }; avatarA.style.visibility = ""; avatarA.src = ta.avatar || ""; }
+  if(avatarB){ avatarB.onerror = function(){ this.style.visibility = "hidden"; }; avatarB.style.visibility = ""; avatarB.src = tb.avatar || ""; }
+  if(nameA) nameA.textContent = ta.team || "";
+  if(nameB) nameB.textContent = tb.team || "";
+  if(recordA) recordA.textContent = (ta.wins||0)+'-'+(ta.losses||0);
+  if(recordB) recordB.textContent = (tb.wins||0)+'-'+(tb.losses||0);
+
   const whyBits = [];
   if(pick.meta.isDesignatedRivalry) whyBits.push("designated rivalry");
   if(pick.meta.streakA && pick.meta.streakA.length>=3) whyBits.push((ta.team||"Team A") + " is on a " + pick.meta.streakA.length + "-game " + (pick.meta.streakA.type==="W"?"win":"losing") + " streak");
@@ -4184,11 +4226,7 @@ function renderGameOfWeek(pick, week){
   }).join("");
 
   card.innerHTML =
-    '<div class="gotw-hero">' +
-      '<div class="gotw-side"><img src="' + (ta.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/><div class="gotw-team-name">' + (ta.team||'') + '</div><div class="gotw-record">' + (ta.wins||0)+'-'+(ta.losses||0) + '</div></div>' +
-      '<div class="gotw-mid"><div class="gotw-score">' + (aPts!=null?aPts.toFixed(1):'-') + '</div><div class="gotw-vs">VS</div><div class="gotw-score">' + (bPts!=null?bPts.toFixed(1):'-') + '</div><div class="gotw-total">Score: ' + pick.total.toFixed(1) + '/100</div></div>' +
-      '<div class="gotw-side right"><img src="' + (tb.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/><div class="gotw-team-name">' + (tb.team||'') + '</div><div class="gotw-record">' + (tb.wins||0)+'-'+(tb.losses||0) + '</div></div>' +
-    '</div>' +
+    '<div class="gotw-scoreline"><span class="gotw-score">' + (aPts!=null?aPts.toFixed(1):'-') + '</span><span class="gotw-vs">VS</span><span class="gotw-score">' + (bPts!=null?bPts.toFixed(1):'-') + '</span><div class="gotw-total">Score: ' + pick.total.toFixed(1) + '/100</div></div>' +
     '<p class="gotw-why">Selected for ' + whyText + '.</p>' +
     '<details class="gotw-details"><summary>See the full scoring breakdown</summary><div class="power-breakdown" style="padding:12px 4px 0;">' + breakdown + '</div></details>';
 
