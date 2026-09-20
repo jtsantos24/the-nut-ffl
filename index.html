@@ -682,7 +682,9 @@
   .team-detail{display:none; margin-top:20px;}
   .team-detail.active{display:block;}
   .team-detail-inner{display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;}
-  .team-detail-inner img{width:112px; height:112px; border-radius:12px; object-fit:cover; border:1px solid var(--line);}
+  .team-detail-inner #tdImg{width:112px; height:112px; border-radius:12px; object-fit:cover; border:1px solid var(--line);}
+  .td-trophycase{margin-left:auto; width:300px; max-width:100%; flex-shrink:0;}
+  .td-trophycase img{width:100%; height:auto; display:block; border-radius:var(--radius-sm); border:1px solid var(--line-soft); box-shadow:var(--shadow-card);}
   .td-back{background:var(--surface-2); border:1px solid var(--line); color:var(--chalk-dim); font-size:12px; padding:7px 14px; border-radius:999px; cursor:pointer; margin-bottom:16px; transition:color 0.15s, border-color 0.15s;}
   .td-back:hover{color:var(--chalk); border-color:var(--gold-dark);}
   .td-name{font-size:27px; color:var(--chalk);}
@@ -1340,7 +1342,8 @@
     .bonus-winner{max-width:none; width:100%; order:3;}
 
     .team-detail-inner{gap:12px;}
-    .team-detail-inner img{width:82px; height:82px;}
+    .team-detail-inner #tdImg{width:82px; height:82px;}
+    .td-trophycase{width:100%; margin-left:0;}
     .td-name{font-size:23px;}
 
     table.standings th, table.standings td{padding:8px 4px; font-size:12px;}
@@ -1873,6 +1876,9 @@
             <div class="td-name" id="tdName"></div>
             <div class="td-mgr" id="tdMgr"></div>
             <div class="td-rival" id="tdRival"></div>
+          </div>
+          <div class="td-trophycase">
+            <img src="owner-trophy-case.webp" alt="Owner Trophy Case" />
           </div>
         </div>
         <div class="alltime" id="tdAllTime"></div>
