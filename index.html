@@ -687,14 +687,18 @@
   .td-trophycase-inner{position:relative;}
   .td-trophycase-bg{width:100%; height:auto; display:block; border-radius:var(--radius); border:1px solid var(--line-soft); box-shadow:var(--shadow-card);}
   /* Championship trophies dropped onto the two shelf ledges baked into the banner photo --
-     coordinates measured directly against owner-trophy-case.webp's native 1983x793 pixels. */
+     coordinates measured directly against owner-trophy-case.webp's native 1983x793 pixels.
+     Each shelf's spotlights were located by scanning brightness peaks in that light row, so
+     every trophy slot sits centered directly under its own light: 5 lights over the top
+     shelf, 6 over the bottom shelf. Positions are set per-trophy via inline `left` (assigned
+     in JS from SHELF1_LIGHTS/SHELF2_LIGHTS) rather than flexbox, since the light spacing
+     isn't perfectly uniform. */
   .td-trophy-shelf{
-    position:absolute; left:16%; right:16%; display:flex; justify-content:center; align-items:flex-end;
-    flex-wrap:nowrap; gap:1.2%; z-index:2; pointer-events:none;
+    position:absolute; left:0; right:0; height:0; z-index:2; pointer-events:none;
   }
-  .td-trophy-shelf-1{bottom:47.04%;}
-  .td-trophy-shelf-2{bottom:7.95%;}
-  .td-trophy{position:relative; width:6.6%; flex-shrink:0; aspect-ratio:1024/1536; container-type:inline-size;}
+  .td-trophy-shelf-1{bottom:46.4%;}
+  .td-trophy-shelf-2{bottom:11.35%;}
+  .td-trophy{position:absolute; bottom:0; width:8.2%; aspect-ratio:1024/1536; container-type:inline-size; transform:translateX(-50%);}
   .td-trophy img{width:100%; height:100%; display:block; filter:drop-shadow(0 8px 10px rgba(0,0,0,0.6));}
   .td-trophy-year{
     position:absolute; left:21.5%; width:58.5%; top:82.6%; height:9.8%;
@@ -4958,12 +4962,20 @@ function showTeamDetail(teamName){
   renderBettingLedger(t.ownerId);
 }
 
+// Spotlight x-positions (percent of the banner's width) for each shelf, located by
+// scanning owner-trophy-case.webp for brightness peaks in each light row -- 5 lights
+// over the top shelf (under the header sign), 6 over the bottom shelf. Trophies are
+// centered under these exact points via CSS translateX(-50%).
+const SHELF1_LIGHTS = [27.53, 38.38, 51.19, 61.57, 72.42];
+const SHELF2_LIGHTS = [21.48, 32.58, 44.23, 55.82, 67.47, 79.07];
+
 // Drops one championship trophy per title year onto the trophy-case banner's shelf
 // ledges, reading straight from CAREER_STATS (the same source the All-time record
 // badges use) so new titles show up automatically once that record is updated --
-// no per-owner wiring needed. Up to 8 trophies per shelf before spilling to the
-// second shelf; multiple titles for the same owner render as separate trophies
-// side-by-side rather than being combined into one.
+// no per-owner wiring needed. Each trophy is lined up directly under its own shelf
+// light (5 on top, 6 on bottom) rather than evenly spaced; multiple titles for the
+// same owner render as separate trophies side-by-side rather than being combined
+// into one.
 function renderTrophyCase(ownerId){
   const shelf1 = document.getElementById("tdTrophyShelf1");
   const shelf2 = document.getElementById("tdTrophyShelf2");
@@ -4971,17 +4983,18 @@ function renderTrophyCase(ownerId){
 
   const record = CAREER_STATS[ownerId];
   const titles = (record && record.titles) ? record.titles.slice().sort() : [];
-  const MAX_PER_SHELF = 8;
 
-  function trophyHtml(year){
-    return '<div class="td-trophy" title="' + year + ' League Champion">' +
+  function trophyHtml(year, leftPct){
+    return '<div class="td-trophy" style="left:' + leftPct + '%;" title="' + year + ' League Champion">' +
       '<img src="championship-trophy.webp" alt="' + year + ' Championship Trophy">' +
       '<div class="td-trophy-year">' + year + '</div>' +
     '</div>';
   }
 
-  shelf1.innerHTML = titles.slice(0, MAX_PER_SHELF).map(trophyHtml).join("");
-  shelf2.innerHTML = titles.slice(MAX_PER_SHELF, MAX_PER_SHELF * 2).map(trophyHtml).join("");
+  shelf1.innerHTML = titles.slice(0, SHELF1_LIGHTS.length)
+    .map(function(year, i){ return trophyHtml(year, SHELF1_LIGHTS[i]); }).join("");
+  shelf2.innerHTML = titles.slice(SHELF1_LIGHTS.length, SHELF1_LIGHTS.length + SHELF2_LIGHTS.length)
+    .map(function(year, i){ return trophyHtml(year, SHELF2_LIGHTS[i]); }).join("");
 }
 
 function renderAllTime(ownerId){
