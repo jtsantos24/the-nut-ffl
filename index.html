@@ -1366,6 +1366,12 @@
     .team-detail-inner #tdImg{width:82px; height:82px;}
     .td-name{font-size:23px;}
 
+    /* Bleed the trophy case out past the panel's own padding (16px) and the page
+       wrap's padding (20px) so it renders noticeably larger on phones -- same
+       full-bleed treatment used for the Game of the Week banner above. */
+    .td-trophycase{margin-left:-36px; margin-right:-36px; width:calc(100% + 72px);}
+    .td-trophycase-bg{border-left:0; border-right:0; border-radius:0;}
+
     table.standings th, table.standings td{padding:8px 4px; font-size:12px;}
     .team-cell-mgr{display:none;}
 
