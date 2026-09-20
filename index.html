@@ -706,6 +706,14 @@
     font-family:'Cinzel', serif; font-weight:700; letter-spacing:0.3px; color:#2a1a08;
     font-size:clamp(6px, 19cqw, 30px);
   }
+  /* Runner-up trophy's blank plate sits lower and narrower (rivets flank it) on its own
+     art, so its year label gets its own box measured against runnerup-trophy.webp. */
+  .td-trophy-year-runnerup{
+    position:absolute; left:26.5%; width:49%; top:77.3%; height:10%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel', serif; font-weight:700; letter-spacing:0.3px; color:#1c1c1f;
+    font-size:clamp(6px, 17cqw, 27px);
+  }
   .td-back{background:var(--surface-2); border:1px solid var(--line); color:var(--chalk-dim); font-size:12px; padding:7px 14px; border-radius:999px; cursor:pointer; margin-bottom:16px; transition:color 0.15s, border-color 0.15s;}
   .td-back:hover{color:var(--chalk); border-color:var(--gold-dark);}
   .td-name{font-size:27px; color:var(--chalk);}
@@ -4988,19 +4996,29 @@ function renderTrophyCase(ownerId){
   if(!shelf1 || !shelf2) return;
 
   const record = CAREER_STATS[ownerId];
-  const titles = (record && record.titles) ? record.titles.slice().sort() : [];
+  const titles = (record && record.titles) ? record.titles : [];
+  const runnerUps = (record && record.runnerUps) ? record.runnerUps : [];
+  // Championships and runner-up finishes share the same shelves, ordered chronologically
+  // so the case reads as one career timeline rather than trophies grouped by type.
+  const trophies = titles.map(function(year){ return { year: year, type: "champion" }; })
+    .concat(runnerUps.map(function(year){ return { year: year, type: "runnerup" }; }))
+    .sort(function(a, b){ return a.year.localeCompare(b.year); });
 
-  function trophyHtml(year, leftPct){
-    return '<div class="td-trophy" style="left:' + leftPct + '%;" title="' + year + ' League Champion">' +
-      '<img src="championship-trophy.webp" alt="' + year + ' Championship Trophy">' +
-      '<div class="td-trophy-year">' + year + '</div>' +
+  function trophyHtml(trophy, leftPct){
+    const isChamp = trophy.type === "champion";
+    const img = isChamp ? "championship-trophy.webp" : "runnerup-trophy.webp";
+    const yearClass = isChamp ? "td-trophy-year" : "td-trophy-year-runnerup";
+    const titleLabel = isChamp ? " League Champion" : " League Runner-up";
+    return '<div class="td-trophy" style="left:' + leftPct + '%;" title="' + trophy.year + titleLabel + '">' +
+      '<img src="' + img + '" alt="' + trophy.year + (isChamp ? ' Championship' : ' Runner-up') + ' Trophy">' +
+      '<div class="' + yearClass + '">' + trophy.year + '</div>' +
     '</div>';
   }
 
-  shelf1.innerHTML = titles.slice(0, SHELF1_LIGHTS.length)
-    .map(function(year, i){ return trophyHtml(year, SHELF1_LIGHTS[i]); }).join("");
-  shelf2.innerHTML = titles.slice(SHELF1_LIGHTS.length, SHELF1_LIGHTS.length + SHELF2_LIGHTS.length)
-    .map(function(year, i){ return trophyHtml(year, SHELF2_LIGHTS[i]); }).join("");
+  shelf1.innerHTML = trophies.slice(0, SHELF1_LIGHTS.length)
+    .map(function(tr, i){ return trophyHtml(tr, SHELF1_LIGHTS[i]); }).join("");
+  shelf2.innerHTML = trophies.slice(SHELF1_LIGHTS.length, SHELF1_LIGHTS.length + SHELF2_LIGHTS.length)
+    .map(function(tr, i){ return trophyHtml(tr, SHELF2_LIGHTS[i]); }).join("");
 }
 
 function renderAllTime(ownerId){
