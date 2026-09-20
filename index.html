@@ -1184,9 +1184,14 @@
   }
   .gotw-record-a{left:21%; width:25%; top:94.6%; transform:translateY(-50%);}
   .gotw-record-b{left:54%; width:25%; top:94.6%; transform:translateY(-50%);}
+  .gotw-cardscore{
+    position:absolute; left:45%; width:10%; text-align:center; transform:translateY(-50%);
+    font-family:'Teko', sans-serif; color:var(--gold); text-shadow:0 0 10px rgba(242,181,66,0.6);
+    font-size:clamp(14px, 3.6cqw, 44px); line-height:1;
+  }
+  .gotw-cardscore-a{top:58.3%;}
+  .gotw-cardscore-b{top:87.3%;}
   .gotw-scoreline{text-align:center; padding:16px 12px 0; position:relative; z-index:1;}
-  .gotw-scoreline .gotw-score{font-family:'Teko', sans-serif; font-size:34px; color:var(--gold); text-shadow:0 0 16px rgba(242,181,66,0.55);}
-  .gotw-scoreline .gotw-vs{font-family:'Teko', sans-serif; font-size:15px; color:var(--chalk-faint); margin:0 8px;}
   .gotw-total{font-size:11px; color:var(--chalk-dim); margin-top:2px;}
   .gotw-why{font-size:13px; color:var(--chalk-dim); text-align:center; margin:14px 0 0; font-style:italic; position:relative; z-index:1;}
   .gotw-details{margin-top:10px; position:relative; z-index:1; padding:0 16px;}
@@ -1482,6 +1487,8 @@
           <div class="gotw-name gotw-name-b" id="gotwNameB"></div>
           <div class="gotw-record gotw-record-a" id="gotwRecordA"></div>
           <div class="gotw-record gotw-record-b" id="gotwRecordB"></div>
+          <div class="gotw-cardscore gotw-cardscore-a" id="gotwCardScoreA"></div>
+          <div class="gotw-cardscore gotw-cardscore-b" id="gotwCardScoreB"></div>
         </div>
       </div>
       <div class="gotw-stage">
@@ -4202,12 +4209,16 @@ function renderGameOfWeek(pick, week){
   const nameB = document.getElementById("gotwNameB");
   const recordA = document.getElementById("gotwRecordA");
   const recordB = document.getElementById("gotwRecordB");
+  const cardScoreA = document.getElementById("gotwCardScoreA");
+  const cardScoreB = document.getElementById("gotwCardScoreB");
   if(avatarA){ avatarA.onerror = function(){ this.style.visibility = "hidden"; }; avatarA.style.visibility = ""; avatarA.src = ta.avatar || ""; }
   if(avatarB){ avatarB.onerror = function(){ this.style.visibility = "hidden"; }; avatarB.style.visibility = ""; avatarB.src = tb.avatar || ""; }
   if(nameA) nameA.textContent = ta.team || "";
   if(nameB) nameB.textContent = tb.team || "";
   if(recordA) recordA.textContent = (ta.wins||0)+'-'+(ta.losses||0);
   if(recordB) recordB.textContent = (tb.wins||0)+'-'+(tb.losses||0);
+  if(cardScoreA) cardScoreA.textContent = aPts!=null ? aPts.toFixed(1) : "-";
+  if(cardScoreB) cardScoreB.textContent = bPts!=null ? bPts.toFixed(1) : "-";
 
   const whyBits = [];
   if(pick.meta.isDesignatedRivalry) whyBits.push("designated rivalry");
@@ -4226,7 +4237,7 @@ function renderGameOfWeek(pick, week){
   }).join("");
 
   card.innerHTML =
-    '<div class="gotw-scoreline"><span class="gotw-score">' + (aPts!=null?aPts.toFixed(1):'-') + '</span><span class="gotw-vs">VS</span><span class="gotw-score">' + (bPts!=null?bPts.toFixed(1):'-') + '</span><div class="gotw-total">Score: ' + pick.total.toFixed(1) + '/100</div></div>' +
+    '<div class="gotw-scoreline"><div class="gotw-total">Score: ' + pick.total.toFixed(1) + '/100</div></div>' +
     '<p class="gotw-why">Selected for ' + whyText + '.</p>' +
     '<details class="gotw-details"><summary>See the full scoring breakdown</summary><div class="power-breakdown" style="padding:12px 4px 0;">' + breakdown + '</div></details>';
 
