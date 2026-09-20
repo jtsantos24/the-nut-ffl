@@ -728,22 +728,22 @@
      one is visible, so resizing the window swaps layouts instantly with no re-render
      and no risk of the two ever showing different trophies.
      Coordinates measured against trophy-case-mobile.webp's native 1024x1535 pixels:
-     each shelf's sit-line is its front lip's highlight edge, and the interior bounds
-     (8%/9%) keep trophies clear of the case's side posts and light strips. Trophies
-     flow left-to-right and wrap onto the next shelf via JS chunking (there are no
-     discrete spotlights to lock onto here, unlike the desktop banner). */
+     each shelf's sit-line is its front lip's highlight edge. Each shelf has exactly
+     two spotlights (located by scanning brightness peaks the same way as the desktop
+     banner), so -- like desktop -- trophies sit centered directly under a real light
+     rather than just evenly spaced; positions are set per-trophy via inline `left`
+     (assigned in JS from MOBILE_SHELF_LIGHTS) with translateX(-50%) doing the centering. */
   .td-trophycase-mobile{display:none; width:100%; margin:22px 0 6px;}
   .td-trophycase-mobile-inner{position:relative;}
   .td-trophycase-mobile-bg{width:100%; height:auto; display:block; border-radius:var(--radius); border:1px solid var(--line-soft); box-shadow:var(--shadow-card);}
   .tdm-shelf{
-    position:absolute; left:8%; right:9%; height:0; z-index:2; pointer-events:none;
-    display:flex; justify-content:center; align-items:flex-end; gap:3%; flex-wrap:nowrap;
+    position:absolute; left:0; right:0; height:0; z-index:2; pointer-events:none;
   }
   .tdm-shelf-1{bottom:71.86%;}
   .tdm-shelf-2{bottom:49.32%;}
   .tdm-shelf-3{bottom:26.78%;}
   .tdm-shelf-4{bottom:5.34%;}
-  .tdm-trophy{position:relative; width:18%; flex-shrink:0; aspect-ratio:1024/1536; container-type:inline-size;}
+  .tdm-trophy{position:absolute; bottom:0; width:20%; aspect-ratio:1024/1536; container-type:inline-size; transform:translateX(-50%);}
   .tdm-trophy img{width:100%; height:100%; display:block; filter:drop-shadow(0 6px 8px rgba(0,0,0,0.65));}
   @media (max-width:768px){
     .td-trophycase{display:none;}
@@ -5032,23 +5032,22 @@ function showTeamDetail(teamName){
 // scanning owner-trophy-case.webp for brightness peaks in each light row -- 5 lights
 // over the top shelf (under the header sign), 6 over the bottom shelf. Trophies are
 // centered under these exact points via CSS translateX(-50%). Desktop/tablet only
-// (>768px); see MOBILE_TROPHY_SHELF_CAPACITY below for the phone layout.
+// (>768px); see MOBILE_SHELF_LIGHTS below for the phone layout.
 const SHELF1_LIGHTS = [27.53, 38.38, 51.19, 61.57, 72.42];
 const SHELF2_LIGHTS = [21.48, 32.58, 44.23, 55.82, 67.47, 79.07];
 
-// Mobile trophy case has no discrete spotlights to lock onto -- each of its 4 shelves
-// is a plain wide ledge -- so trophies simply flow left-to-right and wrap onto the next
-// shelf down once a shelf fills up. 4 per shelf keeps each trophy large (~18% of the
-// case's width) while still leaving room for a whole dynasty's worth of hardware.
-const MOBILE_TROPHY_SHELF_CAPACITY = 4;
+// Each of the mobile case's 4 shelves has exactly two spotlights (found the same way
+// as the desktop banner's), at essentially the same x-position on every shelf, so one
+// shared pair of light positions covers all four. 2 per shelf x 4 shelves = 8 slots.
+const MOBILE_SHELF_LIGHTS = [22.75, 77.4];
 
 // Drops one trophy per championship or runner-up season onto the trophy case shelves,
 // reading straight from CAREER_STATS (the same source the All-time record badges use)
 // so new results show up automatically once that record is updated -- no per-owner
 // wiring needed. Builds ONE shared, chronologically-ordered trophy list and renders it
-// into BOTH the desktop (fixed positions under each shelf light) and mobile (flowing
-// left-to-right, top shelf down) DOM trees every time, so an owner's trophies are
-// always identical on both layouts -- a pure CSS breakpoint just decides which is shown.
+// into BOTH the desktop and mobile DOM trees every time, each fixed under its own real
+// shelf spotlight, so an owner's trophies are always identical on both layouts -- a
+// pure CSS breakpoint just decides which one is shown.
 function renderTrophyCase(ownerId){
   const shelf1 = document.getElementById("tdTrophyShelf1");
   const shelf2 = document.getElementById("tdTrophyShelf2");
@@ -5088,13 +5087,15 @@ function renderTrophyCase(ownerId){
     return '<div class="td-trophy" style="left:' + SHELF2_LIGHTS[i] + '%;" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
   }).join("");
 
-  // ---- Mobile: flow left-to-right, filling the top shelf before moving down ----
+  // ---- Mobile: fixed positions under each shelf's two real spotlights, filling the
+  // top shelf left-to-right before moving down to the next one ----
   if(mShelves[0]){
+    const perShelf = MOBILE_SHELF_LIGHTS.length;
     mShelves.forEach(function(shelfEl, i){
       if(!shelfEl) return;
-      const chunk = trophies.slice(i * MOBILE_TROPHY_SHELF_CAPACITY, (i + 1) * MOBILE_TROPHY_SHELF_CAPACITY);
-      shelfEl.innerHTML = chunk.map(function(tr){
-        return '<div class="tdm-trophy" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
+      const chunk = trophies.slice(i * perShelf, (i + 1) * perShelf);
+      shelfEl.innerHTML = chunk.map(function(tr, j){
+        return '<div class="tdm-trophy" style="left:' + MOBILE_SHELF_LIGHTS[j] + '%;" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
       }).join("");
     });
   }
