@@ -1,0 +1,65 @@
+name: Weekly Nutcast Recap
+
+# Generates the AI audio recap ("The Nutcast") for the most recently completed NFL week and
+# publishes it to recaps/ -- see scripts/generate-recap.mjs for the full pipeline and
+# SETUP_RECAPS.md for the one-time setup this workflow depends on (API key secrets, etc).
+
+on:
+  schedule:
+    # Tuesdays at 11:00 UTC -- comfortably after Monday Night Football wraps up across US time
+    # zones. Cron is evaluated in UTC regardless of your league's local time.
+    - cron: "0 11 * * 2"
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "Force a specific week (leave blank to auto-detect last completed week). Useful for backfilling earlier weeks."
+        required: false
+        type: string
+      force:
+        description: "Regenerate even if this week already has a published episode"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  generate-recap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install headless Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate this week's Nutcast
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
+          RECAP_WEEK: ${{ inputs.week }}
+          RECAP_FORCE: ${{ inputs.force }}
+        run: node scripts/generate-recap.mjs
+
+      - name: Commit and push the new episode
+        run: |
+          git config user.name "nutcast-bot"
+          git config user.email "actions@github.com"
+          git add recaps/
+          if git diff --cached --quiet; then
+            echo "Nothing to commit (no new episode was generated this run)."
+          else
+            git commit -m "The Nutcast: publish weekly recap [skip ci]"
+            git push
+          fi

@@ -1228,6 +1228,60 @@
     .gotw-panel, .gotw-panel::before, .gotw-title, .gotw-title-badge{animation:none;}
   }
 
+  /* ---------- NUTCAST (AI weekly audio recap) ---------- */
+  .nutcast-panel{
+    position:relative; border-color:var(--gold-dark);
+    background:linear-gradient(165deg, rgba(242,181,66,0.06), var(--surface) 55%);
+  }
+  .nutcast-title-badge{display:inline-block; filter:drop-shadow(0 0 6px rgba(242,181,66,0.5));}
+  .nutcast-loading{color:var(--chalk-dim); font-size:13px;}
+  .nutcast-player{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px 22px;
+  }
+  .nutcast-player-top{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  .nutcast-play-btn{
+    font:inherit; font-size:15px; font-weight:700; letter-spacing:0.3px; padding:14px 26px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--gold-dark); background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;
+    transition:transform 0.15s, box-shadow 0.15s; display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
+  }
+  .nutcast-play-btn:hover{transform:translateY(-2px); box-shadow:0 10px 22px -8px rgba(242,181,66,0.55);}
+  .nutcast-play-btn .tri{font-size:12px;}
+  .nutcast-meta{flex:1; min-width:180px;}
+  .nutcast-week-tag{
+    display:inline-block; font-size:10px; letter-spacing:1px; text-transform:uppercase; font-weight:700;
+    color:var(--gold-bright); background:var(--gold-soft); border:1px solid rgba(242,181,66,0.35);
+    border-radius:999px; padding:3px 10px; margin-bottom:6px;
+  }
+  .nutcast-episode-title{font-size:18px; font-weight:700; color:var(--chalk); margin-bottom:3px;}
+  .nutcast-teaser{font-size:13px; color:var(--chalk-dim); line-height:1.5;}
+  .nutcast-audio{width:100%; margin-top:16px; accent-color:var(--gold);}
+  .nutcast-transcript-toggle{
+    background:none; border:none; color:var(--teal); font:inherit; font-size:12px; cursor:pointer;
+    padding:0; margin-top:12px; text-decoration:underline; text-underline-offset:2px;
+  }
+  .nutcast-transcript{
+    display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft);
+    font-size:13px; line-height:1.7; color:var(--chalk-dim); white-space:pre-wrap;
+  }
+  .nutcast-transcript.open{display:block;}
+  .nutcast-archive-link{
+    display:inline-block; margin-top:14px; font-size:12px; color:var(--chalk-dim); text-decoration:none; border-bottom:1px dotted var(--chalk-faint);
+  }
+  .nutcast-archive-link:hover{color:var(--gold-bright); border-color:var(--gold-bright);}
+  .nutcast-empty{
+    color:var(--chalk-dim); font-size:13px; background:var(--surface-2); border:1px dashed var(--line);
+    border-radius:var(--radius-sm); padding:16px 18px;
+  }
+  .nutcast-archive-grid{display:flex; flex-direction:column; gap:14px;}
+  .nutcast-archive-item{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;
+  }
+  @media (max-width:640px){
+    .nutcast-player{padding:16px;}
+    .nutcast-play-btn{width:100%; justify-content:center;}
+  }
+
   /* ---------- RECAP ---------- */
   .recap-card{
     background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
@@ -1368,6 +1422,7 @@
         <div class="nav-dropdown-menu-goo">
           <button data-section="throne">The Iron Throne</button>
           <button data-section="champions">Champions &amp; Records</button>
+          <button data-section="nutcast">The Nutcast Archive</button>
         </div>
       </div>
     </div>
@@ -1399,6 +1454,10 @@
 <div class="wrap">
 
   <div class="section active" id="section-home">
+    <div class="panel nutcast-panel" id="nutcastHomePanel">
+      <h2 class="panel-title"><span class="nutcast-title-badge">🎙️</span> The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show</h2>
+      <div id="nutcastHomeBody"><p class="nutcast-loading">Loading this week's episode&hellip;</p></div>
+    </div>
     <div class="panel">
       <h2 class="panel-title">Key Dates &amp; League Info</h2>
       <div class="keydates-grid">
@@ -1559,6 +1618,14 @@
       <button type="button" class="betting-history-toggle" id="bettingHistoryToggle" style="display:none;">Show my full wager history</button>
       <div class="betting-history-list" id="bettingHistoryList" style="display:none;"></div>
       <p class="const-note" style="margin-top:14px;" id="bettingConstNote">In-league FAAB game only &mdash; no real money involved. Your balance and bets are saved in this browser, so they won't follow you to a different device. Lines are auto-generated from each team's season scoring average; the commissioner can hand-edit any line before it locks (also saved locally). Betting on a matchup locks at that week's estimated kickoff and settles automatically once Sleeper shows a final score.</p>
+    </div>
+  </div>
+
+  <div class="section" id="section-nutcast">
+    <div class="panel nutcast-panel">
+      <h2 class="panel-title"><span class="nutcast-title-badge">🎙️</span> The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show</h2>
+      <p class="panel-sub">An AI-generated audio recap, hosted by our own announcer, drops after every week's Monday night games wrap up &mdash; matchup results, the closest game, the biggest blowout, upsets against the spread, standout and disappointing performances, FAAB betting results, and any movement in the standings or Power Rankings.</p>
+      <div id="nutcastArchiveBody"><p class="nutcast-loading">Loading episode archive&hellip;</p></div>
     </div>
   </div>
 
@@ -7674,6 +7741,274 @@ function startKeyDateCountdowns(){
   setInterval(tickKeyDateCountdowns, 1000);
 }
 
+// ---------- THE NUTCAST: AI WEEKLY AUDIO RECAP ----------
+// buildWeekRecapFacts() and isRecapDataReady() are the data contract for the off-site recap
+// generator (a headless-browser step run by a GitHub Action -- see scripts/generate-recap.mjs
+// in the repo). Rather than re-implementing Power Rankings, matchup spreads, and FAAB betting
+// math a second time in Node (and risking the two copies drifting apart), that Action loads
+// this exact page, waits for isRecapDataReady() to go true, then calls buildWeekRecapFacts(week)
+// and reads the result straight out of the live DOM -- the same numbers a visitor would see.
+// Both functions are also exposed on window so that headless-browser step can call them.
+
+function isRecapDataReady(){
+  return !!(
+    TEAMS && TEAMS.length && TEAMS[0].starters !== undefined &&
+    POWER_SCORES && Object.keys(POWER_SCORES).length > 0 &&
+    ALL_PLAYERS && Array.isArray(RIVALRY_HISTORY) && RIVALRY_HISTORY.length > 0 &&
+    FAAB_FIREBASE_ENABLED !== null && HEAD_TO_HEAD
+  );
+}
+
+function recapTeamRef(rosterId){
+  const t = TEAMS.find(function(x){ return x.rosterId === rosterId; }) || {};
+  return {
+    rosterId: rosterId,
+    ownerId: t.ownerId || null,
+    name: t.team || ("Team " + rosterId),
+    manager: t.manager || "",
+    wins: t.wins || 0, losses: t.losses || 0, ties: t.ties || 0,
+    fpts: t.fpts || 0
+  };
+}
+
+function recapPlayerInfo(pid){
+  const p = ALL_PLAYERS ? ALL_PLAYERS[pid] : null;
+  const name = p ? (p.full_name || ((p.first_name||"") + " " + (p.last_name||"")).trim()) : "";
+  return {
+    playerId: pid,
+    name: name || pid,
+    position: p ? (p.position || "") : "",
+    nflTeam: p ? (p.team || "FA") : ""
+  };
+}
+
+// Ranks a list of {rosterId, wins, losses, ties, fpts} the same way the Ledger Tracker and
+// standings sort does -- record first, points scored as the tiebreaker.
+function recapStandingsRank(list){
+  const sorted = list.slice().sort(function(a,b){ return (b.wins - a.wins) || (b.fpts - a.fpts); });
+  const out = {};
+  sorted.forEach(function(t, i){ out[t.rosterId] = i + 1; });
+  return out;
+}
+
+function buildWeekRecapFacts(week){
+  return fetchMatchupPairs(week).then(function(pairs){
+    if(!pairs || pairs.length === 0) return null;
+
+    // Roll this week's results back out of the current (post-week) cumulative record to
+    // reconstruct where the standings stood right before these games were played.
+    const afterList = TEAMS.map(function(t){ return {rosterId:t.rosterId, wins:t.wins, losses:t.losses, ties:t.ties, fpts:t.fpts}; });
+    const beforeMap = {};
+    afterList.forEach(function(t){ beforeMap[t.rosterId] = Object.assign({}, t); });
+    pairs.forEach(function(p){
+      if(typeof p.aPoints !== "number" || typeof p.bPoints !== "number") return;
+      const a = beforeMap[p.a], b = beforeMap[p.b];
+      if(!a || !b) return;
+      a.fpts -= p.aPoints; b.fpts -= p.bPoints;
+      if(p.aPoints > p.bPoints){ a.wins--; b.losses--; }
+      else if(p.bPoints > p.aPoints){ b.wins--; a.losses--; }
+      else { a.ties--; b.ties--; }
+    });
+    const beforeList = Object.values(beforeMap);
+    const rankAfter = recapStandingsRank(afterList);
+    const rankBefore = recapStandingsRank(beforeList);
+    const standingsMovers = afterList.map(function(t){
+      return {
+        team: recapTeamRef(t.rosterId).name,
+        rankBefore: rankBefore[t.rosterId],
+        rankAfter: rankAfter[t.rosterId],
+        delta: rankBefore[t.rosterId] - rankAfter[t.rosterId]
+      };
+    }).filter(function(m){ return m.delta !== 0; }).sort(function(x,y){ return Math.abs(y.delta) - Math.abs(x.delta); });
+
+    const powerRankingsNow = (POWER_RANK_ORDER || []).map(function(rid, i){
+      return { rosterId: rid, team: recapTeamRef(rid).name, rank: i + 1, score: Math.round((POWER_SCORES[rid]||0) * 10) / 10, trend: POWER_TRENDS[rid] || "flat" };
+    });
+
+    const leagueTop = [], leagueBust = [];
+    const matchups = pairs.map(function(p){
+      const teamA = recapTeamRef(p.a), teamB = recapTeamRef(p.b);
+      const spreadA = spreadForSide(week, {a:p.a, b:p.b}, p.a);
+      const spreadB = -spreadA;
+      const favoriteSide = spreadA < 0 ? "A" : (spreadB < 0 ? "B" : null);
+      const underdogSide = favoriteSide === "A" ? "B" : (favoriteSide === "B" ? "A" : null);
+      const aPts = p.aPoints || 0, bPts = p.bPoints || 0;
+      const winnerSide = aPts > bPts ? "A" : (bPts > aPts ? "B" : "tie");
+      const isUpset = underdogSide !== null && winnerSide === underdogSide && aPts !== bPts;
+
+      function sidePerformers(starters, playerPoints, side, teamName){
+        return (starters || []).filter(function(pid){ return pid && playerPoints && typeof playerPoints[pid] === "number"; })
+          .map(function(pid){
+            const info = recapPlayerInfo(pid);
+            return Object.assign(info, {points: playerPoints[pid], side: side, team: teamName});
+          });
+      }
+      const perf = sidePerformers(p.aStarters, p.aPlayerPoints, "A", teamA.name)
+        .concat(sidePerformers(p.bStarters, p.bPlayerPoints, "B", teamB.name));
+      perf.sort(function(x,y){ return y.points - x.points; });
+      const topPerformers = perf.slice(0, 3);
+      const busts = perf.filter(function(x){ return x.position !== "DEF" && x.position !== "K" && x.points < 3; })
+        .sort(function(x,y){ return x.points - y.points; }).slice(0, 2);
+      leagueTop.push.apply(leagueTop, topPerformers);
+      leagueBust.push.apply(leagueBust, busts);
+
+      const ownerA = teamA.ownerId, ownerB = teamB.ownerId;
+      const isRivalry = RIVALRIES.some(function(pr){ return (pr[0]===ownerA && pr[1]===ownerB) || (pr[1]===ownerA && pr[0]===ownerB); });
+      const h2h = (HEAD_TO_HEAD && HEAD_TO_HEAD[ownerA] && HEAD_TO_HEAD[ownerA][ownerB]) || null;
+      const isGameOfWeek = !!(GOTW_PICK && ((GOTW_PICK.a===p.a && GOTW_PICK.b===p.b) || (GOTW_PICK.a===p.b && GOTW_PICK.b===p.a)));
+
+      return {
+        teamA: Object.assign({}, teamA, {score: aPts, spread: spreadA}),
+        teamB: Object.assign({}, teamB, {score: bPts, spread: spreadB}),
+        winnerSide: winnerSide,
+        margin: Math.round(Math.abs(aPts - bPts) * 10) / 10,
+        favoriteSide: favoriteSide,
+        underdogSide: underdogSide,
+        spreadMagnitude: Math.abs(spreadA),
+        isUpset: isUpset,
+        isGameOfWeek: isGameOfWeek,
+        isRivalry: isRivalry,
+        rivalryRecordForA: h2h,
+        topPerformers: topPerformers,
+        bustPerformers: busts
+      };
+    });
+
+    const decided = matchups.filter(function(m){ return m.winnerSide !== "tie"; });
+    const closestGame = decided.slice().sort(function(a,b){ return a.margin - b.margin; })[0] || null;
+    const biggestBlowout = decided.slice().sort(function(a,b){ return b.margin - a.margin; })[0] || null;
+    const allTeamScores = [];
+    matchups.forEach(function(m){
+      allTeamScores.push({team: m.teamA.name, score: m.teamA.score});
+      allTeamScores.push({team: m.teamB.name, score: m.teamB.score});
+    });
+    allTeamScores.sort(function(a,b){ return b.score - a.score; });
+    const upsets = matchups.filter(function(m){ return m.isUpset; }).sort(function(a,b){ return b.spreadMagnitude - a.spreadMagnitude; });
+
+    leagueTop.sort(function(a,b){ return b.points - a.points; });
+    leagueBust.sort(function(a,b){ return a.points - b.points; });
+
+    const faabResults = (Array.isArray(FAAB_WAGERS) ? FAAB_WAGERS : []).filter(function(w){
+      return w.week === week && (w.status === "won" || w.status === "lost");
+    }).map(function(w){
+      return {
+        team: w.pickTeamName, opponent: w.oppTeamName, spread: w.spread, amount: w.amount,
+        status: w.status, profit: w.status === "won" ? (w.potentialPayout - w.amount) : -w.amount
+      };
+    });
+
+    return {
+      season: "2026",
+      week: week,
+      generatedAt: new Date().toISOString(),
+      matchups: matchups,
+      closestGame: closestGame,
+      biggestBlowout: biggestBlowout,
+      highestScoringTeam: allTeamScores[0] || null,
+      lowestScoringTeam: allTeamScores[allTeamScores.length - 1] || null,
+      biggestUpset: upsets[0] || null,
+      leagueTopPerformers: leagueTop.slice(0, 6),
+      leagueBustPerformers: leagueBust.slice(0, 4),
+      standingsBefore: beforeList.map(function(t){ return Object.assign({team: recapTeamRef(t.rosterId).name, rank: rankBefore[t.rosterId]}, t); }),
+      standingsAfter: afterList.map(function(t){ return Object.assign({team: recapTeamRef(t.rosterId).name, rank: rankAfter[t.rosterId]}, t); }),
+      standingsMovers: standingsMovers,
+      powerRankingsNow: powerRankingsNow,
+      gameOfWeek: GOTW_PICK ? {
+        teamA: recapTeamRef(GOTW_PICK.a).name, teamB: recapTeamRef(GOTW_PICK.b).name,
+        isDesignatedRivalry: GOTW_PICK.meta ? GOTW_PICK.meta.isDesignatedRivalry : false
+      } : null,
+      faabResults: faabResults
+    };
+  });
+}
+window.buildWeekRecapFacts = buildWeekRecapFacts;
+window.isRecapDataReady = isRecapDataReady;
+
+// ---- Site-side playback: reads recaps/manifest.json, written by the GitHub Action after it
+// generates each week's script + audio. Safe to be missing entirely (pre-launch, or before
+// Week 1's recap has published) -- both render spots fall back to a friendly "coming soon". ----
+let NUTCAST_MANIFEST = null;
+
+function nutcastEpisodeHtml(ep){
+  const audioSrc = "recaps/" + throneEscAttr(ep.audioFile || "");
+  const title = throneEscAttr(ep.title || ("Week " + ep.week + " Recap"));
+  const synopsis = ep.synopsis ? throneEscAttr(ep.synopsis) : "";
+  const transcriptId = "nutcastTranscript-" + ep.season + "-" + ep.week;
+  return '<div class="nutcast-player">' +
+      '<div class="nutcast-player-top">' +
+        '<button type="button" class="nutcast-play-btn"><span class="tri">&#9654;</span> Play</button>' +
+        '<div class="nutcast-meta">' +
+          '<div class="nutcast-week-tag">' + throneEscAttr(ep.season) + ' &middot; Week ' + ep.week + '</div>' +
+          '<div class="nutcast-episode-title">' + title + '</div>' +
+          (synopsis ? '<div class="nutcast-teaser">' + synopsis + '</div>' : '') +
+        '</div>' +
+      '</div>' +
+      '<audio class="nutcast-audio" controls preload="none" src="' + audioSrc + '"></audio>' +
+      (ep.script ? (
+        '<button type="button" class="nutcast-transcript-toggle" data-target="' + transcriptId + '">Show transcript</button>' +
+        '<div class="nutcast-transcript" id="' + transcriptId + '">' + throneEscAttr(ep.script) + '</div>'
+      ) : '') +
+    '</div>';
+}
+
+function wireNutcastPlayers(root){
+  root.querySelectorAll(".nutcast-play-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      const wrap = btn.closest(".nutcast-player");
+      const audio = wrap ? wrap.querySelector("audio") : null;
+      if(audio) audio.play();
+    });
+  });
+  root.querySelectorAll(".nutcast-transcript-toggle").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      const target = document.getElementById(btn.dataset.target);
+      if(!target) return;
+      const open = target.classList.toggle("open");
+      btn.textContent = open ? "Hide transcript" : "Show transcript";
+    });
+  });
+}
+
+function renderNutcastHome(){
+  const body = document.getElementById("nutcastHomeBody");
+  if(!body) return;
+  if(!NUTCAST_MANIFEST || NUTCAST_MANIFEST.length === 0){
+    body.innerHTML = '<p class="nutcast-empty">The first episode of The Nutcast drops after this week&rsquo;s Monday night games wrap up. Check back soon.</p>';
+    return;
+  }
+  const latest = NUTCAST_MANIFEST[0];
+  body.innerHTML = nutcastEpisodeHtml(latest) +
+    '<a class="nutcast-archive-link" href="#" id="nutcastArchiveLink">Hear every episode in the archive &rarr;</a>';
+  wireNutcastPlayers(body);
+  const link = document.getElementById("nutcastArchiveLink");
+  if(link) link.addEventListener("click", function(e){ e.preventDefault(); goToSection("nutcast"); });
+}
+
+function renderNutcastArchive(){
+  const body = document.getElementById("nutcastArchiveBody");
+  if(!body) return;
+  if(!NUTCAST_MANIFEST || NUTCAST_MANIFEST.length === 0){
+    body.innerHTML = '<p class="nutcast-empty">No episodes yet &mdash; the first Nutcast publishes after this week&rsquo;s Monday night games wrap up.</p>';
+    return;
+  }
+  body.innerHTML = '<div class="nutcast-archive-grid">' + NUTCAST_MANIFEST.map(nutcastEpisodeHtml).join("") + '</div>';
+  wireNutcastPlayers(body);
+}
+
+function loadRecapManifest(){
+  fetch("recaps/manifest.json", {cache: "no-store"}).then(function(res){
+    if(!res.ok) throw new Error("no manifest yet");
+    return res.json();
+  }).then(function(data){
+    NUTCAST_MANIFEST = Array.isArray(data) ? data.slice().sort(function(a,b){ return (b.season - a.season) || (b.week - a.week); }) : [];
+  }).catch(function(){
+    NUTCAST_MANIFEST = [];
+  }).then(function(){
+    renderNutcastHome();
+    renderNutcastArchive();
+  });
+}
+
 renderStandings(false);
 renderFallbackMatchups();
 renderRivalry();
@@ -7692,6 +8027,7 @@ loadCurrentSeasonChampionStatus();
 loadPlayoffBrackets();
 initFaabBettingSystem();
 loadFaabBudgets();
+loadRecapManifest();
 startTicker();
 startKeyDateCountdowns();
 </script>

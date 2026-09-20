@@ -1,0 +1,13 @@
+{
+  "name": "the-nut-ffl-recap-generator",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Weekly AI audio recap (\"The Nutcast\") generator for The NUT Fantasy Football League site. Not part of the static site itself -- only used by the GitHub Action that produces recaps/*.mp3 and recaps/manifest.json.",
+  "type": "module",
+  "scripts": {
+    "generate-recap": "node scripts/generate-recap.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}
