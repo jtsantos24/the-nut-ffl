@@ -561,6 +561,10 @@
   @keyframes throneRayPulse{ 0%,100%{opacity:0.5;} 50%{opacity:0.85;} }
   .throne-spotlight-cone{pointer-events:none;}
   .throne-crowd-filler{pointer-events:none;}
+  .throne-avatar-ring{stroke:rgba(255,212,107,0); stroke-width:3; transition:stroke 0.2s;}
+  .throne-figure:hover .throne-avatar-ring, .throne-figure:focus-visible .throne-avatar-ring{stroke:rgba(255,212,107,0.85);}
+  .throne-toilet-hotspot{transition:fill 0.2s;}
+  .throne-figure:hover .throne-toilet-hotspot, .throne-figure:focus-visible .throne-toilet-hotspot{fill:rgba(255,212,107,0.12);}
   .throne-caption{margin-top:12px; font-size:12px; color:var(--chalk-faint); text-align:center; font-style:italic;}
   .throne-tooltip{
     position:fixed; z-index:200; background:var(--surface-2); border:1px solid var(--gold-dark);
@@ -4507,54 +4511,21 @@ function renderTeams(){
 // ---------- CHAMPIONS THRONE ROOM ----------
 let CURRENT_CHAMPION_DATA = null; // {championRosterId, toiletRosterId} once this season's brackets resolve
 let THRONE_CLIP_SEQ = 0;
-const THRONE_ROBE_COLORS = ["#6b4f8c","#4f6b8c","#8c5f4f","#4f8c6b","#8c4f7a","#5f4f8c","#8c7a4f","#4f7a8c","#7a8c4f","#8c4f4f"];
+// Pixel coordinates for each avatar slot, measured directly against the trophy photo
+// (throne-trophy.webp, a 1254x1254 image used as the scene's viewBox unit system) --
+// the center/radius of each black circle placeholder, in left-to-right, top-to-bottom
+// plate order. Index 0 is "2ND", index 9 is "11TH" (peasants[] is already ranked that way).
+const THRONE_PEASANT_SLOTS = [
+  {cx:436, cy:348, r:47},  {cx:816, cy:343, r:47},   // 2ND, 3RD
+  {cx:506, cy:530, r:47},  {cx:750, cy:527, r:47},   // 4TH, 5TH
+  {cx:295, cy:710, r:48},  {cx:518, cy:712, r:48}, {cx:736, cy:713, r:48}, {cx:957, cy:711, r:48}, // 6TH-9TH
+  {cx:418, cy:911, r:46},  {cx:837, cy:911, r:46}    // 10TH, 11TH
+];
+const THRONE_CHAMPION_SLOT = {cx:626, cy:156, r:50};
+const THRONE_TOILET_SLOT = {cx:627, cy:890, rx:88, ry:95};
 
 function throneEscAttr(s){
   return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
-}
-
-function thronePillarSVG(x){
-  const w = 58, top = 26, bot = 472;
-  return '<g>' +
-    '<rect x="' + x + '" y="' + top + '" width="' + w + '" height="' + (bot - top) + '" fill="url(#pillarGrad)" stroke="#0a0704" stroke-width="1"></rect>' +
-    '<path d="M' + (x-10) + ',' + top + ' L' + (x+w+10) + ',' + top + ' L' + (x+w) + ',' + (top+16) + ' L' + x + ',' + (top+16) + ' Z" fill="#3a2a18" stroke="#0a0704" stroke-width="1"></path>' +
-    '<rect x="' + (x-10) + '" y="' + bot + '" width="' + (w+20) + '" height="16" fill="#241a10" stroke="#0a0704" stroke-width="1"></rect>' +
-    '<rect x="' + (x+8) + '" y="' + (top+30) + '" width="' + (w-16) + '" height="' + (bot-top-46) + '" fill="rgba(0,0,0,0.18)"></rect>' +
-  '</g>';
-}
-
-function throneWindowSVG(cx){
-  const r = 52, topY = 78, botY = 238;
-  return '<g opacity="0.85">' +
-    '<path d="M' + (cx-r) + ',' + botY + ' L' + (cx-r) + ',' + (topY+r) + ' A' + r + ',' + r + ' 0 0 1 ' + (cx+r) + ',' + (topY+r) + ' L' + (cx+r) + ',' + botY + ' Z" fill="url(#windowGrad)" stroke="#B9822A" stroke-width="2.5"></path>' +
-    '<line x1="' + cx + '" y1="' + (topY-2) + '" x2="' + cx + '" y2="' + botY + '" stroke="#B9822A" stroke-width="1.5" opacity="0.7"></line>' +
-    '<line x1="' + (cx-r) + '" y1="' + (topY+r-14) + '" x2="' + (cx+r) + '" y2="' + (topY+r-14) + '" stroke="#B9822A" stroke-width="1.5" opacity="0.5"></line>' +
-  '</g>';
-}
-
-function throneLightRaySVG(cx, w1, w2){
-  return '<polygon points="' + (cx-w1) + ',10 ' + (cx+w1) + ',10 ' + (cx+w2) + ',400 ' + (cx-w2) + ',400' +
-    '" fill="url(#rayGrad)" class="throne-lightray"></polygon>';
-}
-
-function throneTorchSVG(x, y, flameClass){
-  return '<g transform="translate(' + x + ',' + y + ')">' +
-    '<rect x="-3" y="0" width="6" height="66" fill="#3a2a1a"></rect>' +
-    '<rect x="-9" y="-6" width="18" height="8" rx="2" fill="#241a10" stroke="#B9822A" stroke-width="1"></rect>' +
-    '<circle cx="0" cy="8" r="22" fill="url(#torchGlowGrad)" class="throne-torch-glow"></circle>' +
-    '<g class="throne-torch-flame ' + flameClass + '">' +
-      '<path d="M0,-4 Q11,12 0,28 Q-11,12 0,-4 Z" fill="#ff8a3d"></path>' +
-      '<path d="M0,4 Q6,14 0,24 Q-6,14 0,4 Z" fill="#ffd166"></path>' +
-    '</g>' +
-  '</g>';
-}
-
-function throneBannerSVG(x){
-  return '<g transform="translate(' + x + ',18)" opacity="0.9">' +
-    '<path d="M-26,0 L26,0 L26,160 L0,182 L-26,160 Z" fill="url(#bannerGrad)" stroke="#B9822A" stroke-width="1.5"></path>' +
-    '<path d="M-26,0 L26,0 L26,10 L-26,10 Z" fill="#B9822A" opacity="0.6"></path>' +
-    '<text x="0" y="96" text-anchor="middle" font-size="26">🏈</text>' +
-  '</g>';
 }
 
 function throneSparkleSVG(x, y, size, cls){
@@ -4565,278 +4536,97 @@ function throneSparkleSVG(x, y, size, cls){
     ' Z" fill="#FFD46B"></path>';
 }
 
-// Faceless, low-opacity robed silhouettes scattered just behind the peasant line to
-// suggest a deeper crowd without needing more avatars than the league actually has.
-function throneCrowdFillerSVG(x, y, scale){
-  return '<g transform="translate(' + x + ',' + y + ') scale(' + scale + ')" opacity="0.3" class="throne-crowd-filler">' +
-    '<path d="M-22,32 L-17,-18 Q0,-30 17,-18 L22,32 Q0,42 -22,32 Z" fill="#1c1420"></path>' +
-    '<circle cx="0" cy="-30" r="14" fill="#1c1420"></circle>' +
-  '</g>';
-}
-
-// One shared builder for every face in the scene: champion, peasant, or toilet-bowl loser.
-// All figures are simple flat-icon robed silhouettes (not attempted realism) with a
-// circular clipped team avatar for the head, keeping the art style consistent and legible
-// at small sizes no matter how many teams the league has. Each figure is wrapped in a
-// plain ".tf-enter" group (no transform attribute of its own) so the CSS entrance
-// animation can move it without clobbering the position/scale/rotate set via the SVG
-// transform attribute on the inner group -- CSS transform and the transform attribute
-// fight over the same element otherwise.
-function throneFigureSVG(opts){
-  const t = opts.team || {};
-  const role = opts.role; // "champion" | "peasant" | "toilet"
+// A clipped circular avatar dropped exactly onto one of the trophy photo's black-circle
+// placeholders. No drawn body/robe anymore -- the photo already supplies the figurine,
+// pedestal, and gold nameplate, so this just fills in the "face."
+function throneAvatarCircleSVG(t, slot, role, delay){
   const clipId = "tfclip" + (THRONE_CLIP_SEQ++);
-  const isChampion = role === "champion";
-  const isToilet = role === "toilet";
-  const headR = isChampion ? 28 : (isToilet ? 25 : 19);
-  const headY = isChampion ? -84 : (isToilet ? -66 : -42);
-  const robeFill = isChampion ? "url(#champRobeGrad)" : (isToilet ? "url(#toiletRobeGrad)" : opts.robeColor);
-  const robePath = isChampion
-    ? "M-58,12 L-46,-58 Q0,-80 46,-58 L58,12 Q30,28 0,28 Q-30,28 -58,12 Z"
-    : (isToilet
-      ? "M-27,40 L-21,-22 Q0,-34 21,-22 L27,40 Q0,50 -27,40 Z"
-      : "M-30,42 L-24,-24 Q0,-38 24,-24 L30,42 Q0,54 -30,42 Z");
-
-  const shadowHtml = '<ellipse cx="0" cy="' + (isChampion ? 40 : (isToilet ? 46 : 44)) + '" rx="' +
-    (isChampion ? 52 : (isToilet ? 24 : 27)) + '" ry="9" fill="rgba(0,0,0,0.4)" class="tf-shadow"></ellipse>';
-
-  const capeHtml = isChampion
-    ? '<path d="M-58,10 Q-94,60 -70,126 L-30,40 Z" fill="url(#capeGrad)" stroke="rgba(0,0,0,0.35)" stroke-width="1"></path>' +
-      '<path d="M58,10 Q94,60 70,126 L30,40 Z" fill="url(#capeGrad)" stroke="rgba(0,0,0,0.35)" stroke-width="1"></path>'
-    : "";
-
-  const furTrimHtml = isChampion
-    ? '<path d="M-46,-58 Q0,-80 46,-58" fill="none" stroke="#f4ede0" stroke-width="9" stroke-linecap="round" opacity="0.9"></path>' +
-      '<path d="M-46,-58 Q0,-80 46,-58" fill="none" stroke="#d8cdb8" stroke-width="9" stroke-dasharray="1 8" stroke-linecap="round" opacity="0.55"></path>'
-    : "";
-
-  const glowHtml = isChampion ? '<ellipse class="throne-champion-glow" cx="0" cy="-78" rx="88" ry="88" fill="url(#champGlowGrad)"></ellipse>' : "";
-  const crownHtml = isChampion
-    ? '<g transform="translate(0,-110)">' +
-        '<path d="M-24,11 L-24,-9 L-12,4 L0,-18 L12,4 L24,-9 L24,11 Z" fill="url(#crownGrad)" stroke="#8a5a12" stroke-width="1"></path>' +
-        '<circle cx="-12" cy="-4" r="2.6" fill="#FF6B6B"></circle><circle cx="0" cy="-12" r="3" fill="#45D6C4" class="throne-crown-jewel"></circle><circle cx="12" cy="-4" r="2.6" fill="#FF6B6B"></circle>' +
-      '</g>'
-    : "";
-  const trophyHtml = isChampion
-    ? '<g transform="translate(0,68) scale(2.2)">' +
-        '<path d="M-10,-10 L10,-10 L8,4 Q0,11 -8,4 Z" fill="url(#crownGrad)" stroke="#8a5a12" stroke-width="0.6"></path>' +
-        '<rect x="-3" y="4" width="6" height="7" fill="#B9822A"></rect>' +
-        '<rect x="-9" y="11" width="18" height="4" rx="1" fill="#B9822A"></rect>' +
-        '<path d="M-10,-8 Q-19,-8 -17,3 Q-16,7 -10,5" fill="none" stroke="#F2B542" stroke-width="2"></path>' +
-        '<path d="M10,-8 Q19,-8 17,3 Q16,7 10,5" fill="none" stroke="#F2B542" stroke-width="2"></path>' +
-        '<text x="0" y="-1.5" text-anchor="middle" font-family="Cinzel, serif" font-size="6.5" font-weight="800" letter-spacing="0.4" fill="#7a4f12">NUT</text>' +
-      '</g>'
-    : "";
-  const cheer = !!opts.cheer;
-  const armsHtml = (!isChampion && !isToilet)
-    ? (cheer
-      ? '<path d="M-27,-4 L-42,-64" stroke="' + opts.robeColor + '" stroke-width="7" stroke-linecap="round"></path>' +
-        '<path d="M27,-4 L42,-64" stroke="' + opts.robeColor + '" stroke-width="7" stroke-linecap="round"></path>'
-      : '<path d="M-27,-4 L-45,-32" stroke="' + opts.robeColor + '" stroke-width="7" stroke-linecap="round"></path>' +
-        '<path d="M27,-4 L45,-32" stroke="' + opts.robeColor + '" stroke-width="7" stroke-linecap="round"></path>')
-    : "";
-  const sadHtml = isToilet ? '<text x="26" y="-90" font-size="22">😭</text>' : "";
-  const dunceHtml = isToilet
-    ? '<g transform="translate(0,-104)">' +
-        '<path d="M-14,10 L0,-26 L14,10 Z" fill="#8c5f4f" stroke="#5a3a2e" stroke-width="1"></path>' +
-        '<circle cx="0" cy="-26" r="3.2" fill="#FFD46B"></circle>' +
-      '</g>'
-    : "";
-  const ringColor = isChampion ? "#FFD46B" : (isToilet ? "#7a5a4a" : "rgba(255,255,255,0.32)");
-
-  const rotate = opts.rotate || 0;
-  const delay = (typeof opts.idx === "number") ? (0.12 + opts.idx * 0.045).toFixed(2) : "0";
+  const r = slot.r;
   return '<g class="tf-enter" style="animation-delay:' + delay + 's">' +
-    '<g class="throne-figure' + (isChampion ? " tf-champion" : "") + '" tabindex="0" data-roster="' + throneEscAttr(t.rosterId) +
-      '" data-role="' + role + '" transform="translate(' + opts.x + ',' + opts.y + ') scale(' + opts.scale +
-      ') rotate(' + rotate.toFixed(2) + ')">' +
-      shadowHtml +
+    '<g class="throne-figure" tabindex="0" data-roster="' + throneEscAttr(t.rosterId) +
+      '" data-role="' + role + '" transform="translate(' + slot.cx + ',' + slot.cy + ')">' +
       '<g class="tf-scale">' +
-        capeHtml + glowHtml + armsHtml +
-        '<path class="tf-robe" d="' + robePath + '" fill="' + robeFill + '" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"></path>' +
-        furTrimHtml +
-        '<clipPath id="' + clipId + '"><circle cx="0" cy="' + headY + '" r="' + headR + '"></circle></clipPath>' +
-        '<circle cx="0" cy="' + headY + '" r="' + (headR + 3) + '" fill="#1a1512" stroke="' + ringColor + '" stroke-width="2"></circle>' +
-        '<image href="' + throneEscAttr(t.avatar || "") + '" x="' + (-headR) + '" y="' + (headY - headR) + '" width="' + (headR * 2) +
-          '" height="' + (headR * 2) + '" clip-path="url(#' + clipId + ')" preserveAspectRatio="xMidYMid slice"></image>' +
-        crownHtml + trophyHtml + sadHtml + dunceHtml +
+        '<clipPath id="' + clipId + '"><circle cx="0" cy="0" r="' + r + '"></circle></clipPath>' +
+        '<image href="' + throneEscAttr(t.avatar || "") + '" x="' + (-r) + '" y="' + (-r) + '" width="' + (r*2) +
+          '" height="' + (r*2) + '" clip-path="url(#' + clipId + ')" preserveAspectRatio="xMidYMid slice"></image>' +
+        '<circle class="throne-avatar-ring" cx="0" cy="0" r="' + (r-1) + '" fill="none"></circle>' +
         '<title>' + throneEscAttr(t.team || "") + '</title>' +
       '</g>' +
     '</g>' +
   '</g>';
 }
 
+// The toilet slot in the photo is already fully illustrated (bowl, tank, "LAST PLACE"
+// plate) -- there's no face to drop in, so this just wires up an invisible hover/focus
+// zone over that area so the loser's name/record still shows in the shared tooltip.
+function throneToiletHotspotSVG(t, slot, delay){
+  return '<g class="tf-enter" style="animation-delay:' + delay + 's">' +
+    '<g class="throne-figure" tabindex="0" data-roster="' + throneEscAttr(t.rosterId) +
+      '" data-role="toilet" transform="translate(' + slot.cx + ',' + slot.cy + ')">' +
+      '<ellipse class="tf-scale throne-toilet-hotspot" cx="0" cy="0" rx="' + slot.rx + '" ry="' + slot.ry + '" fill="rgba(255,255,255,0.001)"></ellipse>' +
+      '<title>' + throneEscAttr(t.team || "") + '</title>' +
+    '</g>' +
+  '</g>';
+}
+
 function buildThroneSceneSVG(champion, toiletTeam, peasants, champLabelText, toiletLabelText){
-  const W = 1000, H = 630;
+  const W = 1254, H = 1254;
 
   const defs =
     '<defs>' +
       '<filter id="throneSoftShadow" x="-40%" y="-40%" width="180%" height="180%">' +
-        '<feGaussianBlur in="SourceAlpha" stdDeviation="7" result="blur"></feGaussianBlur>' +
-        '<feOffset in="blur" dx="0" dy="6" result="offsetBlur"></feOffset>' +
-        '<feComponentTransfer in="offsetBlur" result="shadow"><feFuncA type="linear" slope="0.45"></feFuncA></feComponentTransfer>' +
+        '<feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"></feGaussianBlur>' +
+        '<feOffset in="blur" dx="0" dy="4" result="offsetBlur"></feOffset>' +
+        '<feComponentTransfer in="offsetBlur" result="shadow"><feFuncA type="linear" slope="0.4"></feFuncA></feComponentTransfer>' +
         '<feMerge><feMergeNode in="shadow"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>' +
       '</filter>' +
-      '<linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#2c2014"></stop><stop offset="60%" stop-color="#1c150e"></stop><stop offset="100%" stop-color="#100c08"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="pillarGrad" x1="0" y1="0" x2="1" y2="0">' +
-        '<stop offset="0%" stop-color="#4a3a26"></stop><stop offset="45%" stop-color="#241a10"></stop><stop offset="100%" stop-color="#120d08"></stop>' +
-      '</linearGradient>' +
-      '<radialGradient id="windowGrad" cx="50%" cy="30%" r="80%">' +
-        '<stop offset="0%" stop-color="#F2B542" stop-opacity="0.85"></stop>' +
-        '<stop offset="55%" stop-color="#8c3aa8" stop-opacity="0.55"></stop>' +
-        '<stop offset="100%" stop-color="#2a1030" stop-opacity="0.35"></stop>' +
-      '</radialGradient>' +
-      '<linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#FFE7A8" stop-opacity="0.28"></stop><stop offset="100%" stop-color="#FFE7A8" stop-opacity="0"></stop>' +
-      '</linearGradient>' +
-      '<radialGradient id="torchGlowGrad">' +
-        '<stop offset="0%" stop-color="rgba(255,138,61,0.55)"></stop><stop offset="100%" stop-color="rgba(255,138,61,0)"></stop>' +
-      '</radialGradient>' +
-      '<linearGradient id="bannerGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#2e2138"></stop><stop offset="100%" stop-color="#1a1220"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="carpetGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#8c1f2b"></stop><stop offset="100%" stop-color="#4a0f18"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="bladeGrad" x1="0" y1="1" x2="0" y2="0">' +
-        '<stop offset="0%" stop-color="#333c45"></stop><stop offset="100%" stop-color="#e8eef3"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="bladeGradDark" x1="0" y1="1" x2="0" y2="0">' +
-        '<stop offset="0%" stop-color="#20262c"></stop><stop offset="100%" stop-color="#a8b4bd"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="seatGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#5c6570"></stop><stop offset="100%" stop-color="#262b30"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="cushionGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#9c2436"></stop><stop offset="100%" stop-color="#5c111f"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="champRobeGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#9166dd"></stop><stop offset="100%" stop-color="#4a2f80"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="capeGrad" x1="0" y1="0" x2="1" y2="1">' +
-        '<stop offset="0%" stop-color="#6b1f2e"></stop><stop offset="100%" stop-color="#340d16"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="toiletRobeGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#5c6b5c"></stop><stop offset="100%" stop-color="#39453a"></stop>' +
-      '</linearGradient>' +
-      '<radialGradient id="champGlowGrad">' +
-        '<stop offset="0%" stop-color="rgba(242,181,66,0.6)"></stop><stop offset="100%" stop-color="rgba(242,181,66,0)"></stop>' +
-      '</radialGradient>' +
-      '<linearGradient id="crownGrad" x1="0" y1="1" x2="0" y2="0">' +
-        '<stop offset="0%" stop-color="#B9822A"></stop><stop offset="100%" stop-color="#FFD46B"></stop>' +
-      '</linearGradient>' +
-      '<linearGradient id="daisGrad" x1="0" y1="0" x2="0" y2="1">' +
-        '<stop offset="0%" stop-color="#2f2519"></stop><stop offset="100%" stop-color="#18130e"></stop>' +
-      '</linearGradient>' +
     '</defs>';
 
-  const wallHtml = '<rect x="0" y="0" width="' + W + '" height="472" fill="url(#wallGrad)"></rect>';
-  const floorHtml = '<rect x="0" y="470" width="' + W + '" height="160" fill="#0d0a06"></rect>' +
-    '<rect x="0" y="470" width="' + W + '" height="160" fill="#171008" opacity="0.5"></rect>';
+  const bgHtml = '<image href="throne-trophy.webp" x="0" y="0" width="' + W + '" height="' + H + '" preserveAspectRatio="xMidYMid slice"></image>';
 
-  const pillarsHtml = thronePillarSVG(6) + thronePillarSVG(936);
-  const windowsHtml = throneWindowSVG(255) + throneWindowSVG(745);
-  const rayHtml = throneLightRaySVG(255, 34, 130) + throneLightRaySVG(745, 34, 130) + throneLightRaySVG(500, 20, 90);
+  // ---- champion, on the throne at the top of the pyramid ----
+  const champHtml = throneAvatarCircleSVG(champion, THRONE_CHAMPION_SLOT, "champion", 0);
 
-  const carpetHtml =
-    '<path d="M420,630 L580,630 L512,398 L488,398 Z" fill="url(#carpetGrad)" stroke="#2a0a10" stroke-width="1.5"></path>' +
-    '<path d="M420,630 L580,630 L512,398 L488,398 Z" fill="none" stroke="#B9822A" stroke-width="1" opacity="0.4"></path>';
-
-  // Iron-throne-style fan of blades radiating from behind the seat back, two overlapping
-  // tones (a darker back layer, a lighter front layer) so the fan reads with real depth.
-  const throneCx = 500, apexY = 274;
-  const bladeCount = 19;
-  let bladesHtml = "";
-  for(let i = 0; i < bladeCount; i++){
-    const frac = i / (bladeCount - 1);
-    const deg = -62 + frac * 124;
-    const back = i % 2 === 0;
-    const len = (back ? 132 : 172) - Math.abs(deg) * 0.9;
-    const grad = back ? "bladeGradDark" : "bladeGrad";
-    const wTip = back ? 7 : 8;
-    bladesHtml += '<path d="M' + (throneCx-wTip) + ',' + apexY + ' L' + (throneCx+wTip) + ',' + apexY + ' L' + throneCx + ',' + (apexY - len).toFixed(1) +
-      ' Z" fill="url(#' + grad + ')" stroke="#0a0a0a" stroke-width="1" transform="rotate(' + deg.toFixed(1) + ' ' + throneCx + ' ' + apexY + ')"></path>';
-  }
-
-  const seatHtml =
-    '<rect x="430" y="230" width="140" height="140" rx="10" fill="url(#seatGrad)" stroke="#15181c" stroke-width="1.5"></rect>' +
-    '<rect x="400" y="316" width="36" height="52" rx="6" fill="url(#seatGrad)" stroke="#15181c" stroke-width="1.5"></rect>' +
-    '<rect x="564" y="316" width="36" height="52" rx="6" fill="url(#seatGrad)" stroke="#15181c" stroke-width="1.5"></rect>' +
-    '<path d="M450,364 Q500,344 550,364 L546,290 Q500,278 454,290 Z" fill="url(#cushionGrad)" stroke="#2a0a10" stroke-width="1"></path>' +
-    '<rect x="436" y="236" width="128" height="6" rx="3" fill="#B9822A" opacity="0.8"></rect>';
-
-  const daisHtml =
-    '<path d="M340,480 L660,480 L618,400 L382,400 Z" fill="url(#daisGrad)" stroke="#000" stroke-width="1"></path>' +
-    '<path d="M382,400 L618,400 L590,355 L410,355 Z" fill="url(#daisGrad)" stroke="#000" stroke-width="1"></path>' +
-    '<path d="M340,480 L660,480 L660,486 L340,486 Z" fill="#B9822A" opacity="0.35"></path>';
-
-  const champHtml = '<g filter="url(#throneSoftShadow)">' +
-    throneFigureSVG({team: champion, x: throneCx, y: 316, scale: 1.32, role: "champion", rotate: 0, idx: 0}) +
-  '</g>';
-
-  let peasantsHtml = "";
-  let crowdFillerHtml = "";
-  const n = peasants.length;
+  // ---- the 10 pedestal bobbleheads across the tiers, in ranked (2nd..11th) order ----
+  let rowHtml = "";
   peasants.forEach(function(t, i){
-    const frac = n > 1 ? i / (n - 1) : 0.5;
-    const x = 100 + frac * 780;
-    const y = 555 - Math.sin(frac * Math.PI) * 60;
-    const tilt = (throneCx - x) * 0.035;
-    const color = THRONE_ROBE_COLORS[i % THRONE_ROBE_COLORS.length];
-    peasantsHtml += throneFigureSVG({team: t, x: x, y: y, scale: 0.8, role: "peasant", rotate: tilt, robeColor: color, cheer: i % 3 === 1, idx: i + 1});
-    if(i % 2 === 0){
-      crowdFillerHtml += throneCrowdFillerSVG(x + (i % 4 === 0 ? -30 : 30), y - 34, 0.55);
-    }
+    const slot = THRONE_PEASANT_SLOTS[i];
+    if(!slot) return; // more than 10 remaining teams shouldn't happen in this league, but stay safe
+    rowHtml += throneAvatarCircleSVG(t, slot, "peasant", (0.1 + i * 0.04).toFixed(2));
   });
 
-  const toiletCx = 918, toiletCy = 498;
-  const toiletHtml =
-    '<polygon points="' + toiletCx + ',300 ' + (toiletCx-70) + ',' + (toiletCy+10) + ' ' + (toiletCx+70) + ',' + (toiletCy+10) +
-      '" fill="url(#rayGrad)" opacity="0.5" class="throne-spotlight-cone"></polygon>' +
-    '<g transform="translate(' + toiletCx + ',' + toiletCy + ')">' +
-      '<rect x="-30" y="-96" width="46" height="36" rx="6" fill="#d8dde3"></rect>' +
-      '<rect x="-34" y="-100" width="54" height="10" rx="3" fill="#eef1f4"></rect>' +
-      '<ellipse cx="-7" cy="-40" rx="48" ry="21" fill="#eef1f4"></ellipse>' +
-      '<ellipse cx="-7" cy="-47" rx="35" ry="13" fill="#c7ccd2"></ellipse>' +
-      '<rect x="-27" y="-34" width="40" height="18" fill="#c7ccd2"></rect>' +
-      '<rect x="34" y="-70" width="8" height="26" rx="4" fill="#e2c9a8"></rect>' +
-      '<circle cx="38" cy="-72" r="9" fill="#f4ede0"></circle>' +
-    '</g>' +
-    throneFigureSVG({team: toiletTeam, x: toiletCx - 6, y: toiletCy - 84, scale: 0.84, role: "toilet", rotate: -6, idx: n + 1}) +
-    '<g transform="translate(' + (toiletCx - 12) + ',' + (toiletCy - 118) + ') rotate(-8)">' +
-      '<line x1="-18" y1="-14" x2="0" y2="0" stroke="#8a6a4a" stroke-width="1.5"></line>' +
-      '<line x1="18" y1="-14" x2="0" y2="0" stroke="#8a6a4a" stroke-width="1.5"></line>' +
-      '<rect x="-30" y="-14" width="60" height="24" rx="3" fill="#3a2a1c" stroke="#B9822A" stroke-width="1"></rect>' +
-      '<text x="0" y="3" text-anchor="middle" font-family="Cinzel, serif" font-size="11" font-weight="700" fill="#e8b840">LAST PLACE</text>' +
-    '</g>';
+  // ---- toilet-bowl loser -- the photo already draws the toilet, just wire up the hotspot ----
+  const toiletHtml = throneToiletHotspotSVG(toiletTeam, THRONE_TOILET_SLOT, 0.3);
 
-  const decorHtml =
-    throneBannerSVG(56) + throneBannerSVG(920) +
-    throneTorchSVG(150, 130, "") + throneTorchSVG(850, 130, "ttf-2") +
-    throneSparkleSVG(392, 150, 7, "tsp-1") + throneSparkleSVG(608, 170, 5, "tsp-2") + throneSparkleSVG(500, 108, 6, "tsp-3") +
-    throneSparkleSVG(310, 260, 4, "tsp-2") + throneSparkleSVG(690, 250, 4, "tsp-3");
+  const sparkleHtml =
+    throneSparkleSVG(150, 210, 8, "tsp-1") + throneSparkleSVG(1110, 230, 6, "tsp-2") +
+    throneSparkleSVG(626, 40, 7, "tsp-3");
 
+  // Rank plates ("CHAMPION", "2ND"..."11TH", "LAST PLACE") are baked into the photo, so
+  // only the actual team name needs to render dynamically -- placed just under each plate.
+  // Both labels sit clear of the plates/circles above them, on the open dark tier
+  // face, with a dark stroke outline so they stay legible over the photo's busy texture
+  // regardless of what's directly behind them.
+  const labelStroke = 'paint-order="stroke fill" stroke="rgba(0,0,0,0.85)" stroke-width="4" stroke-linejoin="round"';
   const champLabel =
-    '<text x="500" y="600" text-anchor="middle" font-family="Cinzel, serif" font-size="11" font-weight="700" letter-spacing="1.5" fill="#B9822A">' +
+    '<text x="626" y="418" text-anchor="middle" font-family="Cinzel, serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#e0aa4a" ' + labelStroke + '>' +
       throneEscAttr(champLabelText || "CURRENT #1 SEED") +
     '</text>' +
-    '<text x="500" y="620" text-anchor="middle" font-family="Cinzel, serif" font-size="19" font-weight="700" fill="#FFD46B">' +
+    '<text x="626" y="446" text-anchor="middle" font-family="Cinzel, serif" font-size="23" font-weight="700" fill="#FFD46B" ' + labelStroke + '>' +
       throneEscAttr(champion.team) +
     '</text>';
 
   const toiletLabel =
-    '<text x="' + toiletCx + '" y="574" text-anchor="middle" font-family="Cinzel, serif" font-size="10" font-weight="700" letter-spacing="1.2" fill="#a06a5a">' +
+    '<text x="627" y="1152" text-anchor="middle" font-family="Cinzel, serif" font-size="12" font-weight="700" letter-spacing="1.2" fill="#e08a6a" ' + labelStroke + '>' +
       throneEscAttr(toiletLabelText || "TOILET BOWL") +
     '</text>' +
-    '<text x="' + toiletCx + '" y="591" text-anchor="middle" font-size="11" font-weight="600" fill="#d8c2b8">' + throneEscAttr(toiletTeam.team) + '</text>';
+    '<text x="627" y="1178" text-anchor="middle" font-size="16" font-weight="700" fill="#f0ded4" ' + labelStroke + '>' + throneEscAttr(toiletTeam.team) + '</text>';
 
   return '<svg class="throne-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' +
-    defs + wallHtml + pillarsHtml + windowsHtml + floorHtml + rayHtml + decorHtml + carpetHtml + bladesHtml + daisHtml + seatHtml +
-    champHtml + crowdFillerHtml + peasantsHtml + toiletHtml + champLabel + toiletLabel +
+    defs + bgHtml + sparkleHtml + champHtml + rowHtml + toiletHtml + champLabel + toiletLabel +
   '</svg>';
 }
+
 
 function throneTooltipEl(){
   let el = document.getElementById("throneTooltip");
