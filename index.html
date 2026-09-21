@@ -1253,8 +1253,8 @@
   .gotw-name-b{left:58.76%; width:15.46%; top:43.44%; transform:translateY(-50%);}
   .gotw-record{
     position:absolute; overflow:hidden; text-align:center; white-space:nowrap; text-overflow:ellipsis;
-    color:var(--chalk-dim); line-height:1.2;
-    font-size:clamp(6.5px, 1.05cqw, 12px);
+    color:var(--chalk); font-weight:600; line-height:1.2;
+    font-size:clamp(8px, 1.3cqw, 13px);
   }
   .gotw-record-a{left:27.06%; width:12.89%; top:48.67%; transform:translateY(-50%);}
   .gotw-record-b{left:60.05%; width:12.89%; top:48.67%; transform:translateY(-50%);}
@@ -1267,20 +1267,33 @@
   .gotw-cardscore-b{top:43.68%;}
   .gotw-stage{
     position:absolute; left:3.35%; width:93.23%; top:52.12%; height:41.66%;
-    overflow-y:auto; overflow-x:hidden; padding:1.5cqw 2cqw 0.5cqw;
+    overflow-y:auto; overflow-x:hidden; padding:1cqw 2.2cqw 0.4cqw;
+    display:flex; flex-direction:column;
   }
-  .gotw-scoreline{text-align:center; position:relative; z-index:1;}
-  .gotw-total{font-size:clamp(10px, 2.1cqw, 15px); color:var(--chalk-dim); margin-top:2px;}
-  .gotw-why{font-size:clamp(10px, 1.7cqw, 14px); color:var(--chalk-dim); text-align:center; margin:0.8cqw 0 0; font-style:italic; position:relative; z-index:1;}
-  .gotw-details{margin-top:0.8cqw; position:relative; z-index:1;}
-  .gotw-details-label{font-size:clamp(9px, 1.5cqw, 13px); color:var(--gold-dark); text-align:center;}
+  .gotw-scoreline{text-align:center; position:relative; z-index:1; flex-shrink:0;}
+  .gotw-total{font-size:clamp(10px, 1.9cqw, 15px); color:var(--chalk-dim); margin-top:1px;}
+  .gotw-why{
+    font-size:clamp(9px, 1.45cqw, 13px); color:var(--chalk-dim); text-align:center; margin:0.5cqw 0 0;
+    font-style:italic; position:relative; z-index:1; flex-shrink:0; line-height:1.3;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .gotw-details{margin-top:0.5cqw; position:relative; z-index:1; flex-shrink:0;}
+  .gotw-details-label{font-size:clamp(8px, 1.25cqw, 12px); color:var(--gold-dark); text-align:center;}
+  .gotw-stage .power-breakdown{
+    padding:0.35cqw 0 0; background:transparent;
+    display:grid; grid-template-columns:1fr 1fr; column-gap:2.5cqw; row-gap:0;
+  }
+  .gotw-stage .power-cat-row{padding:0.2cqw 0; font-size:clamp(7px, 1.05cqw, 11px); gap:0.6cqw;}
+  .gotw-stage .power-cat-label{width:auto; flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .gotw-stage .power-cat-bar-wrap{flex:0 0 26%; height:5px;}
+  .gotw-stage .power-cat-val{width:34px; flex-shrink:0; font-size:inherit;}
   .gotw-fireworks{
     position:absolute; inset:0; z-index:3; width:100%; height:100%;
     pointer-events:none; mix-blend-mode:screen;
   }
   .gotw-hint{
-    position:relative; z-index:1; text-align:center; font-size:clamp(8px, 1.3cqw, 11px); color:var(--chalk-faint);
-    font-style:italic; margin-top:0.6cqw; letter-spacing:0.2px;
+    position:relative; z-index:1; text-align:center; font-size:clamp(7.5px, 1.1cqw, 10.5px); color:var(--chalk-faint);
+    font-style:italic; margin-top:0.4cqw; letter-spacing:0.2px; flex-shrink:0;
   }
   @media (max-width:640px){
     .gotw-panel{
@@ -4336,20 +4349,20 @@ function renderGameOfWeek(pick, week){
   if(pick.meta.streakB && pick.meta.streakB.length>=3) whyBits.push((tb.team||"Team B") + " is on a " + pick.meta.streakB.length + "-game " + (pick.meta.streakB.type==="W"?"win":"losing") + " streak");
   if(pick.cats.power > 20) whyBits.push("two of the league's top-ranked teams");
   if(pick.cats.playoff > 18) whyBits.push("major playoff implications");
-  const whyText = whyBits.length ? whyBits.join(", ") : "the best overall blend of strength and stakes this week";
+  const whyText = whyBits.length ? whyBits.slice(0, 2).join(", ") : "the best overall blend of strength and stakes this week";
 
-  const catLabels = {power:["Power Ranking Matchup",30], playoff:["Playoff Implications",25], projected:["Projected Matchup",15], rivalry:["Rivalry & History",15], storyline:["Storyline",10], star:["Star Power",5]};
+  const catLabels = {power:["Power Ranking",30], playoff:["Playoff Impact",25], projected:["Projected",15], rivalry:["Rivalry",15], storyline:["Storyline",10], star:["Star Power",5]};
   const breakdown = Object.keys(catLabels).map(function(k){
     const max = catLabels[k][1], val = pick.cats[k];
-    return '<div class="power-cat-row"><div class="power-cat-label">' + catLabels[k][0] + ' (' + max + ')</div>' +
+    return '<div class="power-cat-row"><div class="power-cat-label">' + catLabels[k][0] + '</div>' +
       '<div class="power-cat-bar-wrap"><div class="power-cat-bar" style="width:' + Math.min(100,(val/max*100)).toFixed(0) + '%"></div></div>' +
-      '<div class="power-cat-val">' + val.toFixed(1) + '</div></div>';
+      '<div class="power-cat-val">' + val.toFixed(1) + '/' + max + '</div></div>';
   }).join("");
 
   card.innerHTML =
     '<div class="gotw-scoreline"><div class="gotw-total">Score: ' + pick.total.toFixed(1) + '/100</div></div>' +
     '<p class="gotw-why">Selected for ' + whyText + '.</p>' +
-    '<div class="gotw-details"><div class="gotw-details-label">See the full scoring breakdown</div><div class="power-breakdown" style="padding:12px 4px 0;">' + breakdown + '</div></div>';
+    '<div class="gotw-details"><div class="gotw-details-label">See the full scoring breakdown</div><div class="power-breakdown">' + breakdown + '</div></div>';
 
   initGotwFireworks();
 }
