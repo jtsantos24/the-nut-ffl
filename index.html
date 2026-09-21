@@ -7644,8 +7644,8 @@ function renderTicker(){
   const shown1 = pool.slice(0, CAP);
   // The second ticker surfaces the *next* batch of stories the first one had no
   // room for, so the pair together show up to twice as much league news. If the
-  // pool isn't deep enough yet it falls back to the same items scrolling the
-  // opposite way, rather than sitting empty.
+  // pool isn't deep enough yet it falls back to the same items, still scrolling
+  // a beat slower than the first so the two don't read as one duplicated line.
   let shown2 = pool.slice(CAP, CAP * 2);
   if(shown2.length === 0) shown2 = shown1;
 
@@ -7655,7 +7655,9 @@ function renderTicker(){
     : '<span class="ticker-item ticker-tag-empty">Live ticker unavailable right now.</span>');
 
   if(bar2 && track2){
-    if(!TICKER_MARQUEE_2) TICKER_MARQUEE_2 = createTickerMarquee(bar2, track2, 1, 48);
+    // Same direction as the top ticker (-1), just slower, so The Wire reads as a
+    // calmer second line rather than fighting the eye by running the other way.
+    if(!TICKER_MARQUEE_2) TICKER_MARQUEE_2 = createTickerMarquee(bar2, track2, -1, 38);
     TICKER_MARQUEE_2.setContent(shown2.length
       ? itemsHtml(shown2)
       : '<span class="ticker-item ticker-tag-empty">More headlines coming soon&hellip;</span>');
