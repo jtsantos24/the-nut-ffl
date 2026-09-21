@@ -4136,26 +4136,47 @@ function computeGameOfWeekScore(pair, week){
   };
 }
 
+const GOTW_PICK_KEY = "nutLeagueGotwPick_v1"; // which matchup is locked in as this week's Game of the Week
+
+// renderMatchups() calls this at its own end (so a freshly-drawn grid immediately
+// picks up which card should carry the "Game of the Week" ribbon), and this function
+// in turn calls renderMatchups() again once it has a pick (so an already-drawn grid
+// gets redrawn with that ribbon applied). That's a legitimate one-hop round trip, but
+// without a guard it's also a real mutual-recursion cycle -- harmless before, only
+// because a bug elsewhere (see the localStorage comment further down) meant the branches that
+// call back into renderMatchups() never actually ran. Now that they do, this flag
+// stops the redraw from re-entering a second full computation.
+let GOTW_COMPUTE_IN_PROGRESS = false;
+
 function maybeComputeGameOfWeek(){
+  if(GOTW_COMPUTE_IN_PROGRESS) return;
   if(!LAST_MATCHUPS || !LAST_MATCHUPS.usedLive) return;
   if(!ALL_PLAYERS || !Array.isArray(RIVALRY_HISTORY) || !PLAYOFF_ODDS || !HEAD_TO_HEAD || Object.keys(POWER_SCORES).length === 0) return;
 
-  const week = LAST_MATCHUPS.week;
-  const scored = LAST_MATCHUPS.pairs.map(function(p){ return computeGameOfWeekScore(p, week); });
-  scored.sort(function(x,y){ return y.total - x.total; });
-  function findScored(a, b){
-    return scored.find(function(s){ return (s.a===a && s.b===b) || (s.a===b && s.b===a); });
-  }
-
-  safeStorageGet("gotw_pick_week", true).then(function(res){
-    let saved = null;
-    try{ if(res && res.value) saved = JSON.parse(res.value); }catch(e){}
+  GOTW_COMPUTE_IN_PROGRESS = true;
+  try{
+    const week = LAST_MATCHUPS.week;
+    const scored = LAST_MATCHUPS.pairs.map(function(p){ return computeGameOfWeekScore(p, week); });
+    scored.sort(function(x,y){ return y.total - x.total; });
+    function findScored(a, b){
+      return scored.find(function(s){ return (s.a===a && s.b===b) || (s.a===b && s.b===a); });
+    }
 
     // Once a matchup is chosen for a given week, it stays the Game of the Week for the
     // rest of that week -- its displayed score/breakdown still updates live as games
     // play out, but this function (called from several independent async data loads)
     // no longer reconsiders WHICH matchup to feature every time it reruns. Only a real
-    // week change is allowed to pick a fresh one.
+    // week change is allowed to pick a fresh one. This used to go through a "storage"
+    // object this static site never actually provides, so the lock never engaged and a
+    // fresh (and, thanks to the playoff-odds simulation's randomness, sometimes
+    // different) pick got made on every reload -- localStorage is what's really
+    // available in a browser, same as the FAAB ledger already uses.
+    let saved = null;
+    try{
+      const raw = localStorage.getItem(GOTW_PICK_KEY);
+      if(raw) saved = JSON.parse(raw);
+    }catch(e){ /* private browsing, quota, etc. -- just pick fresh below */ }
+
     if(saved && saved.week === week){
       const existing = findScored(saved.a, saved.b);
       if(existing){
@@ -4179,13 +4200,12 @@ function maybeComputeGameOfWeek(){
       if(pickRepeats && !candidateRepeats && gap <= 6) pick = candidate;
     }
     GOTW_PICK = pick;
-    safeStorageSet("gotw_pick_week", JSON.stringify({week: week, a: pick.a, b: pick.b}), true).catch(function(){});
+    try{ localStorage.setItem(GOTW_PICK_KEY, JSON.stringify({week: week, a: pick.a, b: pick.b})); }catch(e){ /* still works for the rest of this session */ }
     renderGameOfWeek(pick, week);
     if(LAST_MATCHUPS) renderMatchups(LAST_MATCHUPS.week, LAST_MATCHUPS.pairs, LAST_MATCHUPS.usedLive);
-  }).catch(function(){
-    GOTW_PICK = scored[0];
-    renderGameOfWeek(scored[0], week);
-  });
+  } finally {
+    GOTW_COMPUTE_IN_PROGRESS = false;
+  }
 }
 
 // ---------- GAME OF THE WEEK: FIREWORKS ----------
@@ -5500,6 +5520,32 @@ function maybeComputePowerRankings(){
 
 // Monte Carlo playoff-odds simulation using the real remaining schedule (Sleeper pre-populates
 // pairings for unplayed weeks) and each team's season-average points as a strength proxy.
+// Deterministic pseudo-random generator (mulberry32), seeded from a hash of whatever
+// string it's given. Swapped in for Math.random() inside the playoff-odds Monte Carlo
+// simulation below so that re-running the same simulation against the SAME standings
+// always returns the SAME odds -- previously it used real Math.random(), so calling it
+// again (which happens several times per page load, from independent data loads) could
+// shift the odds slightly even with nothing new having actually happened. That mattered
+// beyond just the odds display: Game of the Week's score partly depends on these odds,
+// so that randomness was one of the reasons the featured matchup could change between
+// reloads even within the same week.
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashSeed(str){
+  let h = 2166136261;
+  for(let i=0; i<str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
 function computePlayoffOdds(){
   const scheduleByWeek = {};
   RIVALRY_HISTORY.forEach(function(entry){
@@ -5531,6 +5577,14 @@ function computePlayoffOdds(){
   const baseWins = {};
   TEAMS.forEach(function(t){ baseWins[t.rosterId] = t.wins; });
 
+  // Seed the simulation from the standings + strength ratings it's actually simulating,
+  // not the clock -- so it's reproducible (same input, same odds) but still reruns for
+  // real once a new result changes those inputs.
+  const seedStr = TEAMS.map(function(t){
+    return t.rosterId + ":" + baseWins[t.rosterId] + ":" + strength[t.rosterId].toFixed(2);
+  }).sort().join("|") + "#" + futureWeeks.slice().sort().join(",");
+  const rng = mulberry32(hashSeed(seedStr));
+
   const ITER = 1500, K = 25;
   const playoffCount = {};
   TEAMS.forEach(function(t){ playoffCount[t.rosterId] = 0; });
@@ -5540,11 +5594,11 @@ function computePlayoffOdds(){
     futureWeeks.forEach(function(w){
       scheduleByWeek[w].forEach(function(pair){
         const probA = 1 / (1 + Math.pow(10, (strength[pair.b]-strength[pair.a]) / K));
-        if(Math.random() < probA) wins[pair.a]++; else wins[pair.b]++;
+        if(rng() < probA) wins[pair.a]++; else wins[pair.b]++;
       });
     });
     const order = TEAMS.map(function(t){
-      return {rid: t.rosterId, w: wins[t.rosterId], tiebreak: Math.random()};
+      return {rid: t.rosterId, w: wins[t.rosterId], tiebreak: rng()};
     }).sort(function(a,b){ return (b.w - a.w) || (b.tiebreak - a.tiebreak); });
     order.slice(0,6).forEach(function(o){ playoffCount[o.rid]++; });
   }
@@ -6161,28 +6215,6 @@ function computePowerRankings(){
     : "Through Week " + asOfWeek + " \u2014 updates automatically as new weeks are played.";
 
   renderPowerLines(finalScores, buildPowerLinesData());
-}
-
-function safeStorageGet(key, shared){
-  try{
-    if(!window.storage || typeof window.storage.get !== "function"){
-      return Promise.reject(new Error("storage unavailable"));
-    }
-    return window.storage.get(key, shared);
-  }catch(e){
-    return Promise.reject(e);
-  }
-}
-
-function safeStorageSet(key, value, shared){
-  try{
-    if(!window.storage || typeof window.storage.set !== "function"){
-      return Promise.reject(new Error("storage unavailable"));
-    }
-    return window.storage.set(key, value, shared);
-  }catch(e){
-    return Promise.reject(e);
-  }
 }
 
 function fetchJSON(url){
