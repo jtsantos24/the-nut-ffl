@@ -3929,10 +3929,13 @@ function refreshBettingLedgerIfShowing(){
 // current season: Transaction Tax (TRANSACTION_STATS, above), Betting Ledger net FAAB
 // (FAAB_WAGERS -- same won/lost-only math as renderBettingLedger, so the number matches
 // what a team sees on their own page), and Weekly Bonus Total (BONUS_RESULTS from the
-// Bonus Games feature). Projected Payout is derived from today's regular-season standing,
-// not a playoff simulation. League Dues has no live source at all -- no payment system
-// exists anywhere in this static site -- so it's shown as the flat $130 fee structure from
-// the Constitution rather than a paid/unpaid status that could be wrong.
+// Bonus Games feature). Projected Payout starts from today's regular-season standing (not a
+// playoff simulation), then subtracts that team's Transaction Tax and adds their Weekly
+// Bonus Total, so it reflects real money already paid in or won back this season. Betting
+// Ledger is play-money FAAB and intentionally left out of this calculation. League Dues has
+// no live source at all -- no payment system exists anywhere in this static site -- so it's
+// shown as the flat $130 fee structure from the Constitution rather than a paid/unpaid
+// status that could be wrong.
 const PAYOUT_BY_RANK = {1: 780, 2: 300, 3: 130};
 
 function computeBettingNetAllTeams(){
@@ -3971,7 +3974,7 @@ function renderLedger(){
     return;
   }
 
-  statusEl.textContent = "2026 season. Transaction Tax and Weekly Bonus Total are live from Sleeper; Betting Ledger is net FAAB (play money) from FAAB Betting Lines; Projected Payout reflects today's regular-season standing.";
+  statusEl.textContent = "2026 season. Transaction Tax and Weekly Bonus Total are live from Sleeper; Betting Ledger is net FAAB (play money) from FAAB Betting Lines; Projected Payout is today's regular-season standing payout minus Transaction Tax plus Weekly Bonus Total.";
 
   // League Bank -- every dollar of Transaction Tax collected across every team so far this
   // season, since that tax is what actually funds the bank (per the Constitution).
@@ -4006,7 +4009,8 @@ function renderLedger(){
     const netLabel = (net > 0 ? "+" : "") + net + " FAAB";
     const netClass = net > 0 ? "bl-pos" : (net < 0 ? "bl-neg" : "");
     const bonusTotal = bonusTotals[t.rosterId] || 0;
-    const payout = PAYOUT_BY_RANK[rank] || 0;
+    const payout = txTotal === null ? null : (PAYOUT_BY_RANK[rank] || 0) - txTotal + bonusTotal;
+    const payoutLabel = payout === null ? '&ndash;' : (payout < 0 ? ('-$' + Math.abs(payout).toFixed(0)) : ('$' + payout.toFixed(0)));
 
     return '<tr>' +
       '<td><span class="rank-num">' + rank + '</span></td>' +
@@ -4018,7 +4022,7 @@ function renderLedger(){
       '<td>' + (txTotal === null ? '&ndash;' : ('$' + txTotal.toFixed(0))) + '</td>' +
       '<td class="' + netClass + '">' + netLabel + '</td>' +
       '<td>$' + bonusTotal + '</td>' +
-      '<td>$' + payout + '</td>' +
+      '<td>' + payoutLabel + '</td>' +
     '</tr>';
   }).join("");
 }
