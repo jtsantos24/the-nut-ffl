@@ -4682,15 +4682,16 @@ let THRONE_CLIP_SEQ = 0;
 // the center/radius of each black circle placeholder, in left-to-right, top-to-bottom
 // plate order. Index 0 is "2ND", index 9 is "11TH" (peasants[] is already ranked that way).
 const THRONE_PEASANT_SLOTS = [
-  {cx:436, cy:348, r:47},  {cx:816, cy:343, r:47},   // 2ND, 3RD
-  {cx:506, cy:530, r:47},  {cx:750, cy:527, r:47},   // 4TH, 5TH
-  {cx:295, cy:710, r:48},  {cx:518, cy:712, r:48}, {cx:736, cy:713, r:48}, {cx:957, cy:711, r:48}, // 6TH-9TH
-  {cx:418, cy:911, r:46},  {cx:837, cy:911, r:46}    // 10TH, 11TH
+  {cx:451, cy:348, r:57},  {cx:800, cy:347, r:57},   // 2ND, 3RD
+  {cx:501, cy:532, r:58},  {cx:748, cy:532, r:59},   // 4TH, 5TH
+  {cx:294, cy:727, r:60},  {cx:511, cy:727, r:60}, {cx:739, cy:727, r:60}, {cx:955, cy:727, r:60}, // 6TH-9TH
+  {cx:389, cy:930, r:62},  {cx:859, cy:930, r:62}    // 10TH, 11TH
 ];
-const THRONE_CHAMPION_SLOT = {cx:626, cy:156, r:50};
-// The toilet's tank "mirror" is its own black circle placeholder too -- easy to miss
-// since it reads as a lid at a glance, but it takes an avatar exactly like the others.
-const THRONE_TOILET_SLOT = {cx:628, cy:878, r:44};
+const THRONE_CHAMPION_SLOT = {cx:627, cy:174, r:56};
+// The toilet bowl's own black "water" opening is the placeholder here -- it reads as a
+// wide oval rather than a circle, so it gets its own rx/ry ellipse clip (see
+// throneAvatarEllipseSVG) instead of the uniform-radius circle every other slot uses.
+const THRONE_TOILET_SLOT = {cx:624, cy:907, rx:58, ry:46};
 
 function throneEscAttr(s){
   return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
@@ -4724,11 +4725,31 @@ function throneAvatarCircleSVG(t, slot, role, delay){
   '</g>';
 }
 
-// The toilet's tank has its own black circle placeholder (it reads as a "mirror" set
+// Elliptical counterpart to throneAvatarCircleSVG, for the toilet bowl's oval opening
+// (a uniform-radius circle either leaves the sides of the black oval exposed or spills
+// past its top/bottom into the white porcelain, so this clips to an actual ellipse).
+function throneAvatarEllipseSVG(t, slot, role, delay){
+  const clipId = "tfclip" + (THRONE_CLIP_SEQ++);
+  const rx = slot.rx, ry = slot.ry;
+  return '<g class="tf-enter" style="animation-delay:' + delay + 's">' +
+    '<g class="throne-figure" tabindex="0" data-roster="' + throneEscAttr(t.rosterId) +
+      '" data-role="' + role + '" transform="translate(' + slot.cx + ',' + slot.cy + ')">' +
+      '<g class="tf-scale">' +
+        '<clipPath id="' + clipId + '"><ellipse cx="0" cy="0" rx="' + rx + '" ry="' + ry + '"></ellipse></clipPath>' +
+        '<image href="' + throneEscAttr(t.avatar || "") + '" x="' + (-rx) + '" y="' + (-ry) + '" width="' + (rx*2) +
+          '" height="' + (ry*2) + '" clip-path="url(#' + clipId + ')" preserveAspectRatio="xMidYMid slice"></image>' +
+        '<ellipse class="throne-avatar-ring" cx="0" cy="0" rx="' + (rx-1) + '" ry="' + (ry-1) + '" fill="none"></ellipse>' +
+        '<title>' + throneEscAttr(t.team || "") + '</title>' +
+      '</g>' +
+    '</g>' +
+  '</g>';
+}
+
+// The toilet's tank has its own black oval placeholder (it reads as a "mirror" set
 // into the lid), so the loser gets an avatar dropped in there exactly like everyone
-// else -- same helper as the champion/peasant slots, just aimed at that circle.
+// else -- just via the ellipse helper above, since that opening isn't a true circle.
 function throneToiletHotspotSVG(t, slot, delay){
-  return throneAvatarCircleSVG(t, slot, "toilet", delay);
+  return throneAvatarEllipseSVG(t, slot, "toilet", delay);
 }
 
 function buildThroneSceneSVG(champion, toiletTeam, peasants, champLabelText, toiletLabelText){
@@ -4771,18 +4792,18 @@ function buildThroneSceneSVG(champion, toiletTeam, peasants, champLabelText, toi
   // regardless of what's directly behind them.
   const labelStroke = 'paint-order="stroke fill" stroke="rgba(0,0,0,0.85)" stroke-width="4" stroke-linejoin="round"';
   const champLabel =
-    '<text x="626" y="418" text-anchor="middle" font-family="Cinzel, serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#e0aa4a" ' + labelStroke + '>' +
+    '<text x="627" y="385" text-anchor="middle" font-family="Cinzel, serif" font-size="13" font-weight="700" letter-spacing="1.5" fill="#e0aa4a" ' + labelStroke + '>' +
       throneEscAttr(champLabelText || "CURRENT #1 SEED") +
     '</text>' +
-    '<text x="626" y="446" text-anchor="middle" font-family="Cinzel, serif" font-size="23" font-weight="700" fill="#FFD46B" ' + labelStroke + '>' +
+    '<text x="627" y="413" text-anchor="middle" font-family="Cinzel, serif" font-size="23" font-weight="700" fill="#FFD46B" ' + labelStroke + '>' +
       throneEscAttr(champion.team) +
     '</text>';
 
   const toiletLabel =
-    '<text x="627" y="1152" text-anchor="middle" font-family="Cinzel, serif" font-size="12" font-weight="700" letter-spacing="1.2" fill="#e08a6a" ' + labelStroke + '>' +
+    '<text x="627" y="1148" text-anchor="middle" font-family="Cinzel, serif" font-size="12" font-weight="700" letter-spacing="1.2" fill="#e08a6a" ' + labelStroke + '>' +
       throneEscAttr(toiletLabelText || "TOILET BOWL") +
     '</text>' +
-    '<text x="627" y="1178" text-anchor="middle" font-size="16" font-weight="700" fill="#f0ded4" ' + labelStroke + '>' + throneEscAttr(toiletTeam.team) + '</text>';
+    '<text x="627" y="1174" text-anchor="middle" font-size="16" font-weight="700" fill="#f0ded4" ' + labelStroke + '>' + throneEscAttr(toiletTeam.team) + '</text>';
 
   return '<svg class="throne-svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet">' +
     defs + bgHtml + sparkleHtml + champHtml + rowHtml + toiletHtml + champLabel + toiletLabel +
