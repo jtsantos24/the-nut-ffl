@@ -1347,9 +1347,10 @@
   .nutcast-episode-title{font-size:18px; font-weight:700; color:var(--chalk); margin-bottom:3px;}
   .nutcast-teaser{font-size:13px; color:var(--chalk-dim); line-height:1.5;}
   .nutcast-audio{width:100%; margin-top:16px; accent-color:var(--gold);}
+  .nutcast-player-foot{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-top:12px;}
   .nutcast-transcript-toggle{
     background:none; border:none; color:var(--teal); font:inherit; font-size:12px; cursor:pointer;
-    padding:0; margin-top:12px; text-decoration:underline; text-underline-offset:2px;
+    padding:0; display:inline-flex; align-items:center; gap:5px; text-decoration:underline; text-underline-offset:2px;
   }
   .nutcast-transcript{
     display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft);
@@ -1357,7 +1358,8 @@
   }
   .nutcast-transcript.open{display:block;}
   .nutcast-archive-link{
-    display:inline-block; margin-top:14px; font-size:12px; color:var(--chalk-dim); text-decoration:none; border-bottom:1px dotted var(--chalk-faint);
+    display:inline-block; font-size:12px; font-weight:700; letter-spacing:0.3px; text-transform:uppercase;
+    color:var(--gold-bright); text-decoration:none; border-bottom:1px dotted var(--gold-dark); flex-shrink:0;
   }
   .nutcast-archive-link:hover{color:var(--gold-bright); border-color:var(--gold-bright);}
   .nutcast-empty{
@@ -1367,6 +1369,57 @@
   .nutcast-archive-grid{display:flex; flex-direction:column; gap:14px;}
   .nutcast-archive-item{
     background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px;
+  }
+
+  /* ---------- NUTCAST: BANNER (latest episode dropped onto the console-desk graphic as a floating card) ----------
+     nutcast-banner.webp (2057x765) is the "on air" desk scene; the latest episode's full player (play button,
+     week/title/teaser, native <audio>, transcript toggle, archive link) renders as its own bordered card
+     floating over the lower half of that image, positioned as a percentage of the image exactly like the
+     Game of the Week hero above. Measured against the reference mockup: the card spans left 11.0%/width
+     78.0%, top 49.5%/height 47.1% of the image. */
+  .nutcast-media{
+    position:relative; width:100%; aspect-ratio:2057/765; overflow:hidden;
+    border-radius:var(--radius-sm); background:#0A0F1C; container-type:inline-size;
+  }
+  .nutcast-header-img{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;}
+  .nutcast-slot{
+    position:absolute; left:11.0%; top:49.5%; width:78.0%; height:47.1%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .nutcast-slot .nutcast-player{
+    width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; overflow-y:auto;
+    background:linear-gradient(180deg, rgba(26,38,64,0.94), rgba(9,16,30,0.96));
+    border:1px solid rgba(242,181,66,0.4); border-radius:clamp(10px, 2.2cqw, 18px);
+    box-shadow:0 1.6cqw 3.2cqw -1cqw rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.04);
+    padding:clamp(10px, 2.4cqw, 22px) clamp(12px, 2.8cqw, 26px);
+  }
+  .nutcast-slot .nutcast-player-top{gap:1.4cqw; flex-wrap:nowrap; flex-shrink:0;}
+  .nutcast-slot .nutcast-meta{min-width:0; flex:1 1 auto; overflow:hidden;}
+  .nutcast-slot .nutcast-play-btn{
+    font-size:clamp(10px, 1.7cqw, 15px); padding:clamp(7px, 1.3cqw, 13px) clamp(13px, 2.6cqw, 24px); gap:6px;
+    width:auto; flex:0 0 auto; white-space:nowrap;
+  }
+  .nutcast-slot .nutcast-week-tag{font-size:clamp(7px, 0.95cqw, 10px); padding:2px clamp(6px, 1.1cqw, 10px); margin-bottom:clamp(2px, 0.6cqw, 6px);}
+  .nutcast-slot .nutcast-episode-title{
+    font-size:clamp(12px, 1.9cqw, 19px); margin-bottom:clamp(1px, 0.4cqw, 3px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .nutcast-slot .nutcast-teaser{
+    font-size:clamp(9px, 1.25cqw, 13px); line-height:1.4; flex-shrink:0;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .nutcast-slot .nutcast-audio{
+    margin-top:clamp(6px, 1.3cqw, 14px); height:clamp(26px, 3.6cqw, 32px); width:100%; flex-shrink:0;
+  }
+  .nutcast-slot .nutcast-player-foot{margin-top:clamp(5px, 1.1cqw, 12px); flex-shrink:0;}
+  .nutcast-slot .nutcast-transcript-toggle{font-size:clamp(9px, 1cqw, 11px);}
+  .nutcast-slot .nutcast-archive-link{font-size:clamp(9px, 1cqw, 11px);}
+  .nutcast-slot .nutcast-transcript{font-size:clamp(9px, 1.05cqw, 12px); margin-top:clamp(5px, 1.1cqw, 12px); padding-top:clamp(5px, 1.1cqw, 12px);}
+  .nutcast-slot .nutcast-empty{
+    background:rgba(10,15,28,0.6); border-color:var(--gold-dark); font-size:clamp(10px, 1.3cqw, 13px); padding:clamp(8px, 1.6cqw, 16px);
+    margin:auto; width:100%;
+  }
+  @container (max-width:340px){
+    .nutcast-slot .nutcast-teaser{display:none;}
   }
   @media (max-width:640px){
     .nutcast-player{padding:16px;}
@@ -1548,7 +1601,7 @@
 
   <div class="section active" id="section-home">
     <div class="panel nutcast-panel" id="nutcastHomePanel">
-      <h2 class="panel-title"><span class="nutcast-title-badge">🎙️</span> The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show</h2>
+      <h2 class="panel-title sr-only"><span class="nutcast-title-badge">🎙️</span> The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show</h2>
       <div id="nutcastHomeBody"><p class="nutcast-loading">Loading this week's episode&hellip;</p></div>
     </div>
     <div class="panel">
@@ -8211,7 +8264,8 @@ window.isRecapDataReady = isRecapDataReady;
 // Week 1's recap has published) -- both render spots fall back to a friendly "coming soon". ----
 let NUTCAST_MANIFEST = null;
 
-function nutcastEpisodeHtml(ep){
+function nutcastEpisodeHtml(ep, opts){
+  opts = opts || {};
   const audioSrc = "recaps/" + throneEscAttr(ep.audioFile || "");
   const title = throneEscAttr(ep.title || ("Week " + ep.week + " Recap"));
   const synopsis = ep.synopsis ? throneEscAttr(ep.synopsis) : "";
@@ -8226,10 +8280,13 @@ function nutcastEpisodeHtml(ep){
         '</div>' +
       '</div>' +
       '<audio class="nutcast-audio" controls preload="none" src="' + audioSrc + '"></audio>' +
-      (ep.script ? (
-        '<button type="button" class="nutcast-transcript-toggle" data-target="' + transcriptId + '">Show transcript</button>' +
-        '<div class="nutcast-transcript" id="' + transcriptId + '">' + throneEscAttr(ep.script) + '</div>'
-      ) : '') +
+      '<div class="nutcast-player-foot">' +
+        (ep.script ? (
+          '<button type="button" class="nutcast-transcript-toggle" data-target="' + transcriptId + '">&#127897;&#65039; Show transcript</button>'
+        ) : '<span></span>') +
+        (opts.archiveLink ? '<a class="nutcast-archive-link" href="#" id="nutcastArchiveLink">More episodes &rarr;</a>' : '') +
+      '</div>' +
+      (ep.script ? '<div class="nutcast-transcript" id="' + transcriptId + '">' + throneEscAttr(ep.script) + '</div>' : '') +
     '</div>';
 }
 
@@ -8246,21 +8303,29 @@ function wireNutcastPlayers(root){
       const target = document.getElementById(btn.dataset.target);
       if(!target) return;
       const open = target.classList.toggle("open");
-      btn.textContent = open ? "Hide transcript" : "Show transcript";
+      btn.innerHTML = open ? "&#127897;&#65039; Hide transcript" : "&#127897;&#65039; Show transcript";
     });
   });
+}
+
+/* Wraps the console-desk banner graphic around whatever HTML is dropped into its empty nameplate --
+   used to feature the latest episode's player on both the home panel and the archive page. */
+function nutcastBannerHtml(slotInnerHtml){
+  return '<div class="nutcast-media">' +
+      '<img class="nutcast-header-img" src="nutcast-banner.webp" alt="The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show">' +
+      '<div class="nutcast-slot">' + slotInnerHtml + '</div>' +
+    '</div>';
 }
 
 function renderNutcastHome(){
   const body = document.getElementById("nutcastHomeBody");
   if(!body) return;
   if(!NUTCAST_MANIFEST || NUTCAST_MANIFEST.length === 0){
-    body.innerHTML = '<p class="nutcast-empty">The first episode of The Nutcast drops after this week&rsquo;s Monday night games wrap up. Check back soon.</p>';
+    body.innerHTML = nutcastBannerHtml('<p class="nutcast-empty">The first episode of The Nutcast drops after this week&rsquo;s Monday night games wrap up. Check back soon.</p>');
     return;
   }
   const latest = NUTCAST_MANIFEST[0];
-  body.innerHTML = nutcastEpisodeHtml(latest) +
-    '<a class="nutcast-archive-link" href="#" id="nutcastArchiveLink">Hear every episode in the archive &rarr;</a>';
+  body.innerHTML = nutcastBannerHtml(nutcastEpisodeHtml(latest, {archiveLink: true}));
   wireNutcastPlayers(body);
   const link = document.getElementById("nutcastArchiveLink");
   if(link) link.addEventListener("click", function(e){ e.preventDefault(); goToSection("nutcast"); });
@@ -8270,10 +8335,13 @@ function renderNutcastArchive(){
   const body = document.getElementById("nutcastArchiveBody");
   if(!body) return;
   if(!NUTCAST_MANIFEST || NUTCAST_MANIFEST.length === 0){
-    body.innerHTML = '<p class="nutcast-empty">No episodes yet &mdash; the first Nutcast publishes after this week&rsquo;s Monday night games wrap up.</p>';
+    body.innerHTML = nutcastBannerHtml('<p class="nutcast-empty">No episodes yet &mdash; the first Nutcast publishes after this week&rsquo;s Monday night games wrap up.</p>');
     return;
   }
-  body.innerHTML = '<div class="nutcast-archive-grid">' + NUTCAST_MANIFEST.map(nutcastEpisodeHtml).join("") + '</div>';
+  const latest = NUTCAST_MANIFEST[0];
+  const rest = NUTCAST_MANIFEST.slice(1);
+  body.innerHTML = nutcastBannerHtml(nutcastEpisodeHtml(latest)) +
+    (rest.length ? '<div class="nutcast-archive-grid" style="margin-top:18px;">' + rest.map(function(ep){ return nutcastEpisodeHtml(ep); }).join("") + '</div>' : '');
   wireNutcastPlayers(body);
 }
 
