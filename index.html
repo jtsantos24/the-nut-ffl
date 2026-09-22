@@ -1964,7 +1964,7 @@
         </div>
         <div class="td-trophycase">
           <div class="td-trophycase-inner">
-            <img class="td-trophycase-bg" src="owner-trophy-case.webp" alt="Owner Trophy Case" />
+            <img class="td-trophycase-bg" id="tdTrophyCaseBg" src="owner-trophy-case.webp" alt="Owner Trophy Case" />
             <div class="td-trophy-shelf td-trophy-shelf-1" id="tdTrophyShelf1"></div>
             <div class="td-trophy-shelf td-trophy-shelf-2" id="tdTrophyShelf2"></div>
           </div>
@@ -5072,6 +5072,15 @@ const SHELF2_LIGHTS = [21.48, 32.58, 44.23, 55.82, 67.47, 79.07];
 // shared pair of light positions covers all four. 2 per shelf x 4 shelves = 8 slots.
 const MOBILE_SHELF_LIGHTS = [22.75, 77.4];
 
+// Per-owner custom desktop trophy case skins -- same shelf/light template as
+// owner-trophy-case.webp (verified pixel-for-pixel: identical shelf lines and light
+// positions, just re-themed art/colors), so SHELF1_LIGHTS/SHELF2_LIGHTS above apply
+// unchanged. Mobile keeps the shared trophy-case-mobile.webp for every owner since no
+// vertical version of these custom skins exists yet.
+const TROPHY_CASE_OWNER_BG = {
+  "995923308459745280": "owner-trophy-case-bills.webp" // JSN Your Face (BillsMafia1480) -- Buffalo Bills case
+};
+
 // Drops one trophy per championship or runner-up season onto the trophy case shelves,
 // reading straight from CAREER_STATS (the same source the All-time record badges use)
 // so new results show up automatically once that record is updated -- no per-owner
@@ -5089,6 +5098,9 @@ function renderTrophyCase(ownerId){
     document.getElementById("tdmTrophyShelf4")
   ];
   if(!shelf1 || !shelf2) return;
+
+  const bgImg = document.getElementById("tdTrophyCaseBg");
+  if(bgImg) bgImg.src = TROPHY_CASE_OWNER_BG[ownerId] || "owner-trophy-case.webp";
 
   const record = CAREER_STATS[ownerId];
   const titles = (record && record.titles) ? record.titles : [];
