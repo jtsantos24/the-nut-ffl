@@ -6,34 +6,41 @@
 <title>The NUT Fantasy Football League</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600&family=Cinzel:wght@600;700;800&family=Luckiest+Guy&display=swap" rel="stylesheet">
 <style>
 
   :root{
-    --bg:#0A0C12;
-    --bg-glow: radial-gradient(ellipse 900px 500px at 15% -10%, rgba(242,181,66,0.10), transparent 60%),
-               radial-gradient(ellipse 700px 500px at 100% 0%, rgba(69,214,196,0.07), transparent 55%);
-    --surface:#161A25;
-    --surface-2:#1D2230;
-    --surface-3:#232A3B;
-    --line:#2A3145;
-    --line-soft:rgba(255,255,255,0.06);
-    --chalk:#F4F6FA;
-    --chalk-dim:#8B93A8;
-    --chalk-faint:#5C6478;
+    /* Palette re-tuned to match the cartoon stadium banner: richer navy instead of
+       near-black, a bright sky-blue accent (swapped in for the old teal), warm cream
+       text instead of cool white, and a wood-brown pair for signage-style accents.
+       Almost everything below references these tokens rather than hardcoded colors,
+       so this block carries most of the reskin on its own. */
+    --bg:#0E1B34;
+    --bg-glow: radial-gradient(ellipse 1000px 600px at 15% -10%, rgba(94,196,242,0.16), transparent 60%),
+               radial-gradient(ellipse 850px 550px at 100% 0%, rgba(242,181,66,0.13), transparent 55%);
+    --surface:#152A4E;
+    --surface-2:#1C3661;
+    --surface-3:#234277;
+    --line:#2E4D82;
+    --line-soft:rgba(255,255,255,0.08);
+    --chalk:#FAF3E3;
+    --chalk-dim:#A7B8DE;
+    --chalk-faint:#6E80AC;
     --gold:#F2B542;
     --gold-bright:#FFD46B;
     --gold-dark:#B9822A;
-    --gold-soft:rgba(242,181,66,0.14);
-    --teal:#45D6C4;
-    --teal-dark:#2B8B7F;
+    --gold-soft:rgba(242,181,66,0.16);
+    --teal:#5EC8F0;
+    --teal-dark:#2E86C1;
     --red:#FF6B6B;
     --red-dark:#7A3B3B;
     --red-soft:rgba(255,107,107,0.12);
     --green:#34D399;
-    --shadow-card:0 14px 34px -16px rgba(0,0,0,0.6);
-    --shadow-soft:0 6px 18px -8px rgba(0,0,0,0.5);
-    --shadow-pop:0 20px 46px -14px rgba(0,0,0,0.7);
+    --wood:#8B5A2B;
+    --wood-dark:#5C3A1A;
+    --shadow-card:0 14px 34px -16px rgba(0,0,0,0.55);
+    --shadow-soft:0 6px 18px -8px rgba(0,0,0,0.45);
+    --shadow-pop:0 20px 46px -14px rgba(0,0,0,0.65);
     --radius:14px;
     --radius-sm:8px;
     --ticker-h:34px;
@@ -54,7 +61,7 @@
   }
   img{max-width:100%;}
   a{color:inherit;}
-  h1,h2,h3{font-family:'Teko', sans-serif; font-weight:600; margin:0; letter-spacing:0.2px;}
+  h1,h2,h3{font-family:'Luckiest Guy', 'Teko', cursive; font-weight:400; margin:0; letter-spacing:0.5px; text-transform:uppercase; text-shadow:1px 2px 0 rgba(0,0,0,0.35);}
   ::-webkit-scrollbar{width:10px; height:10px;}
   ::-webkit-scrollbar-track{background:var(--bg);}
   ::-webkit-scrollbar-thumb{background:var(--surface-3); border-radius:8px; border:2px solid var(--bg);}
@@ -70,13 +77,13 @@
   .ticker-flag{
     flex-shrink:0; display:flex; align-items:center; gap:6px;
     padding:0 20px 0 14px; position:relative; z-index:3;
-    background:linear-gradient(135deg, #ED2939, #8C0F22);
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark));
     clip-path:polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
     font-family:'Teko', sans-serif; font-size:15px; font-weight:700; letter-spacing:1.2px;
-    color:#fff; text-transform:uppercase; white-space:nowrap;
+    color:#1A1304; text-transform:uppercase; white-space:nowrap;
     box-shadow:2px 0 10px -2px rgba(0,0,0,0.6);
   }
-  .ticker-flag-dot{width:6px; height:6px; border-radius:50%; background:#fff; flex-shrink:0; animation:tickerPulse 1.4s ease-in-out infinite;}
+  .ticker-flag-dot{width:6px; height:6px; border-radius:50%; background:#1A1304; flex-shrink:0; animation:tickerPulse 1.4s ease-in-out infinite;}
   @keyframes tickerPulse{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
   .ticker-scroll-wrap{flex:1; min-width:0; position:relative; overflow:hidden;}
   .ticker-scroll-wrap::before{
@@ -150,7 +157,7 @@
   /* ---------- NAV ---------- */
   .topnav{
     position:sticky; top:calc(var(--ticker-h) * 2); z-index:50;
-    background:rgba(13,15,22,0.94);
+    background:rgba(14,27,52,0.94);
     border-bottom:1px solid var(--line);
     box-shadow:0 1px 0 rgba(242,181,66,0.25), 0 12px 28px -20px rgba(0,0,0,0.8);
     display:flex; align-items:center; justify-content:space-between;
@@ -159,7 +166,7 @@
   }
   .topnav::before{
     content:''; position:absolute; inset:0; z-index:-1;
-    background:rgba(13,15,22,0.6);
+    background:rgba(14,27,52,0.6);
     backdrop-filter:blur(14px) saturate(1.3);
     -webkit-backdrop-filter:blur(14px) saturate(1.3);
   }
@@ -380,7 +387,7 @@
   /* ---------- HERO ---------- */
   .hero{
     position:relative;
-    background:#0a0a0d;
+    background:var(--bg);
     border-bottom:1px solid var(--line);
     overflow:hidden;
   }
@@ -454,12 +461,17 @@
   .section.active{display:block;}
   @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
   .panel{
-    background:linear-gradient(180deg, var(--surface) 0%, var(--surface) 100%);
-    border:1px solid var(--line); border-radius:var(--radius); padding:24px 26px; margin-bottom:22px;
+    background:linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 14%, var(--surface) 100%);
+    border:1px solid var(--line); border-top:3px solid var(--gold-dark); border-radius:var(--radius); padding:24px 26px; margin-bottom:22px;
     box-shadow:var(--shadow-card);
   }
   .panel-title{font-size:25px; margin-bottom:16px; color:var(--chalk); display:flex; align-items:center; gap:10px;}
-  .panel-title::before{content:''; width:4px; height:20px; background:linear-gradient(180deg, var(--gold-bright), var(--gold-dark)); border-radius:3px; display:inline-block;}
+  .panel-title::before{
+    content:''; width:16px; height:22px; flex-shrink:0; display:inline-block;
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark));
+    clip-path:polygon(0 0, 100% 50%, 0 100%);
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+  }
   .panel-sub{color:var(--chalk-dim); font-size:13px; margin:-10px 0 18px;}
 
   /* ---------- STANDINGS ---------- */
