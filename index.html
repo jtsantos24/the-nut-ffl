@@ -1971,7 +1971,7 @@
         </div>
         <div class="td-trophycase-mobile">
           <div class="td-trophycase-mobile-inner">
-            <img class="td-trophycase-mobile-bg" src="trophy-case-mobile.webp" alt="Owner Trophy Case" />
+            <img class="td-trophycase-mobile-bg" id="tdTrophyCaseMobileBg" src="trophy-case-mobile.webp" alt="Owner Trophy Case" />
             <div class="tdm-shelf tdm-shelf-1" id="tdmTrophyShelf1"></div>
             <div class="tdm-shelf tdm-shelf-2" id="tdmTrophyShelf2"></div>
             <div class="tdm-shelf tdm-shelf-3" id="tdmTrophyShelf3"></div>
@@ -5075,13 +5075,22 @@ const MOBILE_SHELF_LIGHTS = [22.75, 77.4];
 // Per-owner custom desktop trophy case skins -- same shelf/light template as
 // owner-trophy-case.webp (verified pixel-for-pixel: identical shelf lines and light
 // positions, just re-themed art/colors), so SHELF1_LIGHTS/SHELF2_LIGHTS above apply
-// unchanged. Mobile keeps the shared trophy-case-mobile.webp for every owner since no
-// vertical version of these custom skins exists yet.
+// unchanged. Owners without a vertical mobile skin yet still fall back to the shared
+// trophy-case-mobile.webp -- see MOBILE_TROPHY_CASE_OWNER_BG below for owners who have one.
 const TROPHY_CASE_OWNER_BG = {
   "995923308459745280": "owner-trophy-case-bills.webp",    // JSN Your Face (BillsMafia1480) -- Buffalo Bills case
   "931163037363515392": "owner-trophy-case-bengals.webp",  // Prestige Worldwide (cincy_kid) -- Cincinnati Bengals case
   "604190850481713152": "owner-trophy-case-seahawks.webp", // Breece & Desist (Awesomeus) -- Seattle Seahawks case
   "999558477183913984": "owner-trophy-case-eagles.webp"    // Gus Swayze's Squad (AlanCarignan) -- Philadelphia Eagles case
+};
+
+// Mobile counterparts of the above -- same 4-shelf/2-light-per-shelf vertical template as
+// trophy-case-mobile.webp (verified via stacked crop comparison at all 4 shelf rows:
+// ledge lines and light positions match exactly), so MOBILE_SHELF_LIGHTS above and the
+// .tdm-shelf-1..4 CSS positions apply unchanged. Owners not listed here keep the shared
+// trophy-case-mobile.webp.
+const MOBILE_TROPHY_CASE_OWNER_BG = {
+  "995923308459745280": "trophy-case-mobile-bills.webp" // JSN Your Face (BillsMafia1480) -- Buffalo Bills case
 };
 
 // Drops one trophy per championship or runner-up season onto the trophy case shelves,
@@ -5104,6 +5113,9 @@ function renderTrophyCase(ownerId){
 
   const bgImg = document.getElementById("tdTrophyCaseBg");
   if(bgImg) bgImg.src = TROPHY_CASE_OWNER_BG[ownerId] || "owner-trophy-case.webp";
+
+  const mobileBgImg = document.getElementById("tdTrophyCaseMobileBg");
+  if(mobileBgImg) mobileBgImg.src = MOBILE_TROPHY_CASE_OWNER_BG[ownerId] || "trophy-case-mobile.webp";
 
   const record = CAREER_STATS[ownerId];
   const titles = (record && record.titles) ? record.titles : [];
