@@ -4059,27 +4059,36 @@ function renderLedger(){
 }
 
 // ---------- CAREER EARNINGS (Teams tab) ----------
-// A team's total real-money take from the league: confirmed top-3 payouts from prior
-// seasons (2023-2025, read from each team's actual playoff finish in PLAYOFF_STATS) at the
-// same $780/$300/$130 rates as PAYOUT_BY_RANK above, plus this in-progress season's own net
-// -- today's standing-based prize estimate minus the season's live Transaction Tax plus its
-// live Weekly Bonus Total, i.e. the exact math the Ledger Tracker's Projected Payout already
-// uses, so the two numbers always agree. Trade/waiver tax and weekly bonus prizes only exist
-// as live Sleeper data for the CURRENT season -- there's no transaction-by-transaction
-// history for 2023-2025 -- so prior seasons below contribute placement money only.
+// A team's true net take from the league: every season they've been a member, they've paid
+// the $130 League Dues entry fee (see the Constitution) whether or not they placed -- so each
+// season below nets that season's placement payout (confirmed top-3 finish from PLAYOFF_STATS
+// for prior years, at the same $780/$300/$130 rates as PAYOUT_BY_RANK) against that $130 buy-
+// in. The current in-progress season also nets its live Transaction Tax (trades/waivers) and
+// adds its live Weekly Bonus Total, matching the Ledger Tracker's Projected Payout math (minus
+// the dues line the Ledger deliberately leaves out, since it can't confirm who's actually
+// paid -- Career Earnings assumes every roster on TEAMS has paid in, same as the dues table on
+// the League Info tab). Trade/waiver tax and weekly bonus prizes only exist as live Sleeper
+// data for the CURRENT season -- there's no transaction-by-transaction history for 2023-2025
+// -- so prior seasons net placement payout against dues only.
 const FINISH_RANK = {"Champion":1, "Runner-up":2, "3rd":3, "4th":4, "5th":5, "6th":6};
+const LEAGUE_DUES_PER_SEASON = 130;
 
 function computeCareerEarnings(ownerId, rosterId){
   const playoffRecord = PLAYOFF_STATS[ownerId];
   const priorSeasons = (playoffRecord && playoffRecord.seasons) ? playoffRecord.seasons : [];
-  const priorRows = [];
-  priorSeasons.forEach(function(s){
-    if(!s.made) return;
-    const rank = FINISH_RANK[s.finish];
-    const amount = rank ? (PAYOUT_BY_RANK[rank] || 0) : 0;
-    if(amount > 0) priorRows.push({season: s.season, finish: s.finish, amount: amount});
+  const priorRows = priorSeasons.map(function(s){
+    const rank = s.made ? FINISH_RANK[s.finish] : null;
+    const placement = rank ? (PAYOUT_BY_RANK[rank] || 0) : 0;
+    return {
+      season: s.season,
+      made: s.made,
+      finish: s.finish,
+      placement: placement,
+      dues: LEAGUE_DUES_PER_SEASON,
+      net: placement - LEAGUE_DUES_PER_SEASON
+    };
   });
-  const priorTotal = priorRows.reduce(function(sum, r){ return sum + r.amount; }, 0);
+  const priorTotal = priorRows.reduce(function(sum, r){ return sum + r.net; }, 0);
 
   const txReady = TRANSACTION_STATS !== null && TRANSACTION_STATS !== "error";
   const bonusReady = !!BONUS_RESULTS;
@@ -4096,9 +4105,10 @@ function computeCareerEarnings(ownerId, rosterId){
     current = {
       rank: rank,
       placementEstimate: placementEstimate,
+      dues: LEAGUE_DUES_PER_SEASON,
       txTotal: txTotal,
       bonusTotal: bonusTotal,
-      net: placementEstimate - txTotal + bonusTotal
+      net: placementEstimate - LEAGUE_DUES_PER_SEASON - txTotal + bonusTotal
     };
   }
 
@@ -4112,6 +4122,10 @@ function computeCareerEarnings(ownerId, rosterId){
 
 function formatMoney(n){
   return n < 0 ? ("-$" + Math.abs(n).toFixed(0)) : ("$" + n.toFixed(0));
+}
+
+function netCellClass(n){
+  return n < 0 ? 'bl-neg' : (n > 0 ? 'bl-pos' : '');
 }
 
 function renderCareerEarnings(ownerId, rosterId){
@@ -4129,34 +4143,36 @@ function renderCareerEarnings(ownerId, rosterId){
   const data = computeCareerEarnings(ownerId, rosterId);
 
   const priorRowsHTML = data.priorRows.map(function(r){
-    return '<tr><td>' + r.season + '</td><td>' + r.finish + ' finish</td><td>' + formatMoney(r.amount) + '</td></tr>';
+    const finishLabel = r.made ? (r.finish === "Champion" || r.finish === "Runner-up" ? (r.finish + " finish") : (r.finish + " place")) : "Missed playoffs";
+    const detail = finishLabel + " &mdash; " + (r.placement > 0 ? (formatMoney(r.placement) + ' payout &minus; ') : "") + formatMoney(r.dues) + " dues";
+    return '<tr><td>' + r.season + '</td><td>' + detail + '</td><td class="' + netCellClass(r.net) + '">' + formatMoney(r.net) + '</td></tr>';
   }).join("");
 
   let currentRowHTML;
   if(data.current){
     const c = data.current;
     currentRowHTML = '<tr><td>2026</td><td>' + ordinal(c.rank) + ' place so far &mdash; ' +
-      formatMoney(c.placementEstimate) + ' est. &minus; ' + formatMoney(c.txTotal) + ' tax + ' + formatMoney(c.bonusTotal) +
-      ' bonus</td><td class="' + (c.net < 0 ? 'bl-neg' : (c.net > 0 ? 'bl-pos' : '')) + '">' + formatMoney(c.net) + '</td></tr>';
+      formatMoney(c.placementEstimate) + ' est. &minus; ' + formatMoney(c.dues) + ' dues &minus; ' + formatMoney(c.txTotal) + ' tax + ' + formatMoney(c.bonusTotal) +
+      ' bonus</td><td class="' + netCellClass(c.net) + '">' + formatMoney(c.net) + '</td></tr>';
   } else {
     currentRowHTML = '<tr><td>2026</td><td colspan="2">Transaction tax unavailable right now.</td></tr>';
   }
 
   const rowsHTML = priorRowsHTML + currentRowHTML;
   const emptyNote = data.priorRows.length === 0
-    ? '<div class="new-team-note" style="margin-bottom:10px;">No top-3 finishes in prior seasons on record.</div>'
+    ? '<div class="new-team-note" style="margin-bottom:10px;">New to the league in 2026 &mdash; no prior seasons of dues or payouts on record.</div>'
     : '';
 
   el.innerHTML =
     '<div class="alltime-title">Career earnings</div>' +
-    '<p class="panel-sub" style="margin:-4px 0 12px;">Confirmed top-3 payouts from prior seasons ($780 &middot; $300 &middot; $130 for 1st/2nd/3rd), plus this season&rsquo;s live net: today&rsquo;s standing-based prize estimate minus the 2026 Transaction Tax (trades/waivers) plus the 2026 Weekly Bonus Total. Trade, waiver, and weekly-bonus totals only exist as live data for the current season, so prior seasons reflect placement money only.</p>' +
+    '<p class="panel-sub" style="margin:-4px 0 12px;">Every season nets that year&rsquo;s $130 League Dues buy-in against whatever came back: confirmed top-3 payouts for prior seasons ($780 &middot; $300 &middot; $130 for 1st/2nd/3rd), and for the in-progress season, today&rsquo;s standing-based prize estimate minus the live 2026 Transaction Tax (trades/waivers) plus the live 2026 Weekly Bonus Total. Trade, waiver, and weekly-bonus totals only exist as live data for the current season, so prior seasons net placement payout against dues only.</p>' +
     '<div class="alltime-summary">' +
       '<div><div class="num">' + formatMoney(data.total) + '</div><div class="lbl">Career earnings</div></div>' +
-      '<div><div class="num">' + formatMoney(data.priorTotal) + '</div><div class="lbl">Prior-season payouts</div></div>' +
+      '<div><div class="num">' + formatMoney(data.priorTotal) + '</div><div class="lbl">Prior-season net</div></div>' +
       '<div><div class="num">' + (data.current ? formatMoney(data.current.net) : '&ndash;') + '</div><div class="lbl">2026 net (live)</div></div>' +
     '</div>' +
     emptyNote +
-    '<table class="season-history"><thead><tr><th>Season</th><th>Detail</th><th>Amount</th></tr></thead><tbody>' + rowsHTML + '</tbody></table>';
+    '<table class="season-history"><thead><tr><th>Season</th><th>Detail</th><th>Net</th></tr></thead><tbody>' + rowsHTML + '</tbody></table>';
 }
 
 // ---------- DYNASTY GAME OF THE WEEK ----------
