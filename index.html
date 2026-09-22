@@ -718,11 +718,14 @@
   .td-trophy-shelf-2{bottom:11.35%;}
   .td-trophy{position:absolute; bottom:0; width:8.2%; aspect-ratio:1024/1536; container-type:inline-size; transform:translateX(-50%);}
   .td-trophy img{width:100%; height:100%; display:block; filter:drop-shadow(0 8px 10px rgba(0,0,0,0.6));}
+  /* Champion trophy's blank faceplate box, measured directly against championship-trophy.webp's
+     native 1024x1536 pixels (plate spans x:232-786, y:1185-1358), inset ~50px horizontally and
+     ~20px vertically to clear the plate's four corner rivets. */
   .td-trophy-year{
-    position:absolute; left:21.5%; width:58.5%; top:82.6%; height:9.8%;
+    position:absolute; left:27.5%; width:44.3%; top:78.4%; height:8.7%;
     display:flex; align-items:center; justify-content:center;
     font-family:'Cinzel', serif; font-weight:700; letter-spacing:0.3px; color:#2a1a08;
-    font-size:clamp(6px, 19cqw, 30px);
+    font-size:clamp(6px, 14.5cqw, 23px);
   }
   /* Runner-up trophy's blank plate sits lower and narrower (rivets flank it) on its own
      art, so its year label gets its own box measured against runnerup-trophy.webp. */
