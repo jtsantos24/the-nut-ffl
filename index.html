@@ -1274,6 +1274,7 @@
   table.faab-ledger-table th:nth-child(n+4), table.faab-ledger-table td:nth-child(n+4){text-align:right;}
   table.faab-ledger-table th:nth-child(3), table.faab-ledger-table td:nth-child(3){white-space:normal;}
   .faab-ledger-vs{color:var(--chalk-faint); font-size:11px;}
+  .faab-sealed{color:var(--chalk-faint); font-style:italic;}
 
   .faab-ledger-cards{display:none;}
   .faab-card{
@@ -4002,10 +4003,13 @@ function renderBettingLedger(ownerId){
     const rowNet = w.status === "won" ? (w.potentialPayout - w.amount) : (w.status === "lost" ? -w.amount : (w.status === "push" ? 0 : null));
     const rowLabel = rowNet === null ? "&mdash;" : ((rowNet > 0 ? "+" : "") + rowNet);
     const rowClass = rowNet === null ? "" : (rowNet > 0 ? "bl-pos" : (rowNet < 0 ? "bl-neg" : ""));
+    const sealed = faabWagerSealed(w);
+    const pickCell = sealed ? '<span class="faab-sealed">' + faabSealedLabel() + '</span>' : (throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread));
+    const oppCell = sealed ? '<span class="faab-sealed">&mdash;</span>' : throneEscAttr(w.oppTeamName);
     return '<tr>' +
       '<td>Wk ' + w.week + '</td>' +
-      '<td>' + throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread) + '</td>' +
-      '<td>' + throneEscAttr(w.oppTeamName) + '</td>' +
+      '<td>' + pickCell + '</td>' +
+      '<td>' + oppCell + '</td>' +
       '<td>' + w.amount + '</td>' +
       '<td><span class="betting-status-badge ' + w.status + '">' + w.status + '</span></td>' +
       '<td class="' + rowClass + '">' + rowLabel + '</td>' +
@@ -7379,13 +7383,16 @@ function renderBettingHistory(ownerId){
     return;
   }
   el.innerHTML = mine.map(function(w){
-    const scoreNote = (w.status !== "pending" && typeof w.finalPickScore === "number")
+    const sealed = faabWagerSealed(w);
+    const scoreNote = (!sealed && typeof w.finalPickScore === "number")
       ? ' <span class="betting-bet-meta">(' + w.finalPickScore.toFixed(1) + '–' + w.finalOppScore.toFixed(1) + ')</span>'
       : '';
+    const pickCell = sealed ? faabSealedLabel() : (throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread));
+    const oppCell = sealed ? '' : ('<span class="betting-bet-meta">vs ' + throneEscAttr(w.oppTeamName) + '</span>');
     return '<div class="betting-bet-row">' +
       '<span class="betting-bet-meta">Wk ' + w.week + '</span>' +
-      '<span class="betting-bet-pick">' + throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread) + '</span>' +
-      '<span class="betting-bet-meta">vs ' + throneEscAttr(w.oppTeamName) + '</span>' +
+      '<span class="betting-bet-pick' + (sealed ? ' faab-sealed' : '') + '">' + pickCell + '</span>' +
+      oppCell +
       '<span class="betting-bet-meta">' + w.amount + ' FAAB → ' + w.potentialPayout + '</span>' +
       scoreNote +
       '<span class="betting-status-badge ' + w.status + '">' + w.status + '</span>' +
@@ -7541,6 +7548,21 @@ function faabAdjustmentClass(w){
   return amt > 0 ? "bl-pos" : (amt < 0 ? "bl-neg" : "");
 }
 
+// While a wager is still pending, which team was picked and what line they took is kept
+// sealed everywhere a wager can be viewed -- the "Betting as" identity and the Ledger's team
+// picker are both just a dropdown selection with no real per-viewer login behind them, so
+// there's no way to show a pick only to "its own" bettor without also showing it to anyone
+// else who happens to pick the same team. Sealing it for everyone until the matchup finishes
+// keeps a manager from seeing a rival's pick and reacting to it (copying or fading it) while
+// betting on that same game is still open. Amount wagered and week stay visible -- only the
+// pick itself (team + line) is hidden -- so the ledger still shows real money is in play.
+function faabWagerSealed(w){
+  return w.status === "pending";
+}
+function faabSealedLabel(){
+  return "🔒 Sealed until final";
+}
+
 // Groups one team's full wager history by season, sorted most-recent-season-first, with each
 // season's own rows in chronological (week) order internally so the running "Season Net" can
 // be accumulated correctly -- callers that display most-recent-first (this section does, to
@@ -7674,11 +7696,16 @@ function renderFaabLedgerTable(displayRows){
     const w = entry.row.wager;
     const statusLabel = FAAB_STATUS_LABEL[w.status] || w.status.toUpperCase();
     const netVal = entry.row.runningNet;
+    const sealed = faabWagerSealed(w);
+    const matchupCell = sealed
+      ? '<span class="faab-sealed">' + faabSealedLabel() + '</span>'
+      : throneEscAttr(w.pickTeamName) + ' <span class="faab-ledger-vs">vs</span> ' + throneEscAttr(w.oppTeamName);
+    const lineCell = sealed ? '<span class="faab-sealed">&mdash;</span>' : formatSpread(w.spread);
     return '<tr>' +
       '<td>' + throneEscAttr(entry.season) + '</td>' +
       '<td>Wk ' + w.week + '</td>' +
-      '<td>' + throneEscAttr(w.pickTeamName) + ' <span class="faab-ledger-vs">vs</span> ' + throneEscAttr(w.oppTeamName) + '</td>' +
-      '<td>' + formatSpread(w.spread) + '</td>' +
+      '<td>' + matchupCell + '</td>' +
+      '<td>' + lineCell + '</td>' +
       '<td>$' + w.amount + '</td>' +
       '<td><span class="betting-status-badge ' + w.status + '">' + statusLabel + '</span></td>' +
       '<td class="' + faabAdjustmentClass(w) + '">' + faabAdjustmentLabel(w) + '</td>' +
@@ -7696,20 +7723,24 @@ function renderFaabLedgerCards(displayRows){
     const w = entry.row.wager;
     const statusLabel = FAAB_STATUS_LABEL[w.status] || w.status.toUpperCase();
     const netVal = entry.row.runningNet;
-    const scoreNote = (w.status !== "pending" && typeof w.finalPickScore === "number")
+    const sealed = faabWagerSealed(w);
+    const scoreNote = (!sealed && typeof w.finalPickScore === "number")
       ? (w.finalPickScore.toFixed(1) + '&ndash;' + w.finalOppScore.toFixed(1))
       : "Not final yet";
+    const pickSummary = sealed ? faabSealedLabel() : (throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread));
+    const oppCell = sealed ? '&mdash;' : throneEscAttr(w.oppTeamName);
+    const lineCell = sealed ? '&mdash;' : formatSpread(w.spread);
     return '<details class="faab-card">' +
       '<summary>' +
         '<span class="faab-card-week">Wk ' + w.week + '</span>' +
-        '<span class="faab-card-pick">' + throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread) + '</span>' +
+        '<span class="faab-card-pick' + (sealed ? ' faab-sealed' : '') + '">' + pickSummary + '</span>' +
         '<span class="betting-status-badge ' + w.status + '">' + statusLabel + '</span>' +
         '<span class="faab-card-adj ' + faabAdjustmentClass(w) + '">' + faabAdjustmentLabel(w) + '</span>' +
       '</summary>' +
       '<div class="faab-card-body">' +
         '<div><span class="faab-card-lbl">Season</span><span>' + throneEscAttr(entry.season) + '</span></div>' +
-        '<div><span class="faab-card-lbl">Opponent</span><span>' + throneEscAttr(w.oppTeamName) + '</span></div>' +
-        '<div><span class="faab-card-lbl">Line</span><span>' + formatSpread(w.spread) + '</span></div>' +
+        '<div><span class="faab-card-lbl">Opponent</span><span>' + oppCell + '</span></div>' +
+        '<div><span class="faab-card-lbl">Line</span><span>' + lineCell + '</span></div>' +
         '<div><span class="faab-card-lbl">Wager</span><span>$' + w.amount + '</span></div>' +
         '<div><span class="faab-card-lbl">Final score</span><span>' + scoreNote + '</span></div>' +
         '<div><span class="faab-card-lbl">Season Net</span><span class="' + netCellClass(netVal) + '">' + faabNetLabel(netVal) + '</span></div>' +
