@@ -1312,6 +1312,23 @@
   @container (max-width:400px){
     .gotw-hint{display:none;}
   }
+  /* The rows above are sized with cqw tuned to fit a narrow MOBILE container -- their clamp()
+     caps saturate almost immediately on a full-width desktop panel, so "See the full scoring
+     breakdown" and its two-column grid end up a small huddle of text with a big empty gap down
+     the middle and dead chalkboard space below. This override only kicks in once the panel
+     itself is wide enough to afford larger type, and switches which side of each row stretches:
+     the label keeps a fixed share of the width instead of flex-growing into blank space, and the
+     bar grows to fill what's left, so the columns actually use the room instead of leaving a hole
+     between them. */
+  @container (min-width:700px){
+    .gotw-details{margin-top:12px;}
+    .gotw-details-label{font-size:clamp(13px, 1.3cqw, 16px); letter-spacing:1px; text-transform:uppercase; margin-bottom:9px;}
+    .gotw-stage .power-breakdown{column-gap:clamp(28px, 4cqw, 56px); row-gap:clamp(5px, 0.7cqw, 9px); padding-top:2px;}
+    .gotw-stage .power-cat-row{font-size:clamp(13px, 1.5cqw, 16px); gap:clamp(10px, 1.2cqw, 16px); padding:clamp(5px, 0.6cqw, 8px) 0;}
+    .gotw-stage .power-cat-label{flex:0 0 34%;}
+    .gotw-stage .power-cat-bar-wrap{flex:1 1 auto; height:clamp(6px, 0.7cqw, 9px);}
+    .gotw-stage .power-cat-val{width:clamp(48px, 5cqw, 66px);}
+  }
   @media (max-width:640px){
     .gotw-panel{
       padding:0 !important; margin-left:-20px; margin-right:-20px; width:calc(100% + 40px);
