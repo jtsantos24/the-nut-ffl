@@ -781,6 +781,8 @@
   .alltime-title{font-size:18px; color:var(--chalk); margin-bottom:10px;}
   .alltime-summary{display:flex; gap:24px; flex-wrap:wrap; margin-bottom:14px;}
   .alltime-summary .num{font-family:'Teko', sans-serif; font-size:29px; color:var(--gold); line-height:1;}
+  .alltime-summary .num.bl-pos{color:var(--green);}
+  .alltime-summary .num.bl-neg{color:var(--red);}
   .alltime-summary .lbl{font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--chalk-faint); margin-top:3px;}
   .titles-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
   .title-badge{background:var(--gold-soft); color:var(--gold-bright); border:1px solid rgba(242,181,66,0.35); border-radius:999px; padding:4px 11px; font-size:12px; font-weight:600;}
@@ -1241,6 +1243,59 @@
     .betting-actions{margin-left:0; width:100%;}
     .betting-bet-btn{flex:1;}
     .betting-preview{gap:14px;}
+  }
+
+  .betting-status-badge.push{background:var(--surface-3); color:var(--teal); border:1px solid rgba(69,214,196,0.35);}
+
+  /* ---------- FAAB BETTING LEDGER (persistent, per-team, underneath FAAB Betting Lines) ---------- */
+  .faab-ledger-summary{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(118px, 1fr)); gap:16px 20px;
+    margin-bottom:20px; padding-bottom:18px; border-bottom:1px solid var(--line-soft);
+  }
+  .faab-ledger-summary .num{font-family:'Teko', sans-serif; font-size:27px; color:var(--gold); line-height:1;}
+  .faab-ledger-summary .num.bl-pos{color:var(--green);}
+  .faab-ledger-summary .num.bl-neg{color:var(--red);}
+  .faab-ledger-summary .lbl{font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-faint); margin-top:4px;}
+
+  .faab-chart-wrap{margin-bottom:22px;}
+  .faab-chart-title{font-size:12px; letter-spacing:0.5px; color:var(--chalk-dim); margin-bottom:8px;}
+  .faab-chart-svg{width:100%; height:auto; display:block; overflow:visible;}
+  .faab-chart-zeroline{stroke:var(--line); stroke-width:1; stroke-dasharray:3 3;}
+  .faab-chart-area{opacity:0.14;}
+  .faab-chart-line{fill:none; stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round;}
+  .faab-chart-dot{fill:var(--bg); stroke:var(--chalk-faint); stroke-width:1.5;}
+  .faab-chart-dot.is-last{fill:var(--gold-bright); stroke:var(--gold-dark);}
+  .faab-chart-xlabel{font-size:9px; fill:var(--chalk-faint); font-family:inherit;}
+
+  table.faab-ledger-table{width:100%; border-collapse:collapse; font-size:13px;}
+  table.faab-ledger-table th{text-align:left; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--chalk-faint); padding:8px 10px; border-bottom:1px solid var(--line);}
+  table.faab-ledger-table td{padding:9px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap;}
+  table.faab-ledger-table tr:last-child td{border-bottom:none;}
+  table.faab-ledger-table th:nth-child(n+4), table.faab-ledger-table td:nth-child(n+4){text-align:right;}
+  table.faab-ledger-table th:nth-child(3), table.faab-ledger-table td:nth-child(3){white-space:normal;}
+  .faab-ledger-vs{color:var(--chalk-faint); font-size:11px;}
+
+  .faab-ledger-cards{display:none;}
+  .faab-card{
+    background:var(--surface-2); border:1px solid var(--line-soft); border-radius:var(--radius-sm);
+    margin-bottom:9px; overflow:hidden;
+  }
+  .faab-card summary{
+    display:flex; align-items:center; gap:10px; padding:11px 13px; cursor:pointer; list-style:none; flex-wrap:wrap;
+  }
+  .faab-card summary::-webkit-details-marker{display:none;}
+  .faab-card summary::after{content:'\25BC'; font-size:9px; color:var(--chalk-faint); margin-left:auto; transition:transform 0.2s;}
+  .faab-card[open] summary::after{transform:rotate(180deg); color:var(--gold);}
+  .faab-card-week{font-family:'Teko', sans-serif; font-size:16px; color:var(--gold-dark); flex-shrink:0;}
+  .faab-card-pick{font-size:12.5px; font-weight:600; color:var(--chalk); flex:1; min-width:120px;}
+  .faab-card-adj{font-size:12.5px; font-weight:700; margin-right:6px;}
+  .faab-card-body{padding:0 13px 13px; display:flex; flex-direction:column; gap:7px; border-top:1px solid var(--line-soft); padding-top:10px;}
+  .faab-card-body > div{display:flex; align-items:center; justify-content:space-between; font-size:12.5px;}
+  .faab-card-lbl{font-size:10px; letter-spacing:0.6px; text-transform:uppercase; color:var(--chalk-faint);}
+
+  @media (max-width:768px){
+    table.faab-ledger-table{display:none;}
+    .faab-ledger-cards{display:block;}
   }
 
   /* ---------- GAME OF THE WEEK HERO ---------- */
@@ -1728,6 +1783,17 @@
       <button type="button" class="betting-history-toggle" id="bettingHistoryToggle" style="display:none;">Show my full wager history</button>
       <div class="betting-history-list" id="bettingHistoryList" style="display:none;"></div>
       <p class="const-note" style="margin-top:14px;" id="bettingConstNote">In-league FAAB game only &mdash; no real money involved. Your balance and bets are saved in this browser, so they won't follow you to a different device. Lines are auto-generated from each team's season scoring average; the commissioner can hand-edit any line before it locks (also saved locally). Betting on a matchup locks at that week's estimated kickoff and settles automatically once Sleeper shows a final score.</p>
+    </div>
+    <div class="panel betting-ledger-panel" id="faabLedgerPanel" style="display:none;">
+      <h2 class="panel-title">📒 FAAB Betting Ledger</h2>
+      <p class="panel-sub">A permanent, season-by-season record of every wager placed &mdash; every team's full betting history, win or lose, kept on file so career betting stats can eventually be tracked across seasons.</p>
+      <div class="betting-toolbar">
+        <div class="betting-identity">
+          <label for="faabLedgerTeamSelect">Viewing ledger for</label>
+          <select id="faabLedgerTeamSelect"><option value="">Loading teams&hellip;</option></select>
+        </div>
+      </div>
+      <div id="faabLedgerBody"></div>
     </div>
   </div>
 
@@ -3927,15 +3993,15 @@ function renderBettingLedger(ownerId){
   mine.forEach(function(w){
     if(w.status === "won"){ wins++; net += (w.potentialPayout - w.amount); }
     else if(w.status === "lost"){ losses++; net -= w.amount; }
-    else pending++;
+    else if(w.status === "pending") pending++;
   });
   const netTotalLabel = (net > 0 ? "+" : "") + net;
   const netTotalClass = net > 0 ? "bl-pos" : (net < 0 ? "bl-neg" : "");
 
   const rows = mine.map(function(w){
-    const rowNet = w.status === "won" ? (w.potentialPayout - w.amount) : (w.status === "lost" ? -w.amount : null);
+    const rowNet = w.status === "won" ? (w.potentialPayout - w.amount) : (w.status === "lost" ? -w.amount : (w.status === "push" ? 0 : null));
     const rowLabel = rowNet === null ? "&mdash;" : ((rowNet > 0 ? "+" : "") + rowNet);
-    const rowClass = rowNet === null ? "" : (rowNet > 0 ? "bl-pos" : "bl-neg");
+    const rowClass = rowNet === null ? "" : (rowNet > 0 ? "bl-pos" : (rowNet < 0 ? "bl-neg" : ""));
     return '<tr>' +
       '<td>Wk ' + w.week + '</td>' +
       '<td>' + throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread) + '</td>' +
@@ -6682,6 +6748,12 @@ function loadDynastyHistory(){
 //   (real FAAB remaining per Sleeper's waiver_budget minus actual waiver spend, live-fetched)
 //   + (this identity's betting ledger: -pending, -lost, +profit-on-won)
 // so it stays honest as real waiver spending happens, without ever double-counting bets.
+// Every wager is stamped with the season it was placed in so the permanent Betting Ledger
+// (underneath FAAB Betting Lines) can group a team's history season by season -- today
+// that's always "2026" since FAAB betting is new this year, but the field is there from
+// the start so a future season's wagers land in their own ledger instead of getting mixed
+// into this one, and career betting stats can eventually be rolled up across all of them.
+const FAAB_CURRENT_SEASON = "2026";
 const FAAB_BOOK_KEY = "nutLeagueFaabBook_v1"; // local-mode wagers + line overrides
 const FAAB_IDENTITY_KEY = "nutLeagueFaabIdentity_v1"; // "who am I" -- always local, both modes
 const FAAB_PASSCODE_CACHE_PREFIX = "nutLeagueFaabPasscodeHash_v1_"; // per-owner, Firebase mode only
@@ -6930,8 +7002,12 @@ function settlePendingWagersForWeek(week, pairs){
     const myScore = pair.a === w.pickRosterId ? pair.aPoints : pair.bPoints;
     const oppScore = pair.a === w.pickRosterId ? pair.bPoints : pair.aPoints;
     if(typeof myScore !== "number" || typeof oppScore !== "number") return;
-    const covered = (myScore + w.spread) > oppScore;
-    const patch = {status: covered ? "won" : "lost", settledAt: new Date().toISOString(), finalPickScore: myScore, finalOppScore: oppScore};
+    // Every line (auto-generated or commissioner-edited) is forced to a half-point, so an
+    // exact push is structurally very unlikely -- but not impossible against real float
+    // scores, and worth handling correctly rather than silently mis-marking it a loss.
+    const margin = (myScore + w.spread) - oppScore;
+    const status = margin > 0 ? "won" : (margin < 0 ? "lost" : "push");
+    const patch = {status: status, settledAt: new Date().toISOString(), finalPickScore: myScore, finalOppScore: oppScore};
     if(FAAB_FIREBASE_ENABLED){
       remoteUpdates.push(FAAB_FB.updateDoc(FAAB_FB.doc(FAAB_FB.db, "faab_wagers", w.id), patch).catch(function(){ /* likely already settled by another browser -- fine */ }));
     } else {
@@ -7079,6 +7155,7 @@ function executeWager(ctx){
   }
   const wager = {
     ownerId: ctx.ownerId,
+    season: FAAB_CURRENT_SEASON,
     week: ctx.week,
     pickRosterId: ctx.pickRosterId,
     pickTeamName: ctx.pickTeamName,
@@ -7414,6 +7491,299 @@ function renderBettingPanel(){
 
   refreshBettingLedgerIfShowing();
   renderLedger();
+  renderFaabLedgerSection();
+}
+
+// ---------- FAAB BETTING LEDGER (persistent, per-team, underneath FAAB Betting Lines) ----------
+// A permanent, sportsbook-style record of every team's wagers -- separate from the live
+// betting lines above (which are scoped to "you, betting this week") and from the compact
+// per-team summary on the Teams tab (renderBettingLedger, above): this shows any team's full
+// history, grouped by season so a future season starts its own ledger while still keeping
+// every prior season's rows on file for a career rollup later. Reads straight from
+// FAAB_WAGERS/ensureFaabBook(), same live data source as the rest of the betting module, so
+// it inherits the same scope note (shared ledger in Firebase mode, this browser only in local
+// mode) and updates any time that data changes.
+const FAAB_STATUS_LABEL = {pending: "PENDING", won: "WIN", lost: "LOSS", push: "PUSH"};
+
+function faabWagerSeason(w){
+  return w.season || FAAB_CURRENT_SEASON;
+}
+
+// null = pending (no adjustment yet); otherwise the signed FAAB adjustment this wager
+// resolved to -- positive for a win, negative for a loss, exactly 0 for a push (stake
+// returned, no profit or loss).
+function faabAdjustmentAmount(w){
+  if(w.status === "won") return w.potentialPayout - w.amount;
+  if(w.status === "lost") return -w.amount;
+  if(w.status === "push") return 0;
+  return null;
+}
+
+function faabAdjustmentLabel(w){
+  const amt = faabAdjustmentAmount(w);
+  if(amt === null) return "Pending";
+  if(amt === 0) return "— $0";
+  return (amt > 0 ? "▲ +$" : "▼ -$") + Math.abs(amt).toFixed(0);
+}
+
+// Signed dollar label for a net figure, e.g. "+$10" / "-$5" / "$0" -- like formatMoney()
+// but also prefixes a "+" for a positive value, since these running/season totals read
+// better with an explicit direction (matches the arrows on the per-wager adjustment).
+function faabNetLabel(n){
+  if(n < 0) return "-$" + Math.abs(n).toFixed(0);
+  if(n > 0) return "+$" + n.toFixed(0);
+  return "$0";
+}
+
+function faabAdjustmentClass(w){
+  const amt = faabAdjustmentAmount(w);
+  if(amt === null) return "";
+  return amt > 0 ? "bl-pos" : (amt < 0 ? "bl-neg" : "");
+}
+
+// Groups one team's full wager history by season, sorted most-recent-season-first, with each
+// season's own rows in chronological (week) order internally so the running "Season Net" can
+// be accumulated correctly -- callers that display most-recent-first (this section does, to
+// match renderBettingLedger's convention) reverse the already-computed rows rather than
+// recomputing the running total backwards.
+function computeFaabLedgerForTeam(ownerId){
+  const all = (Array.isArray(FAAB_WAGERS) ? FAAB_WAGERS : []).filter(function(w){ return w.ownerId === ownerId; });
+  const bySeasonMap = {};
+  all.forEach(function(w){
+    const season = faabWagerSeason(w);
+    if(!bySeasonMap[season]) bySeasonMap[season] = [];
+    bySeasonMap[season].push(w);
+  });
+
+  return Object.keys(bySeasonMap).sort().reverse().map(function(season){
+    const ordered = bySeasonMap[season].slice().sort(function(a, b){
+      return (a.week - b.week) || (new Date(a.placedAt) - new Date(b.placedAt));
+    });
+    let running = 0, wins = 0, losses = 0, pushes = 0, pending = 0, totalWon = 0, totalLost = 0, totalWagered = 0;
+    const rows = ordered.map(function(w){
+      const amt = faabAdjustmentAmount(w);
+      totalWagered += w.amount;
+      if(w.status === "won"){ wins++; totalWon += amt; running += amt; }
+      else if(w.status === "lost"){ losses++; totalLost += Math.abs(amt); running += amt; }
+      else if(w.status === "push"){ pushes++; }
+      else pending++;
+      return {wager: w, adjustment: amt, runningNet: running};
+    });
+    const decided = wins + losses;
+    return {
+      season: season, rows: rows, seasonNet: running,
+      wins: wins, losses: losses, pushes: pushes, pending: pending,
+      totalWon: totalWon, totalLost: totalLost, totalWagered: totalWagered,
+      winPct: decided > 0 ? (wins / decided * 100) : null
+    };
+  });
+}
+
+// A per-week cumulative-net series for the chart, running from Week 1 through the current
+// week even on weeks with no wager (the line just holds flat), so the shape of the season is
+// visible even for a team that skipped a week or two.
+function computeFaabCumulativeSeries(seasonRows, uptoWeek){
+  const byWeek = {};
+  seasonRows.forEach(function(r){ byWeek[r.wager.week] = r.runningNet; });
+  const lastRowWeek = seasonRows.length ? seasonRows[seasonRows.length - 1].wager.week : 1;
+  const maxWeek = Math.max(1, uptoWeek || 1, lastRowWeek);
+  const series = [];
+  let last = 0;
+  for(let wk = 1; wk <= maxWeek; wk++){
+    if(byWeek[wk] !== undefined) last = byWeek[wk];
+    series.push({week: wk, net: last});
+  }
+  return series;
+}
+
+function buildFaabCumulativeChartSvg(series){
+  const W = 640, H = 180, padL = 8, padR = 8, padT = 14, padB = 22;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const netVals = series.map(function(p){ return p.net; });
+  let minV = Math.min.apply(null, netVals.concat([0]));
+  let maxV = Math.max.apply(null, netVals.concat([0]));
+  if(minV === maxV){ minV -= 5; maxV += 5; }
+  const pad = (maxV - minV) * 0.15;
+  minV -= pad; maxV += pad;
+
+  function xFor(i){ return padL + (series.length <= 1 ? innerW/2 : (innerW * i / (series.length - 1))); }
+  function yFor(v){ return padT + innerH - ((v - minV) / (maxV - minV)) * innerH; }
+  const zeroY = yFor(0);
+
+  let pathD = "";
+  series.forEach(function(p, i){
+    pathD += (i === 0 ? "M" : " L") + xFor(i).toFixed(1) + " " + yFor(p.net).toFixed(1);
+  });
+  const areaD = pathD +
+    " L " + xFor(series.length - 1).toFixed(1) + " " + zeroY.toFixed(1) +
+    " L " + xFor(0).toFixed(1) + " " + zeroY.toFixed(1) + " Z";
+
+  const finalNet = series.length ? series[series.length - 1].net : 0;
+  const lineColor = finalNet >= 0 ? "var(--green)" : "var(--red)";
+
+  const showEvery = series.length > 10 ? 2 : 1;
+  const labelsHtml = series.map(function(p, i){
+    const isLast = i === series.length - 1;
+    if(!isLast && (p.week % showEvery !== 0)) return "";
+    return '<text x="' + xFor(i).toFixed(1) + '" y="' + (H - 6) + '" class="faab-chart-xlabel" text-anchor="middle">Wk ' + p.week + '</text>';
+  }).join("");
+
+  const dotsHtml = series.map(function(p, i){
+    const isLast = i === series.length - 1;
+    const label = (p.net > 0 ? "+" : "") + p.net.toFixed(0) + " FAAB";
+    return '<circle cx="' + xFor(i).toFixed(1) + '" cy="' + yFor(p.net).toFixed(1) + '" r="' + (isLast ? 4 : 2.5) + '" class="faab-chart-dot' + (isLast ? ' is-last' : '') + '"><title>Week ' + p.week + ': ' + label + '</title></circle>';
+  }).join("");
+
+  return '<svg class="faab-chart-svg" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Cumulative FAAB betting net by week">' +
+    '<line x1="' + padL + '" y1="' + zeroY.toFixed(1) + '" x2="' + (W - padR) + '" y2="' + zeroY.toFixed(1) + '" class="faab-chart-zeroline"></line>' +
+    '<path d="' + areaD + '" class="faab-chart-area" style="fill:' + lineColor + ';"></path>' +
+    '<path d="' + pathD + '" class="faab-chart-line" style="stroke:' + lineColor + ';"></path>' +
+    dotsHtml + labelsHtml +
+  '</svg>';
+}
+
+function renderFaabLedgerSummary(ownerId, sg){
+  const balance = Math.round(getAvailableFaab(ownerId) * 100) / 100;
+  const recordLabel = sg.pushes > 0 ? (sg.wins + '-' + sg.losses + '-' + sg.pushes) : (sg.wins + '-' + sg.losses);
+  const winPctLabel = sg.winPct === null ? '&ndash;' : (sg.winPct.toFixed(1) + '%');
+  return '<div class="faab-ledger-summary">' +
+    '<div><div class="num">$' + balance.toFixed(0) + '</div><div class="lbl">Betting Balance</div></div>' +
+    '<div><div class="num ' + netCellClass(sg.seasonNet) + '">' + faabNetLabel(sg.seasonNet) + '</div><div class="lbl">Season Net</div></div>' +
+    '<div><div class="num bl-pos">$' + sg.totalWon.toFixed(0) + '</div><div class="lbl">Total Won</div></div>' +
+    '<div><div class="num bl-neg">$' + sg.totalLost.toFixed(0) + '</div><div class="lbl">Total Lost</div></div>' +
+    '<div><div class="num">' + recordLabel + '</div><div class="lbl">Betting Record</div></div>' +
+    '<div><div class="num">' + winPctLabel + '</div><div class="lbl">Win Percentage</div></div>' +
+    '<div><div class="num">$' + sg.totalWagered.toFixed(0) + '</div><div class="lbl">Total FAAB Wagered</div></div>' +
+  '</div>';
+}
+
+// Both the desktop table and the mobile cards read the same most-recent-first row order
+// (already-computed running "Season Net" values just get displayed in reverse) so the two
+// views never disagree, and share the row list across every season on file for this team.
+function faabLedgerDisplayRows(seasonGroups){
+  const out = [];
+  seasonGroups.forEach(function(sg){
+    sg.rows.slice().reverse().forEach(function(r){ out.push({season: sg.season, row: r}); });
+  });
+  return out;
+}
+
+function renderFaabLedgerTable(displayRows){
+  if(displayRows.length === 0) return '<div class="new-team-note">No FAAB bets placed yet.</div>';
+  const rowsHtml = displayRows.map(function(entry){
+    const w = entry.row.wager;
+    const statusLabel = FAAB_STATUS_LABEL[w.status] || w.status.toUpperCase();
+    const netVal = entry.row.runningNet;
+    return '<tr>' +
+      '<td>' + throneEscAttr(entry.season) + '</td>' +
+      '<td>Wk ' + w.week + '</td>' +
+      '<td>' + throneEscAttr(w.pickTeamName) + ' <span class="faab-ledger-vs">vs</span> ' + throneEscAttr(w.oppTeamName) + '</td>' +
+      '<td>' + formatSpread(w.spread) + '</td>' +
+      '<td>$' + w.amount + '</td>' +
+      '<td><span class="betting-status-badge ' + w.status + '">' + statusLabel + '</span></td>' +
+      '<td class="' + faabAdjustmentClass(w) + '">' + faabAdjustmentLabel(w) + '</td>' +
+      '<td class="' + netCellClass(netVal) + '">' + faabNetLabel(netVal) + '</td>' +
+    '</tr>';
+  }).join("");
+  return '<table class="faab-ledger-table"><thead><tr>' +
+    '<th>Season</th><th>Week</th><th>Matchup</th><th>Line</th><th>Wager</th><th>Result</th><th>Adjustment</th><th>Season Net</th>' +
+  '</tr></thead><tbody>' + rowsHtml + '</tbody></table>';
+}
+
+function renderFaabLedgerCards(displayRows){
+  if(displayRows.length === 0) return '<div class="new-team-note">No FAAB bets placed yet.</div>';
+  return displayRows.map(function(entry){
+    const w = entry.row.wager;
+    const statusLabel = FAAB_STATUS_LABEL[w.status] || w.status.toUpperCase();
+    const netVal = entry.row.runningNet;
+    const scoreNote = (w.status !== "pending" && typeof w.finalPickScore === "number")
+      ? (w.finalPickScore.toFixed(1) + '&ndash;' + w.finalOppScore.toFixed(1))
+      : "Not final yet";
+    return '<details class="faab-card">' +
+      '<summary>' +
+        '<span class="faab-card-week">Wk ' + w.week + '</span>' +
+        '<span class="faab-card-pick">' + throneEscAttr(w.pickTeamName) + ' ' + formatSpread(w.spread) + '</span>' +
+        '<span class="betting-status-badge ' + w.status + '">' + statusLabel + '</span>' +
+        '<span class="faab-card-adj ' + faabAdjustmentClass(w) + '">' + faabAdjustmentLabel(w) + '</span>' +
+      '</summary>' +
+      '<div class="faab-card-body">' +
+        '<div><span class="faab-card-lbl">Season</span><span>' + throneEscAttr(entry.season) + '</span></div>' +
+        '<div><span class="faab-card-lbl">Opponent</span><span>' + throneEscAttr(w.oppTeamName) + '</span></div>' +
+        '<div><span class="faab-card-lbl">Line</span><span>' + formatSpread(w.spread) + '</span></div>' +
+        '<div><span class="faab-card-lbl">Wager</span><span>$' + w.amount + '</span></div>' +
+        '<div><span class="faab-card-lbl">Final score</span><span>' + scoreNote + '</span></div>' +
+        '<div><span class="faab-card-lbl">Season Net</span><span class="' + netCellClass(netVal) + '">' + faabNetLabel(netVal) + '</span></div>' +
+      '</div>' +
+    '</details>';
+  }).join("");
+}
+
+function renderFaabLedgerBody(ownerId){
+  const body = document.getElementById("faabLedgerBody");
+  if(!body) return;
+  if(!ownerId){ body.innerHTML = '<div class="new-team-note">No teams available.</div>'; return; }
+  if(FAAB_FIREBASE_ENABLED === null){
+    body.innerHTML = '<div class="new-team-note">Loading betting activity&hellip;</div>';
+    return;
+  }
+
+  const seasonGroups = computeFaabLedgerForTeam(ownerId);
+  const currentSeasonGroup = seasonGroups.find(function(s){ return s.season === FAAB_CURRENT_SEASON; }) || {
+    season: FAAB_CURRENT_SEASON, rows: [], seasonNet: 0, wins: 0, losses: 0, pushes: 0, pending: 0,
+    totalWon: 0, totalLost: 0, totalWagered: 0, winPct: null
+  };
+
+  const scopeNote = FAAB_FIREBASE_ENABLED
+    ? "Shared league-wide ledger &mdash; every settled and pending wager, permanently saved to this team's record."
+    : "Local to this browser only &mdash; bets placed on other devices won't show up here.";
+
+  const currentWk = CURRENT_NFL_WEEK || (LAST_MATCHUPS ? LAST_MATCHUPS.week : null) || 1;
+  const series = computeFaabCumulativeSeries(currentSeasonGroup.rows, currentWk);
+  const chartHtml = currentSeasonGroup.rows.length > 0
+    ? '<div class="faab-chart-wrap">' +
+        '<div class="faab-chart-title">Cumulative FAAB net &mdash; ' + FAAB_CURRENT_SEASON + ' season, Week 1&ndash;' + currentWk + '</div>' +
+        buildFaabCumulativeChartSvg(series) +
+      '</div>'
+    : '';
+
+  const displayRows = faabLedgerDisplayRows(seasonGroups);
+
+  body.innerHTML =
+    '<p class="panel-sub" style="margin:-4px 0 12px;">' + scopeNote + ' Adjustments below are what the commissioner applies by hand to real Sleeper FAAB every Tuesday, consistent with the league’s existing betting process &mdash; nothing here changes anyone’s actual waiver budget automatically.</p>' +
+    renderFaabLedgerSummary(ownerId, currentSeasonGroup) +
+    chartHtml +
+    renderFaabLedgerTable(displayRows) +
+    '<div class="faab-ledger-cards">' + renderFaabLedgerCards(displayRows) + '</div>';
+}
+
+function renderFaabLedgerSection(){
+  const panel = document.getElementById("faabLedgerPanel");
+  if(!panel) return;
+  if(!Array.isArray(TEAMS) || TEAMS.length < 2){ panel.style.display = "none"; return; }
+  panel.style.display = "";
+
+  const sel = document.getElementById("faabLedgerTeamSelect");
+  let ownerId = "";
+  if(sel){
+    const sorted = TEAMS.slice().sort(function(a, b){ return a.team.localeCompare(b.team); });
+    const prevValue = sel.value;
+    sel.innerHTML = sorted.map(function(t){
+      return '<option value="' + throneEscAttr(t.ownerId) + '">' + throneEscAttr(t.team) + '</option>';
+    }).join("");
+    const book = ensureFaabBook();
+    ownerId = (prevValue && sorted.some(function(t){ return t.ownerId === prevValue; }))
+      ? prevValue
+      : ((book.identityOwnerId && sorted.some(function(t){ return t.ownerId === book.identityOwnerId; }))
+        ? book.identityOwnerId
+        : (sorted[0] ? sorted[0].ownerId : ""));
+    sel.value = ownerId;
+    if(sel.dataset.wired !== "1"){
+      sel.dataset.wired = "1";
+      sel.addEventListener("change", function(){ renderFaabLedgerBody(sel.value); });
+    }
+  }
+
+  renderFaabLedgerBody(ownerId);
 }
 
 // Decides LOCAL vs FIREBASE mode and wires up whichever one applies. The Firebase bootstrap
