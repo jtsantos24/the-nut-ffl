@@ -5757,24 +5757,6 @@ window.addEventListener("popstate", function(e){
   if(state.team) showTeamDetail(state.team);
 });
 
-const initialSection = decodeURIComponent(location.hash.slice(1).split("/")[0] || "home");
-if(document.getElementById("section-" + initialSection)){
-  goToSection(initialSection, true);
-  safeHistoryReplace({section: initialSection}, location.hash || "#home");
-} else {
-  safeHistoryReplace({section: "home"}, "#home");
-}
-
-document.querySelectorAll(".app-tabs button[data-app-section]").forEach(function(button){
-  button.addEventListener("click", function(){
-    goToSection(button.dataset.appSection);
-    window.scrollTo({top:0, behavior:"instant"});
-  });
-});
-document.getElementById("appMore").addEventListener("click", function(){
-  openMobileMenu();
-});
-
 document.getElementById("teamDetailBack").addEventListener("click", function(){
   if(HISTORY_ENABLED){
     try{ history.back(); return; }catch(e){ HISTORY_ENABLED = false; }
@@ -5794,6 +5776,24 @@ document.querySelectorAll(".navlinks button[data-section]").forEach(function(btn
 // JS-driven -- on hover, focus, AND click -- rather than plain CSS :hover, because the
 // menu has to be positioned (positionDropdownMenu) before it becomes visible.
 let navDropdownCloseTimer = null;
+const initialSection = decodeURIComponent(location.hash.slice(1).split("/")[0] || "home");
+if(document.getElementById("section-" + initialSection)){
+  goToSection(initialSection, true);
+  safeHistoryReplace({section: initialSection}, location.hash || "#home");
+} else {
+  safeHistoryReplace({section: "home"}, "#home");
+}
+
+document.querySelectorAll(".app-tabs button[data-app-section]").forEach(function(button){
+  button.addEventListener("click", function(){
+    goToSection(button.dataset.appSection);
+    window.scrollTo({top:0, behavior:"instant"});
+  });
+});
+document.getElementById("appMore").addEventListener("click", function(){
+  openMobileMenu();
+});
+
 
 function openNavDropdown(dropdown){
   clearTimeout(navDropdownCloseTimer);
