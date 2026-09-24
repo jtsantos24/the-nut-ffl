@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0E1B34" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="The NUT FFL" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-180.png" />
 <title>The NUT Fantasy Football League</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1523,6 +1530,28 @@
     .teams-grid{grid-template-columns:1fr 1fr;}
   }
 
+
+  /* Phone app navigation; the full league menu remains available through More. */
+  .app-tabs{display:none;}
+  @media (max-width:700px){
+    body{padding-bottom:calc(72px + env(safe-area-inset-bottom));}
+    .app-tabs{
+      display:flex; position:fixed; bottom:0; left:0; right:0; z-index:90;
+      padding:7px 4px calc(7px + env(safe-area-inset-bottom));
+      background:rgba(14,27,52,.97); border-top:1px solid var(--line);
+      box-shadow:0 -8px 30px rgba(0,0,0,.35);
+    }
+    .app-tabs button{
+      flex:1; min-width:0; min-height:48px; border:0; border-radius:10px;
+      background:transparent; color:var(--chalk-dim); font:600 10px 'Inter',sans-serif;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+      cursor:pointer;
+    }
+    .app-tabs button .tab-icon{font-size:20px; line-height:1.1;}
+    .app-tabs button.active{color:var(--gold-bright); background:var(--gold-soft);}
+    .app-tabs button:focus-visible{outline:2px solid var(--gold);}
+    .navlinks{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
+  }
 </style>
 </head>
 <body>
@@ -1612,6 +1641,14 @@
   <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">&#9776;</button>
 </div>
 <div class="nav-backdrop" id="navBackdrop"></div>
+<nav class="app-tabs" aria-label="App navigation">
+  <button type="button" data-app-section="home" aria-label="Home"><span class="tab-icon" aria-hidden="true">⌂</span>Home</button>
+  <button type="button" data-app-section="schedule" aria-label="Matchups"><span class="tab-icon" aria-hidden="true">🏈</span>Matchups</button>
+  <button type="button" data-app-section="teams" aria-label="Teams"><span class="tab-icon" aria-hidden="true">♟</span>Teams</button>
+  <button type="button" data-app-section="betting" aria-label="FAAB"><span class="tab-icon" aria-hidden="true">＄</span>FAAB</button>
+  <button type="button" id="appMore" aria-label="More league sections" aria-expanded="false"><span class="tab-icon" aria-hidden="true">⋯</span>More</button>
+</nav>
+
 
 <div class="hero">
   <img class="hero-banner-img" src="hero-banner.webp" alt="The NUT Fantasy Football League &mdash; Year 4 Dynasty League, 2026 Season">
@@ -5660,6 +5697,20 @@ function createNavRipple(e){
   ripple.addEventListener("animationend", function(){ ripple.remove(); });
 }
 
+function syncAppTabs(section){
+  const primary = ["home", "schedule", "teams", "betting"];
+  document.querySelectorAll(".app-tabs button[data-app-section]").forEach(function(button){
+    const active = button.dataset.appSection === section;
+    button.classList.toggle("active", active);
+    if(active) button.setAttribute("aria-current", "page");
+    else button.removeAttribute("aria-current");
+  });
+  const more = document.getElementById("appMore");
+  more.classList.toggle("active", !primary.includes(section));
+  if(!primary.includes(section)) more.setAttribute("aria-current", "page");
+  else more.removeAttribute("aria-current");
+}
+
 function goToSection(section, skipPush){
   document.querySelectorAll(".navlinks button[data-section]").forEach(function(b){ b.classList.remove("active"); });
   document.querySelectorAll(".nav-dropdown").forEach(function(d){ d.classList.remove("active"); });
@@ -5682,6 +5733,7 @@ function goToSection(section, skipPush){
   document.querySelectorAll(".section").forEach(function(s){ s.classList.remove("active"); });
   const target = document.getElementById("section-" + section);
   if(target) target.classList.add("active");
+  syncAppTabs(section);
   document.getElementById("teamDetail").classList.remove("active");
   document.getElementById("teamsGrid").style.display = "";
   if(!skipPush){
@@ -5705,8 +5757,6 @@ window.addEventListener("popstate", function(e){
   if(state.team) showTeamDetail(state.team);
 });
 
-safeHistoryReplace({section: "home"}, "#home");
-
 document.getElementById("teamDetailBack").addEventListener("click", function(){
   if(HISTORY_ENABLED){
     try{ history.back(); return; }catch(e){ HISTORY_ENABLED = false; }
@@ -5726,6 +5776,24 @@ document.querySelectorAll(".navlinks button[data-section]").forEach(function(btn
 // JS-driven -- on hover, focus, AND click -- rather than plain CSS :hover, because the
 // menu has to be positioned (positionDropdownMenu) before it becomes visible.
 let navDropdownCloseTimer = null;
+const initialSection = decodeURIComponent(location.hash.slice(1).split("/")[0] || "home");
+if(document.getElementById("section-" + initialSection)){
+  goToSection(initialSection, true);
+  safeHistoryReplace({section: initialSection}, location.hash || "#home");
+} else {
+  safeHistoryReplace({section: "home"}, "#home");
+}
+
+document.querySelectorAll(".app-tabs button[data-app-section]").forEach(function(button){
+  button.addEventListener("click", function(){
+    goToSection(button.dataset.appSection);
+    window.scrollTo({top:0, behavior:"instant"});
+  });
+});
+document.getElementById("appMore").addEventListener("click", function(){
+  openMobileMenu();
+});
+
 
 function openNavDropdown(dropdown){
   clearTimeout(navDropdownCloseTimer);
@@ -5810,11 +5878,13 @@ function openMobileMenu(){
   document.getElementById("navlinks").classList.add("open");
   document.getElementById("navBackdrop").classList.add("open");
   document.body.style.overflow = "hidden";
+  document.getElementById("appMore").setAttribute("aria-expanded", "true");
 }
 function closeMobileMenu(){
   document.getElementById("navlinks").classList.remove("open");
   document.getElementById("navBackdrop").classList.remove("open");
   document.body.style.overflow = "";
+  document.getElementById("appMore").setAttribute("aria-expanded", "false");
   closeAllNavDropdowns();
 }
 document.getElementById("hamburgerBtn").addEventListener("click", openMobileMenu);
@@ -8844,5 +8914,12 @@ startTicker();
 startKeyDateCountdowns();
 </script>
 
+<script>
+if("serviceWorker" in navigator && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("./sw.js").catch(function(){ /* Site remains usable without installation. */ });
+  });
+}
+</script>
 </body>
 </html>
