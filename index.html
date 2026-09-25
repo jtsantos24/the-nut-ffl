@@ -522,6 +522,28 @@
   .rivalry-history .rh-last{font-size:12px; color:var(--chalk-dim);}
   .rivalry-history .rh-note{font-size:12px; color:var(--chalk-dim); font-style:italic;}
 
+  /* ---- Custom illustrated rivalry card (currently just Love Hurts vs Boom Goes The
+     Dynamite -- the "Husband & Wife" banner) in place of the generic text card above.
+     Stat values are overlaid on the banner's own empty scoreboard boxes, positioned as
+     percentages measured directly against the banner's native 1473x1068 pixels, the same
+     technique the trophy case uses for its shelf/trophy positions. ---- */
+  .rivalry-card-custom{padding:0; overflow:hidden; background:none;}
+  .rivalry-custom-inner{position:relative; line-height:0;}
+  .rivalry-custom-inner img{width:100%; height:auto; display:block;}
+  .rivalry-stat-box{
+    position:absolute; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; color:#eef6ff; pointer-events:none; overflow:hidden;
+    container-type:inline-size; /* cqw below is relative to THIS box's own (narrow) width, not the banner */
+  }
+  .rivalry-stat-box .rsb-value{
+    font-family:'Teko', sans-serif; font-weight:700; letter-spacing:0.5px; line-height:1;
+    font-size:clamp(9px, 22cqw, 34px); text-shadow:0 1px 3px rgba(0,0,0,0.7); white-space:nowrap;
+  }
+  .rivalry-stat-box .rsb-sub{
+    font-family:'Inter', sans-serif; font-weight:600; letter-spacing:0.3px; text-transform:uppercase;
+    font-size:clamp(5px, 4.6cqw, 11px); opacity:0.72; margin-top:2px;
+  }
+
   /* ---------- CHAMPIONS / RECORDS ---------- */
   .empty-trophy{text-align:center; padding:38px 10px; color:var(--chalk-dim);}
   .empty-trophy .icon{font-size:44px; opacity:0.6; margin-bottom:12px; filter:drop-shadow(0 4px 12px rgba(242,181,66,0.35));}
@@ -3676,10 +3698,92 @@ document.querySelectorAll("th.sortable").forEach(function(th){
 
 let RIVALRY_HISTORY = null; // filled in once fetched
 
+// One matchup (Love Hurts vs Boom Goes The Dynamite -- an actual married couple, per their
+// manager handles) gets a fully custom illustrated card instead of the generic text one,
+// using the "Husband & Wife Fantasy Rivalry League" banner. Box positions are percentages
+// measured directly against the banner's native 1473x1068 pixels (same technique the trophy
+// case uses for its shelf/trophy spots) -- left = pink side = Boom, right = blue side = Love
+// Hurts, matching the banner artwork itself.
+const RIVALRY_CUSTOM_CARD = {
+  ownerA: "996503416859709440", // Boom Goes The Dynamite -- pink/left side of the banner
+  ownerB: "959226991016816640", // Love Hurts -- blue/right side of the banner
+  img: "rivalry-love-hurts-vs-boom.webp",
+  boxes: [
+    {side:"a", stat:"wins", left:5.70,  top:72.38, width:15.82, height:16.57},
+    {side:"a", stat:"avg",  left:25.12, top:72.38, width:16.50, height:5.62},
+    {side:"a", stat:"high", left:25.19, top:83.80, width:16.36, height:5.71},
+    {side:"b", stat:"avg",  left:58.32, top:72.38, width:16.43, height:5.62},
+    {side:"b", stat:"high", left:58.32, top:83.80, width:16.43, height:5.81},
+    {side:"b", stat:"wins", left:78.41, top:72.38, width:16.02, height:16.57}
+  ]
+};
+
+// Regular-season-only head-to-head stats for one rivalry pair (playoff meetings, if any,
+// are excluded -- same scope as the "Series" line on the generic rivalry cards).
+function computeRivalryBoxStats(rosterA, rosterB){
+  if(RIVALRY_HISTORY === null || RIVALRY_HISTORY === "error") return null;
+  const meetings = findMeetings(RIVALRY_HISTORY, rosterA, rosterB);
+  if(meetings.length === 0) return {meetings: 0};
+  let winsA=0, winsB=0, ties=0, sumA=0, sumB=0, maxA=-Infinity, maxB=-Infinity;
+  meetings.forEach(function(m){
+    if(m.ptsA > m.ptsB) winsA++; else if(m.ptsB > m.ptsA) winsB++; else ties++;
+    sumA += m.ptsA; sumB += m.ptsB;
+    if(m.ptsA > maxA) maxA = m.ptsA;
+    if(m.ptsB > maxB) maxB = m.ptsB;
+  });
+  return {
+    meetings: meetings.length, ties: ties,
+    a: {wins: winsA, avg: sumA / meetings.length, high: maxA},
+    b: {wins: winsB, avg: sumB / meetings.length, high: maxB}
+  };
+}
+
+function renderRivalryCustomCard(){
+  const cfg = RIVALRY_CUSTOM_CARD;
+  const ta = TEAMS.find(function(t){ return t.ownerId === cfg.ownerA; }) || {};
+  const tb = TEAMS.find(function(t){ return t.ownerId === cfg.ownerB; }) || {};
+  const stats = (ta.rosterId !== undefined && tb.rosterId !== undefined)
+    ? computeRivalryBoxStats(ta.rosterId, tb.rosterId) : null;
+
+  function valueFor(box){
+    const mine = box.side === "a" ? (stats && stats.a) : (stats && stats.b);
+    const theirs = box.side === "a" ? (stats && stats.b) : (stats && stats.a);
+    if(!stats || !stats.meetings || !mine) return {value: "–", sub: ""};
+    if(box.stat === "wins"){
+      const record = mine.wins + "-" + theirs.wins + (stats.ties ? "-" + stats.ties : "");
+      return {value: record, sub: stats.meetings + " all-time meeting" + (stats.meetings === 1 ? "" : "s")};
+    }
+    if(box.stat === "avg") return {value: mine.avg.toFixed(1), sub: ""};
+    if(box.stat === "high") return {value: mine.high.toFixed(1), sub: ""};
+    return {value: "–", sub: ""};
+  }
+
+  const boxesHtml = cfg.boxes.map(function(box){
+    const v = valueFor(box);
+    const teamName = (box.side === "a" ? ta.team : tb.team) || "";
+    const statLabel = box.stat === "wins" ? "Rivalry wins" : box.stat === "avg" ? "Average score" : "High score";
+    return '<div class="rivalry-stat-box" style="left:' + box.left + '%; top:' + box.top + '%; width:' + box.width + '%; height:' + box.height + '%;" title="' + teamName + ' — ' + statLabel + '">' +
+      '<div class="rsb-value">' + v.value + '</div>' +
+      (v.sub ? '<div class="rsb-sub">' + v.sub + '</div>' : '') +
+    '</div>';
+  }).join("");
+
+  return '<div class="rivalry-card rivalry-card-custom">' +
+    '<div class="rivalry-custom-inner">' +
+      '<img src="' + cfg.img + '" alt="' + (ta.team||'Boom Goes The Dynamite') + ' vs ' + (tb.team||'Love Hurts') + ' — Husband &amp; Wife Fantasy Rivalry League">' +
+      boxesHtml +
+    '</div>' +
+  '</div>';
+}
+
 function renderRivalry(){
   const grid = document.getElementById("rivalryGrid");
   grid.innerHTML = RIVALRIES.map(function(pair){
     const ownerA = pair[0], ownerB = pair[1];
+    if((ownerA === RIVALRY_CUSTOM_CARD.ownerA && ownerB === RIVALRY_CUSTOM_CARD.ownerB) ||
+       (ownerA === RIVALRY_CUSTOM_CARD.ownerB && ownerB === RIVALRY_CUSTOM_CARD.ownerA)){
+      return renderRivalryCustomCard();
+    }
     const ta = TEAMS.find(function(t){ return t.ownerId === ownerA; }) || {};
     const tb = TEAMS.find(function(t){ return t.ownerId === ownerB; }) || {};
     const a = ta.team || "Unknown team", b = tb.team || "Unknown team";
