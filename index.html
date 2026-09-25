@@ -3698,6 +3698,12 @@ document.querySelectorAll("th.sortable").forEach(function(th){
 
 let RIVALRY_HISTORY = null; // filled in once fetched
 
+// Owner IDs whose roster slot changed hands going into this season -- any pre-2026 meeting
+// data for that roster_id belongs to the PREVIOUS manager, not this one, so it would be
+// wrong to show it as this person's own rivalry history. Used by both the generic card
+// (renderRivalryHistoryLine) and the custom banner cards below.
+const RIVALRY_NEW_MANAGER_OWNERS = ["604190850481713152"]; // Breece & Desist (Awesomeus) -- new to the league in 2026
+
 // Certain matchups get a fully custom illustrated card instead of the generic text one, each
 // using its own hand-made banner. Box positions are percentages measured directly against
 // each banner's native 1473x1068 pixels (same technique the trophy case uses for its
@@ -3732,6 +3738,21 @@ const RIVALRY_CUSTOM_CARDS = [
       {side:"b", stat:"high", left:58.32, top:83.61, width:16.43, height:5.99},
       {side:"b", stat:"wins", left:78.41, top:72.47, width:16.23, height:16.67}
     ]
+  },
+  {
+    // Gus Swayze's Squad vs Breece & Desist -- "Aisle Rivals" Costco banner. Left = teal =
+    // Gus Swayze's Squad, right = green = Breece & Desist.
+    ownerA: "999558477183913984", // Gus Swayze's Squad -- teal/left side of the banner
+    ownerB: "604190850481713152", // Breece & Desist -- green/right side of the banner
+    img: "rivalry-gus-swayze-vs-breece-desist.webp",
+    boxes: [
+      {side:"a", stat:"wins", left:4.07,  top:72.73, width:16.89, height:17.34},
+      {side:"a", stat:"avg",  left:24.76, top:72.73, width:16.21, height:5.72},
+      {side:"a", stat:"high", left:24.76, top:84.54, width:16.21, height:6.00},
+      {side:"b", stat:"avg",  left:58.75, top:72.73, width:16.28, height:5.72},
+      {side:"b", stat:"high", left:58.75, top:84.54, width:16.28, height:6.09},
+      {side:"b", stat:"wins", left:78.97, top:72.73, width:16.96, height:17.34}
+    ]
   }
 ];
 
@@ -3758,7 +3779,10 @@ function computeRivalryBoxStats(rosterA, rosterB){
 function renderRivalryCustomCard(cfg){
   const ta = TEAMS.find(function(t){ return t.ownerId === cfg.ownerA; }) || {};
   const tb = TEAMS.find(function(t){ return t.ownerId === cfg.ownerB; }) || {};
-  const stats = (ta.rosterId !== undefined && tb.rosterId !== undefined)
+  // If either side's roster slot changed hands this season, any pre-2026 meeting data
+  // belongs to the previous manager -- show placeholders rather than someone else's history.
+  const isNewManagerPair = RIVALRY_NEW_MANAGER_OWNERS.indexOf(cfg.ownerA) !== -1 || RIVALRY_NEW_MANAGER_OWNERS.indexOf(cfg.ownerB) !== -1;
+  const stats = (!isNewManagerPair && ta.rosterId !== undefined && tb.rosterId !== undefined)
     ? computeRivalryBoxStats(ta.rosterId, tb.rosterId) : null;
 
   function valueFor(box){
@@ -3832,8 +3856,7 @@ function renderRivalry(){
 function renderRivalryHistoryLine(ta, tb){
   if(ta.rosterId === undefined || tb.rosterId === undefined) return "";
 
-  // The Breece & Desist slot changed managers heading into this season, so there's no real history for that person yet
-  if(ta.ownerId === "604190850481713152" || tb.ownerId === "604190850481713152"){
+  if(RIVALRY_NEW_MANAGER_OWNERS.indexOf(ta.ownerId) !== -1 || RIVALRY_NEW_MANAGER_OWNERS.indexOf(tb.ownerId) !== -1){
     return '<div class="rivalry-history"><span class="rh-note">New rivalry &mdash; first meeting is this season.</span></div>';
   }
 
