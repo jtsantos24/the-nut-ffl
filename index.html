@@ -3768,6 +3768,23 @@ const RIVALRY_CUSTOM_CARDS = [
       {side:"b", stat:"high", left:58.01, top:83.04, width:16.55, height:5.06},
       {side:"b", stat:"wins", left:78.09, top:72.16, width:16.28, height:15.56}
     ]
+  },
+  {
+    // White Center Rats vs Lickety Splitz Squad -- "Tee Time Rivals" golf banner. Left =
+    // blue = White Center Rats, right = green = Lickety Splitz Squad. This banner labels its
+    // third box "Low Round" (golf framing) instead of "High Score" -- mapped to each side's
+    // lowest single-game score in the series via the "low" stat.
+    ownerA: "996256741807603712", // White Center Rats -- blue/left side of the banner
+    ownerB: "996196287416528896", // Lickety Splitz Squad -- green/right side of the banner
+    img: "rivalry-white-center-vs-lickety-splitz.webp",
+    boxes: [
+      {side:"a", stat:"wins", left:5.09,  top:77.51, width:16.42, height:13.59},
+      {side:"a", stat:"avg",  left:24.97, top:77.51, width:16.35, height:3.56},
+      {side:"a", stat:"low",  left:24.97, top:86.32, width:16.35, height:4.78},
+      {side:"b", stat:"avg",  left:58.62, top:77.41, width:16.49, height:3.56},
+      {side:"b", stat:"low",  left:58.62, top:86.32, width:16.55, height:4.78},
+      {side:"b", stat:"wins", left:78.49, top:77.51, width:16.42, height:13.68}
+    ]
   }
 ];
 
@@ -3777,17 +3794,19 @@ function computeRivalryBoxStats(rosterA, rosterB){
   if(RIVALRY_HISTORY === null || RIVALRY_HISTORY === "error") return null;
   const meetings = findMeetings(RIVALRY_HISTORY, rosterA, rosterB);
   if(meetings.length === 0) return {meetings: 0};
-  let winsA=0, winsB=0, ties=0, sumA=0, sumB=0, maxA=-Infinity, maxB=-Infinity;
+  let winsA=0, winsB=0, ties=0, sumA=0, sumB=0, maxA=-Infinity, maxB=-Infinity, minA=Infinity, minB=Infinity;
   meetings.forEach(function(m){
     if(m.ptsA > m.ptsB) winsA++; else if(m.ptsB > m.ptsA) winsB++; else ties++;
     sumA += m.ptsA; sumB += m.ptsB;
     if(m.ptsA > maxA) maxA = m.ptsA;
     if(m.ptsB > maxB) maxB = m.ptsB;
+    if(m.ptsA < minA) minA = m.ptsA;
+    if(m.ptsB < minB) minB = m.ptsB;
   });
   return {
     meetings: meetings.length, ties: ties,
-    a: {wins: winsA, avg: sumA / meetings.length, high: maxA},
-    b: {wins: winsB, avg: sumB / meetings.length, high: maxB}
+    a: {wins: winsA, avg: sumA / meetings.length, high: maxA, low: minA},
+    b: {wins: winsB, avg: sumB / meetings.length, high: maxB, low: minB}
   };
 }
 
@@ -3810,13 +3829,14 @@ function renderRivalryCustomCard(cfg){
     }
     if(box.stat === "avg") return {value: mine.avg.toFixed(1), sub: ""};
     if(box.stat === "high") return {value: mine.high.toFixed(1), sub: ""};
+    if(box.stat === "low") return {value: mine.low.toFixed(1), sub: ""};
     return {value: "–", sub: ""};
   }
 
   const boxesHtml = cfg.boxes.map(function(box){
     const v = valueFor(box);
     const teamName = (box.side === "a" ? ta.team : tb.team) || "";
-    const statLabel = box.stat === "wins" ? "Rivalry wins" : box.stat === "avg" ? "Average score" : "High score";
+    const statLabel = box.stat === "wins" ? "Rivalry wins" : box.stat === "avg" ? "Average score" : box.stat === "low" ? "Low round" : "High score";
     return '<div class="rivalry-stat-box" style="left:' + box.left + '%; top:' + box.top + '%; width:' + box.width + '%; height:' + box.height + '%;" title="' + teamName + ' — ' + statLabel + '">' +
       '<div class="rsb-value">' + v.value + '</div>' +
       (v.sub ? '<div class="rsb-sub">' + v.sub + '</div>' : '') +
