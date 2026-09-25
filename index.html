@@ -3785,6 +3785,24 @@ const RIVALRY_CUSTOM_CARDS = [
       {side:"b", stat:"low",  left:58.62, top:86.32, width:16.55, height:4.78},
       {side:"b", stat:"wins", left:78.49, top:77.51, width:16.42, height:13.68}
     ]
+  },
+  {
+    // JSN Your Face vs Price is Wrong Bitch! -- "Backyard Games Rivals" cornhole banner. Left =
+    // blue/Bills = JSN Your Face, right = green/Seahawks = Price is Wrong Bitch! Unlike the other
+    // custom cards, this banner's right-hand stacked pair is Average Score over RIVALRY WINS
+    // (not High Score), with High Score instead given its own large box on the far right --
+    // box order below follows the banner's actual layout, not the other cards' pattern.
+    ownerA: "995923308459745280", // JSN Your Face -- blue/left side of the banner
+    ownerB: "996494307496542208", // Price is Wrong Bitch! -- green/right side of the banner
+    img: "rivalry-jsn-vs-price-is-wrong.webp",
+    boxes: [
+      {side:"a", stat:"wins", left:6.58,  top:78.07, width:15.13, height:12.00},
+      {side:"a", stat:"avg",  left:24.22, top:77.51, width:16.01, height:4.50},
+      {side:"a", stat:"high", left:24.15, top:85.94, width:16.08, height:5.44},
+      {side:"b", stat:"avg",  left:59.63, top:77.41, width:16.01, height:4.40},
+      {side:"b", stat:"wins", left:59.70, top:86.13, width:15.94, height:5.06, noSub:true},
+      {side:"b", stat:"high", left:78.15, top:77.79, width:15.20, height:12.18}
+    ]
   }
 ];
 
@@ -3825,7 +3843,11 @@ function renderRivalryCustomCard(cfg){
     if(!stats || !stats.meetings || !mine) return {value: "–", sub: ""};
     if(box.stat === "wins"){
       const record = mine.wins + "-" + theirs.wins + (stats.ties ? "-" + stats.ties : "");
-      return {value: record, sub: stats.meetings + " all-time meeting" + (stats.meetings === 1 ? "" : "s")};
+      // Some banners place the wins box in a short slot sized like an avg/high box (no room
+      // for a second line) rather than the usual tall box -- box.noSub skips the meeting-count
+      // caption in that case so it doesn't get clipped against the box's own border.
+      const sub = box.noSub ? "" : stats.meetings + " all-time meeting" + (stats.meetings === 1 ? "" : "s");
+      return {value: record, sub: sub};
     }
     if(box.stat === "avg") return {value: mine.avg.toFixed(1), sub: ""};
     if(box.stat === "high") return {value: mine.high.toFixed(1), sub: ""};
