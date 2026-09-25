@@ -718,6 +718,13 @@
   .td-trophy-shelf-2{bottom:11.35%;}
   .td-trophy{position:absolute; bottom:0; width:8.2%; aspect-ratio:1024/1536; container-type:inline-size; transform:translateX(-50%);}
   .td-trophy img{width:100%; height:100%; display:block; filter:drop-shadow(0 8px 10px rgba(0,0,0,0.6));}
+  /* runnerup-trophy.webp carries a soft reflection/shadow fade below its actual solid base
+     (measured: the real pedestal ends ~8.1% up from the image's bottom edge, unlike
+     championship-trophy.webp whose base is flush with its own canvas bottom) -- anchoring
+     the raw image at bottom:0 like the champion trophy left it visibly hovering above the
+     shelf line. Nudging the whole trophy (image + year plate together, so the label stays
+     put on the plate) down by that same amount puts its actual base back on the shelf. */
+  .td-trophy-runnerup{transform:translateX(-50%) translateY(8.1%);}
   /* Champion trophy's blank faceplate box, measured directly against championship-trophy.webp's
      native 1024x1536 pixels (plate spans x:232-786, y:1185-1358), inset ~50px horizontally and
      ~20px vertically to clear the plate's four corner rivets. */
@@ -760,6 +767,8 @@
   .tdm-shelf-4{bottom:5.34%;}
   .tdm-trophy{position:absolute; bottom:0; width:20%; aspect-ratio:1024/1536; container-type:inline-size; transform:translateX(-50%);}
   .tdm-trophy img{width:100%; height:100%; display:block; filter:drop-shadow(0 6px 8px rgba(0,0,0,0.65));}
+  /* Same runnerup-trophy.webp reflection-fade fix as the desktop case, see .td-trophy-runnerup. */
+  .tdm-trophy-runnerup{transform:translateX(-50%) translateY(8.1%);}
   @media (max-width:768px){
     .td-trophycase{display:none;}
     .td-trophycase-mobile{display:block;}
@@ -5542,10 +5551,12 @@ function renderTrophyCase(ownerId){
 
   // ---- Desktop/tablet: fixed positions centered under each shelf's real spotlight ----
   shelf1.innerHTML = trophies.slice(0, SHELF1_LIGHTS.length).map(function(tr, i){
-    return '<div class="td-trophy" style="left:' + SHELF1_LIGHTS[i] + '%;" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
+    const cls = "td-trophy" + (tr.type === "champion" ? "" : " td-trophy-runnerup");
+    return '<div class="' + cls + '" style="left:' + SHELF1_LIGHTS[i] + '%;" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
   }).join("");
   shelf2.innerHTML = trophies.slice(SHELF1_LIGHTS.length, SHELF1_LIGHTS.length + SHELF2_LIGHTS.length).map(function(tr, i){
-    return '<div class="td-trophy" style="left:' + SHELF2_LIGHTS[i] + '%;" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
+    const cls = "td-trophy" + (tr.type === "champion" ? "" : " td-trophy-runnerup");
+    return '<div class="' + cls + '" style="left:' + SHELF2_LIGHTS[i] + '%;" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
   }).join("");
 
   // ---- Mobile: fixed positions under each shelf's two real spotlights, filling the
@@ -5556,7 +5567,8 @@ function renderTrophyCase(ownerId){
       if(!shelfEl) return;
       const chunk = trophies.slice(i * perShelf, (i + 1) * perShelf);
       shelfEl.innerHTML = chunk.map(function(tr, j){
-        return '<div class="tdm-trophy" style="left:' + MOBILE_SHELF_LIGHTS[j] + '%;" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
+        const cls = "tdm-trophy" + (tr.type === "champion" ? "" : " tdm-trophy-runnerup");
+        return '<div class="' + cls + '" style="left:' + MOBILE_SHELF_LIGHTS[j] + '%;" title="' + trophyTitle(tr) + '">' + trophyInner(tr) + '</div>';
       }).join("");
     });
   }
