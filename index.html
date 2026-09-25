@@ -4388,7 +4388,17 @@ function computeGameOfWeekScore(pair, week){
   };
 }
 
-const GOTW_PICK_KEY = "nutLeagueGotwPick_v1"; // which matchup is locked in as this week's Game of the Week
+const GOTW_PICK_KEY = "nutLeagueGotwPick_v1"; // local-mode fallback: which matchup is locked in as this week's Game of the Week
+
+// Shared, database-backed lock (Firebase mode): one immutable doc per season+week in the
+// "gotw_picks" collection, reusing the exact Firebase project/bridge that already powers FAAB
+// betting sync (see initFaabBettingSystem/window.__FAAB_FB). Populated by an onSnapshot listener
+// there, kept here so maybeComputeGameOfWeek() can read it synchronously. Without this, each
+// browser/device computed its own pick independently with zero synchronization, so the
+// "featured matchup" could genuinely disagree from one visitor's screen to another's as the
+// live inputs it's scored from (Power Scores, Playoff Odds, recent form) drifted over the week.
+let GOTW_REMOTE_PICKS = {}; // "season_week" -> {season, week, a, b, decidedAt}
+function gotwPickDocId(week){ return FAAB_CURRENT_SEASON + "_" + week; }
 
 // renderMatchups() calls this at its own end (so a freshly-drawn grid immediately
 // picks up which card should carry the "Game of the Week" ribbon), and this function
@@ -4402,6 +4412,10 @@ let GOTW_COMPUTE_IN_PROGRESS = false;
 
 function maybeComputeGameOfWeek(){
   if(GOTW_COMPUTE_IN_PROGRESS) return;
+  // Wait for Firebase betting sync to resolve one way or the other (same signal the betting
+  // panel itself waits on) so every visitor -- Firebase-backed or not -- locks in a pick from
+  // the same starting point instead of a local guess that might later get overridden.
+  if(FAAB_FIREBASE_ENABLED === null) return;
   if(!LAST_MATCHUPS || !LAST_MATCHUPS.usedLive) return;
   if(!ALL_PLAYERS || !Array.isArray(RIVALRY_HISTORY) || !PLAYOFF_ODDS || !HEAD_TO_HEAD || Object.keys(POWER_SCORES).length === 0) return;
 
@@ -4418,16 +4432,19 @@ function maybeComputeGameOfWeek(){
     // rest of that week -- its displayed score/breakdown still updates live as games
     // play out, but this function (called from several independent async data loads)
     // no longer reconsiders WHICH matchup to feature every time it reruns. Only a real
-    // week change is allowed to pick a fresh one. This used to go through a "storage"
-    // object this static site never actually provides, so the lock never engaged and a
-    // fresh (and, thanks to the playoff-odds simulation's randomness, sometimes
-    // different) pick got made on every reload -- localStorage is what's really
-    // available in a browser, same as the FAAB ledger already uses.
+    // week change is allowed to pick a fresh one. When Firebase betting sync is configured,
+    // that lock is shared (read from gotw_picks below) so every visitor agrees; otherwise it
+    // falls back to this browser's own localStorage, same as the FAAB ledger already uses.
+    const useRemote = FAAB_FIREBASE_ENABLED === true;
     let saved = null;
-    try{
-      const raw = localStorage.getItem(GOTW_PICK_KEY);
-      if(raw) saved = JSON.parse(raw);
-    }catch(e){ /* private browsing, quota, etc. -- just pick fresh below */ }
+    if(useRemote){
+      saved = GOTW_REMOTE_PICKS[gotwPickDocId(week)] || null;
+    } else {
+      try{
+        const raw = localStorage.getItem(GOTW_PICK_KEY);
+        if(raw) saved = JSON.parse(raw);
+      }catch(e){ /* private browsing, quota, etc. -- just pick fresh below */ }
+    }
 
     if(saved && saved.week === week){
       const existing = findScored(saved.a, saved.b);
@@ -4442,8 +4459,12 @@ function maybeComputeGameOfWeek(){
 
     let pick = scored[0];
     // Avoid repeating the same franchise as LAST week's featured matchup, if a
-    // comparably-scored alternative exists this week.
-    const lastTeams = saved ? [saved.a, saved.b] : [];
+    // comparably-scored alternative exists this week. In remote mode, prefer the shared
+    // store's record of last week's pick over this browser's own memory of it, so the
+    // tie-break agrees across browsers too; fall back to `saved` when the shared history
+    // doesn't reach back that far (e.g. right after this collection was first introduced).
+    const lastRef = useRemote ? (GOTW_REMOTE_PICKS[gotwPickDocId(week - 1)] || saved) : saved;
+    const lastTeams = lastRef ? [lastRef.a, lastRef.b] : [];
     for(let i=1; i<scored.length; i++){
       const candidate = scored[i];
       const gap = pick.total - candidate.total;
@@ -4452,7 +4473,23 @@ function maybeComputeGameOfWeek(){
       if(pickRepeats && !candidateRepeats && gap <= 6) pick = candidate;
     }
     GOTW_PICK = pick;
-    try{ localStorage.setItem(GOTW_PICK_KEY, JSON.stringify({week: week, a: pick.a, b: pick.b})); }catch(e){ /* still works for the rest of this session */ }
+
+    if(useRemote){
+      // First writer wins: gotw_picks is create-only/immutable (see security rules), one doc
+      // per season+week. If another browser's write lands first, Firestore rejects this one
+      // and the shared onSnapshot listener (initFaabBettingSystem) delivers the authoritative
+      // pick moments later, re-running this function so this browser converges onto the same
+      // matchup as everyone else instead of staying stuck on its own losing guess.
+      const docId = gotwPickDocId(week);
+      const payload = {season: FAAB_CURRENT_SEASON, week: week, a: pick.a, b: pick.b, decidedAt: new Date().toISOString()};
+      GOTW_REMOTE_PICKS[docId] = payload; // optimistic cache so this tab doesn't flicker while the write is in flight
+      FAAB_FB.setDoc(FAAB_FB.doc(FAAB_FB.db, "gotw_picks", docId), payload).catch(function(){
+        // Lost the race, or offline -- harmless; the shared listener corrects this automatically.
+      });
+    } else {
+      try{ localStorage.setItem(GOTW_PICK_KEY, JSON.stringify({week: week, a: pick.a, b: pick.b})); }catch(e){ /* still works for the rest of this session */ }
+    }
+
     renderGameOfWeek(pick, week);
     if(LAST_MATCHUPS) renderMatchups(LAST_MATCHUPS.week, LAST_MATCHUPS.pairs, LAST_MATCHUPS.usedLive);
   } finally {
@@ -7833,6 +7870,7 @@ function initFaabBettingSystem(){
     FAAB_FIREBASE_ENABLED = false;
     renderBettingPanel();
     settleAllPendingWagers();
+    maybeComputeGameOfWeek(); // was blocked waiting on this resolving -- try again now
   }
 
   function goFirebase(){
@@ -7858,7 +7896,16 @@ function initFaabBettingSystem(){
       FAAB_MEMBERS = obj;
       renderBettingPanel();
     });
+    // Shared Game of the Week lock -- see maybeComputeGameOfWeek(). Small collection (one doc
+    // per week per season), so the whole thing is kept in memory just like the other three.
+    FAAB_FB.onSnapshot(FAAB_FB.collection(FAAB_FB.db, "gotw_picks"), function(snap){
+      const obj = {};
+      snap.docs.forEach(function(d){ obj[d.id] = d.data(); });
+      GOTW_REMOTE_PICKS = obj;
+      maybeComputeGameOfWeek();
+    });
     renderBettingPanel();
+    maybeComputeGameOfWeek(); // was blocked waiting on this resolving -- try again now
   }
 
   window.addEventListener("faab-firebase-ready", goFirebase, {once: true});
