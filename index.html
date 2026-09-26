@@ -5698,7 +5698,18 @@ const TROPHY_CASE_OWNER_BG = {
   "959226991016816640": "owner-trophy-case-seahawks-2.webp", // Love Hurts (KShrewsberry) -- Seattle Seahawks case (mural version)
   "996196287416528896": "owner-trophy-case-sounders.webp",   // Lickety Splitz Squad (twillie391) -- Seattle Sounders case
   "996183312672669696": "owner-trophy-case-cwu.webp",        // Points Against Champion (PAHTNAH) -- Central Washington University case
-  "996196931028389888": "owner-trophy-case-michigan.webp"    // The OG Champ (JeffPeterson20) -- Michigan Wolverines case
+  "996196931028389888": "owner-trophy-case-michigan.webp",   // The OG Champ (JeffPeterson20) -- Michigan Wolverines case
+  "996390324501024768": "owner-trophy-case-seahawks-3.webp"  // The Many-Faced Squad (CamWells16) -- Seattle Seahawks case (shelf-mural version)
+};
+
+// Per-owner override for the 2 desktop shelf-line positions (bottom %, top to bottom), for a
+// skin whose own art doesn't land on owner-trophy-case.webp's shared 46.4%/11.35% template.
+// Measured pixel-for-pixel against each skin's own 1983x793 art the same way as the mobile
+// override below; left/right spotlight x-positions still matched SHELF1_LIGHTS/SHELF2_LIGHTS
+// closely enough to reuse unchanged. Owners not listed here keep the shared
+// .td-trophy-shelf-1/-2 CSS positions.
+const DESKTOP_TROPHY_CASE_SHELF_OVERRIDE = {
+  "996390324501024768": [35.94, 13.24] // The Many-Faced Squad -- Seattle Seahawks case (shelf-mural version)
 };
 
 // Mobile counterparts of the above -- same 4-shelf/2-light-per-shelf vertical template as
@@ -5747,6 +5758,11 @@ function renderTrophyCase(ownerId){
     document.getElementById("tdmTrophyShelf4")
   ];
   if(!shelf1 || !shelf2) return;
+
+  // Empty string falls back to the shared .td-trophy-shelf-1/-2 CSS positions.
+  const deskShelfOverride = DESKTOP_TROPHY_CASE_SHELF_OVERRIDE[ownerId];
+  shelf1.style.bottom = deskShelfOverride ? deskShelfOverride[0] + "%" : "";
+  shelf2.style.bottom = deskShelfOverride ? deskShelfOverride[1] + "%" : "";
 
   const bgImg = document.getElementById("tdTrophyCaseBg");
   if(bgImg) bgImg.src = TROPHY_CASE_OWNER_BG[ownerId] || "owner-trophy-case.webp";
