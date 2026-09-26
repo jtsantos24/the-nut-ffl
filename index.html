@@ -2315,7 +2315,7 @@
   <div class="section" id="section-teams">
     <div class="panel teams-hero-panel" id="teamsPanel">
       <h2 class="panel-title sr-only">Teams</h2>
-      <div class="teams-media">
+      <div class="teams-media" id="teamsMedia">
         <picture>
           <source media="(max-width:640px)" srcset="teams-banner-mobile.webp">
           <img class="teams-header-img" src="teams-banner.webp" alt="Teams &mdash; JSN Your Face, Breece &amp; Desist, Points Against Champion, Prestige Worldwide, Lickety Splitz Squad, The OG Champ, Love Hurts, White Center Rats, The Many-Faced Squad, Gus Swayze&rsquo;s Squad, Price is wrong Bitch!, Boom Goes The Dynamite">
@@ -5898,7 +5898,10 @@ function loadPlayoffBrackets(){
 function showTeamDetail(teamName){
   const t = TEAMS.find(function(x){ return x.team === teamName; });
   if(!t) return;
-  document.getElementById("teamsGrid").style.display = "none";
+  // Hide the whole banner (background art + avatar overlay), not just the overlay -- hiding only
+  // teamsGrid left the chalkboard artwork with its now-avatar-less card slots sitting above the
+  // profile, which read as "the other teams' avatars vanished" rather than a real page change.
+  document.getElementById("teamsMedia").style.display = "none";
   const detail = document.getElementById("teamDetail");
   detail.classList.add("active");
   document.getElementById("tdImg").src = t.avatar;
@@ -6229,7 +6232,7 @@ function goToSection(section, skipPush){
   const target = document.getElementById("section-" + section);
   if(target) target.classList.add("active");
   document.getElementById("teamDetail").classList.remove("active");
-  document.getElementById("teamsGrid").style.display = "";
+  document.getElementById("teamsMedia").style.display = "";
   if(!skipPush){
     safeHistoryPush({section: section}, "#" + section);
   }
@@ -6258,7 +6261,7 @@ document.getElementById("teamDetailBack").addEventListener("click", function(){
     try{ history.back(); return; }catch(e){ HISTORY_ENABLED = false; }
   }
   document.getElementById("teamDetail").classList.remove("active");
-  document.getElementById("teamsGrid").style.display = "";
+  document.getElementById("teamsMedia").style.display = "";
 });
 
 document.querySelectorAll(".navlinks button[data-section]").forEach(function(btn){
