@@ -5708,7 +5708,18 @@ const TROPHY_CASE_OWNER_BG = {
 // trophy-case-mobile.webp.
 const MOBILE_TROPHY_CASE_OWNER_BG = {
   "995923308459745280": "trophy-case-mobile-bills.webp", // JSN Your Face (BillsMafia1480) -- Buffalo Bills case
-  "996183312672669696": "trophy-case-mobile-cwu.webp"    // Points Against Champion (PAHTNAH) -- Central Washington University case
+  "996183312672669696": "trophy-case-mobile-cwu.webp",   // Points Against Champion (PAHTNAH) -- Central Washington University case
+  "996196931028389888": "trophy-case-mobile-michigan.webp" // The OG Champ (JeffPeterson20) -- Michigan Wolverines case
+};
+
+// Per-owner override for the 4 mobile shelf-line positions (bottom %, top to bottom), for a
+// skin whose own art doesn't land on trophy-case-mobile.webp's shared template. Measured
+// pixel-for-pixel against owner-trophy-case-mobile-michigan.webp's own 1024x1536 art: its
+// left/right spotlights still sit at the same x-positions as MOBILE_SHELF_LIGHTS (so those are
+// reused unchanged), but its 4 shelf ledges sit at different heights than the shared template,
+// so this owner gets its own vertical positions instead of the .tdm-shelf-1..4 CSS defaults.
+const MOBILE_TROPHY_CASE_SHELF_OVERRIDE = {
+  "996196931028389888": [66.08, 42.77, 21.42, 6.38] // The OG Champ -- Michigan Wolverines case
 };
 
 // Drops one trophy per championship or runner-up season onto the trophy case shelves,
@@ -5769,8 +5780,11 @@ function renderTrophyCase(ownerId){
   // top shelf left-to-right before moving down to the next one ----
   if(mShelves[0]){
     const perShelf = MOBILE_SHELF_LIGHTS.length;
+    const shelfOverride = MOBILE_TROPHY_CASE_SHELF_OVERRIDE[ownerId];
     mShelves.forEach(function(shelfEl, i){
       if(!shelfEl) return;
+      // Empty string falls back to the shared .tdm-shelf-1..4 CSS positions.
+      shelfEl.style.bottom = shelfOverride ? shelfOverride[i] + "%" : "";
       const chunk = trophies.slice(i * perShelf, (i + 1) * perShelf);
       shelfEl.innerHTML = chunk.map(function(tr, j){
         const cls = "tdm-trophy" + (tr.type === "champion" ? "" : " tdm-trophy-runnerup");
