@@ -769,6 +769,32 @@
   .team-card .tname{font-size:15px; font-weight:600;}
   .team-card .tmgr{font-size:12px; color:var(--chalk-dim); margin-top:2px;}
 
+  /* ---- Teams hero variant: teams-banner.webp (1295x1215) bakes in a 4x3 grid of chalkboard
+     cards, each already showing its team name and manager name, leaving one empty chalkboard
+     box per card for the roster avatar -- same overlay technique as the other hero banners.
+     Slots are numbered 1-12 in the image's own reading order (left-to-right, top-to-bottom),
+     which lines up exactly with FALLBACK_TEAMS' rosterId 1-12 order, so renderTeams() looks
+     each team up by rosterId (stable across seasons) rather than by array position. ---- */
+  .teams-hero-panel{position:relative; overflow:hidden; padding:0;}
+  .teams-media{position:relative; width:100%; aspect-ratio:1295/1215; overflow:hidden; background:#001a10;}
+  .teams-header-img{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;}
+  .teams-overlay{position:absolute; inset:0;}
+  .team-slot{position:absolute; overflow:hidden; border-radius:4px; cursor:pointer; background:#00121c;}
+  .team-slot img{width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.2s ease;}
+  .team-slot:hover img{transform:scale(1.07);}
+  .team-slot-1{left:7.57%; top:16.79%; width:13.51%; height:13.09%;}
+  .team-slot-2{left:31.43%; top:16.79%; width:13.59%; height:13.09%;}
+  .team-slot-3{left:55.37%; top:16.79%; width:13.90%; height:13.09%;}
+  .team-slot-4{left:79.23%; top:16.79%; width:13.51%; height:13.09%;}
+  .team-slot-5{left:7.57%; top:42.30%; width:13.51%; height:13.09%;}
+  .team-slot-6{left:31.43%; top:42.30%; width:13.59%; height:13.09%;}
+  .team-slot-7{left:55.37%; top:42.30%; width:13.90%; height:13.09%;}
+  .team-slot-8{left:79.23%; top:42.30%; width:13.51%; height:13.09%;}
+  .team-slot-9{left:7.57%; top:68.15%; width:13.51%; height:13.33%;}
+  .team-slot-10{left:31.43%; top:68.15%; width:13.59%; height:13.33%;}
+  .team-slot-11{left:55.37%; top:68.15%; width:13.90%; height:13.33%;}
+  .team-slot-12{left:79.23%; top:68.15%; width:13.51%; height:13.33%;}
+
   .team-detail{display:none; margin-top:20px;}
   .team-detail.active{display:block;}
   .team-detail-inner{display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;}
@@ -2194,9 +2220,12 @@
   </div>
 
   <div class="section" id="section-teams">
-    <div class="panel">
-      <h2 class="panel-title">Teams</h2>
-      <div class="teams-grid" id="teamsGrid"></div>
+    <div class="panel teams-hero-panel" id="teamsPanel">
+      <h2 class="panel-title sr-only">Teams</h2>
+      <div class="teams-media">
+        <img class="teams-header-img" src="teams-banner.webp" alt="Teams &mdash; JSN Your Face, Breece &amp; Desist, Points Against Champion, Prestige Worldwide, Lickety Splitz Squad, The OG Champ, Love Hurts, White Center Rats, The Many-Faced Squad, Gus Swayze&rsquo;s Squad, Price is wrong Bitch!, Boom Goes The Dynamite">
+        <div class="teams-overlay" id="teamsGrid"></div>
+      </div>
       <div class="team-detail" id="teamDetail">
         <button class="td-back" id="teamDetailBack">&larr; Back to all teams</button>
         <div class="team-detail-inner">
@@ -5353,16 +5382,20 @@ function loadRivalryHistory(){
 
 function renderTeams(){
   const grid = document.getElementById("teamsGrid");
-  grid.innerHTML = TEAMS.map(function(t){
-    return '<div class="team-card" data-team="' + t.team.replace(/"/g,'&quot;') + '">' +
-      '<img src="' + t.avatar + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
-      '<div class="tname">' + t.team + '</div>' +
-      '<div class="tmgr">' + t.manager + '</div>' +
+  // teams-banner.webp bakes in each card's name/manager text already, in a fixed 1-12 reading
+  // order (left-to-right, top-to-bottom) that matches FALLBACK_TEAMS' rosterId order -- so each
+  // slot looks its team up by rosterId (stable across seasons) rather than by array position,
+  // which the live Sleeper fetch doesn't guarantee.
+  grid.innerHTML = [1,2,3,4,5,6,7,8,9,10,11,12].map(function(rosterId){
+    const t = TEAMS.find(function(x){ return x.rosterId === rosterId; });
+    if(!t) return '';
+    return '<div class="team-slot team-slot-' + rosterId + '" data-team="' + t.team.replace(/"/g,'&quot;') + '">' +
+      '<img src="' + t.avatar + '" alt="' + t.team.replace(/"/g,'&quot;') + '" onerror="this.style.visibility=\'hidden\'"/>' +
     '</div>';
   }).join("");
-  const cards = grid.querySelectorAll(".team-card");
-  cards.forEach(function(card){
-    card.addEventListener("click", function(){ goToTeam(card.dataset.team); });
+  const slots = grid.querySelectorAll(".team-slot");
+  slots.forEach(function(slot){
+    slot.addEventListener("click", function(){ goToTeam(slot.dataset.team); });
   });
 }
 
