@@ -442,6 +442,44 @@
     .cd-num{font-size:17px;}
   }
 
+  /* ---- Key Dates hero variant: keydates-banner.webp (2166x726) bakes in the "Key Dates &
+     League Info" title plus each column's own label and date/week text on a 4-panel stadium
+     scoreboard, leaving 4 empty plaques per column for the countdown boxes -- same overlay
+     technique as the GOTW and Nutcast heroes. Only .keydate-countdown is overlaid; the panel
+     title and the per-item label/value text are hidden via sr-only since the art already shows
+     them. Each column's countdown reuses the exact same #cd-* ids and 4-box (D:H:M:S) markup the
+     existing JS renders -- .cd-colon is hidden here and, being display:none, is skipped entirely
+     by grid auto-placement, so the 4 real .cd-box elements land cleanly into the 4 grid columns
+     that line up with the art's 4 plaques. ---- */
+  .keydates-hero-panel{position:relative; overflow:hidden; padding:0;}
+  .keydates-media{position:relative; width:100%; aspect-ratio:2166/726; overflow:hidden; background:#001e42;}
+  .keydates-header-img{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;}
+  .keydates-overlay{position:absolute; inset:0;}
+  /* container-type lives on each column (not the whole panel) so cqw below scales off that
+     column's own ~18%-of-banner width, not the full banner width -- the columns are much
+     narrower than the panel, so sizing off the panel width made mobile numbers overflow their
+     boxes and collide. */
+  .keydates-col{position:absolute; top:65.84%; height:13.36%; container-type:inline-size;}
+  .keydates-col-draft{left:8.82%; width:17.96%;}
+  .keydates-col-trade{left:30.29%; width:18.05%;}
+  .keydates-col-rivalry{left:51.57%; width:17.64%;}
+  .keydates-col-playoffs{left:72.58%; width:18.14%;}
+  .keydates-overlay .keydate-countdown{
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:3.2%;
+    width:100%; height:100%; margin-top:0;
+  }
+  .keydates-overlay .cd-colon{display:none;}
+  .keydates-overlay .cd-box{
+    background:none; border:none; border-radius:0; padding:0; min-width:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .keydates-overlay .cd-num{font-size:clamp(8px, 15cqw, 22px);}
+  .keydates-overlay .cd-unit{font-size:clamp(4.5px, 5cqw, 9px);}
+  .keydates-overlay .cd-done{
+    grid-column:1 / -1; display:flex; align-items:center; justify-content:center; gap:4px;
+    font-size:clamp(7px, 9cqw, 15px); margin-top:0; text-align:center;
+  }
+
   .contact-section-card{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:6px;}
   .contact-section-card a{
     color:var(--chalk); font-size:13px; font-weight:500; text-decoration:none;
@@ -1729,31 +1767,18 @@
         <div class="nutcast-stage" id="nutcastHomeBody"><p class="nutcast-loading">Loading this week's episode&hellip;</p></div>
       </div>
     </div>
-    <div class="panel">
-      <h2 class="panel-title">Key Dates &amp; League Info</h2>
-      <div class="keydates-grid">
-        <div class="keydate-item has-countdown">
-          <div class="keydate-label">Draft Day</div>
-          <div class="keydate-value">May 2, 2027</div>
-          <div class="keydate-countdown" id="cd-draftDay"></div>
-        </div>
-        <div class="keydate-item has-countdown">
-          <div class="keydate-label">Trade Deadline</div>
-          <div class="keydate-value">Week 13</div>
-          <div class="keydate-countdown" id="cd-tradeDeadline"></div>
-        </div>
-        <div class="keydate-item has-countdown">
-          <div class="keydate-label">Rivalry Week</div>
-          <div class="keydate-value">Weeks 5 &amp; 10</div>
-          <div class="keydate-countdown" id="cd-rivalryWeek"></div>
-        </div>
-        <div class="keydate-item has-countdown">
-          <div class="keydate-label">Playoffs Begin</div>
-          <div class="keydate-value">Week 15</div>
-          <div class="keydate-countdown" id="cd-playoffsBegin"></div>
+    <div class="panel keydates-hero-panel" id="keyDatesPanel">
+      <h2 class="panel-title sr-only">Key Dates &amp; League Info</h2>
+      <div class="keydates-media">
+        <img class="keydates-header-img" src="keydates-banner.webp" alt="Key Dates &amp; League Info &mdash; Draft Day May 2, 2027, Trade Deadline Week 13, Rivalry Week Weeks 5 &amp; 10, Playoffs Begin Week 15">
+        <div class="keydates-overlay">
+          <div class="keydates-col keydates-col-draft"><div class="keydate-countdown" id="cd-draftDay"></div></div>
+          <div class="keydates-col keydates-col-trade"><div class="keydate-countdown" id="cd-tradeDeadline"></div></div>
+          <div class="keydates-col keydates-col-rivalry"><div class="keydate-countdown" id="cd-rivalryWeek"></div></div>
+          <div class="keydates-col keydates-col-playoffs"><div class="keydate-countdown" id="cd-playoffsBegin"></div></div>
         </div>
       </div>
-      <p class="const-note" style="margin-top:14px;">Full rules for all of the above live in the Constitution tab.</p>
+      <p class="const-note" style="margin:14px 16px 16px;">Full rules for all of the above live in the Constitution tab.</p>
     </div>
     <div class="panel gotw-panel" id="gotwPanel" style="display:none;">
       <h2 class="panel-title sr-only">🏆 Dynasty Game of the Week</h2>
