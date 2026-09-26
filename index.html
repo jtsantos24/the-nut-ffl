@@ -479,6 +479,18 @@
     grid-column:1 / -1; display:flex; align-items:center; justify-content:center; gap:4px;
     font-size:clamp(7px, 9cqw, 15px); margin-top:0; text-align:center;
   }
+  /* ---- Mobile variant: keydates-banner-mobile.webp (1024x1536) stacks the same 4 panels
+     vertically instead of side-by-side, so each column becomes a full-width row and its own
+     box band sits at a different top% down the tall image -- swapped in below 640px via the
+     <picture> source, same technique as the Nutcast mobile banner. ---- */
+  @media (max-width:640px){
+    .keydates-media{aspect-ratio:1024/1536;}
+    .keydates-col{left:23.73%; width:52.44%; height:5.08%;}
+    .keydates-col-draft{top:32.55%;}
+    .keydates-col-trade{top:51.04%; height:5.53%;}
+    .keydates-col-rivalry{top:69.66%; height:5.47%;}
+    .keydates-col-playoffs{top:88.41%; height:5.4%;}
+  }
 
   .contact-section-card{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:6px;}
   .contact-section-card a{
@@ -1770,7 +1782,10 @@
     <div class="panel keydates-hero-panel" id="keyDatesPanel">
       <h2 class="panel-title sr-only">Key Dates &amp; League Info</h2>
       <div class="keydates-media">
-        <img class="keydates-header-img" src="keydates-banner.webp" alt="Key Dates &amp; League Info &mdash; Draft Day May 2, 2027, Trade Deadline Week 13, Rivalry Week Weeks 5 &amp; 10, Playoffs Begin Week 15">
+        <picture>
+          <source media="(max-width:640px)" srcset="keydates-banner-mobile.webp">
+          <img class="keydates-header-img" src="keydates-banner.webp" alt="Key Dates &amp; League Info &mdash; Draft Day May 2, 2027, Trade Deadline Week 13, Rivalry Week Weeks 5 &amp; 10, Playoffs Begin Week 15">
+        </picture>
         <div class="keydates-overlay">
           <div class="keydates-col keydates-col-draft"><div class="keydate-countdown" id="cd-draftDay"></div></div>
           <div class="keydates-col keydates-col-trade"><div class="keydate-countdown" id="cd-tradeDeadline"></div></div>
