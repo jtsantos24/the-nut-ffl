@@ -794,6 +794,26 @@
   .team-slot-10{left:31.43%; top:68.15%; width:13.59%; height:13.33%;}
   .team-slot-11{left:55.37%; top:68.15%; width:13.90%; height:13.33%;}
   .team-slot-12{left:79.23%; top:68.15%; width:13.51%; height:13.33%;}
+  /* ---- Mobile variant: teams-banner-mobile.webp (1024x1536) rearranges the same 12 chalkboard
+     cards into a 3-column x 4-row portrait grid instead of 4x3, so every slot's position
+     changes -- swapped in below 640px via the <picture> source, same technique as the other
+     mobile banners. Reading order (and therefore the rosterId each slot maps to) is unchanged:
+     slot-1..12 still go left-to-right, top-to-bottom. ---- */
+  @media (max-width:640px){
+    .teams-media{aspect-ratio:1024/1536;}
+    .team-slot-1{left:9.38%; top:15.49%; width:19.34%; height:9.51%;}
+    .team-slot-2{left:40.53%; top:15.49%; width:18.95%; height:9.51%;}
+    .team-slot-3{left:71.39%; top:15.49%; width:19.14%; height:9.51%;}
+    .team-slot-4{left:9.38%; top:34.31%; width:19.34%; height:9.51%;}
+    .team-slot-5{left:40.53%; top:34.31%; width:18.95%; height:9.51%;}
+    .team-slot-6{left:71.39%; top:34.31%; width:19.14%; height:9.51%;}
+    .team-slot-7{left:9.38%; top:53.32%; width:19.34%; height:9.70%;}
+    .team-slot-8{left:40.53%; top:53.32%; width:18.95%; height:9.70%;}
+    .team-slot-9{left:71.39%; top:53.32%; width:19.14%; height:9.70%;}
+    .team-slot-10{left:9.38%; top:72.66%; width:19.34%; height:9.96%;}
+    .team-slot-11{left:40.53%; top:72.66%; width:18.95%; height:9.96%;}
+    .team-slot-12{left:71.39%; top:72.66%; width:19.14%; height:9.96%;}
+  }
 
   .team-detail{display:none; margin-top:20px;}
   .team-detail.active{display:block;}
@@ -2223,7 +2243,10 @@
     <div class="panel teams-hero-panel" id="teamsPanel">
       <h2 class="panel-title sr-only">Teams</h2>
       <div class="teams-media">
-        <img class="teams-header-img" src="teams-banner.webp" alt="Teams &mdash; JSN Your Face, Breece &amp; Desist, Points Against Champion, Prestige Worldwide, Lickety Splitz Squad, The OG Champ, Love Hurts, White Center Rats, The Many-Faced Squad, Gus Swayze&rsquo;s Squad, Price is wrong Bitch!, Boom Goes The Dynamite">
+        <picture>
+          <source media="(max-width:640px)" srcset="teams-banner-mobile.webp">
+          <img class="teams-header-img" src="teams-banner.webp" alt="Teams &mdash; JSN Your Face, Breece &amp; Desist, Points Against Champion, Prestige Worldwide, Lickety Splitz Squad, The OG Champ, Love Hurts, White Center Rats, The Many-Faced Squad, Gus Swayze&rsquo;s Squad, Price is wrong Bitch!, Boom Goes The Dynamite">
+        </picture>
         <div class="teams-overlay" id="teamsGrid"></div>
       </div>
       <div class="team-detail" id="teamDetail">
