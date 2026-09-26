@@ -778,41 +778,35 @@
   .teams-hero-panel{position:relative; overflow:hidden; padding:0;}
   .teams-media{position:relative; width:100%; aspect-ratio:1295/1215; overflow:hidden; background:#001a10;}
   .teams-header-img{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;}
-  .teams-overlay{position:absolute; inset:0;}
-  .team-slot{position:absolute; overflow:hidden; border-radius:4px; cursor:pointer; background:#00121c;}
-  .team-slot img{width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.2s ease;}
+  /* .teams-overlay is a CSS grid spanning just the 12-card region (measured from the art, not
+     the whole banner -- excludes the "TEAMS" title above and the grass strip below) with one
+     grid track per row/column, so each .team-slot is a full CARD-sized cell (auto-placed in DOM
+     order, which matches the image's own 1-12 reading order) rather than only the small avatar
+     box -- clicking anywhere on a card, including its name/manager text, opens that team's
+     profile, matching how the plain card grid used to behave before this hero redesign. The
+     avatar <img> is then positioned at the measured box position *within* its own cell. */
+  .teams-overlay{
+    position:absolute; left:2.32%; top:14.40%; width:95.44%; height:77.45%;
+    display:grid; grid-template-columns:repeat(4, 1fr); grid-template-rows:repeat(3, 1fr);
+  }
+  .team-slot{position:relative; cursor:pointer;}
+  .team-slot img{
+    position:absolute; left:22.2%; top:8.5%; width:57.3%; height:51.2%;
+    object-fit:cover; display:block; border-radius:4px; background:#00121c;
+    transition:transform 0.2s ease;
+  }
   .team-slot:hover img{transform:scale(1.07);}
-  .team-slot-1{left:7.57%; top:16.79%; width:13.51%; height:13.09%;}
-  .team-slot-2{left:31.43%; top:16.79%; width:13.59%; height:13.09%;}
-  .team-slot-3{left:55.37%; top:16.79%; width:13.90%; height:13.09%;}
-  .team-slot-4{left:79.23%; top:16.79%; width:13.51%; height:13.09%;}
-  .team-slot-5{left:7.57%; top:42.30%; width:13.51%; height:13.09%;}
-  .team-slot-6{left:31.43%; top:42.30%; width:13.59%; height:13.09%;}
-  .team-slot-7{left:55.37%; top:42.30%; width:13.90%; height:13.09%;}
-  .team-slot-8{left:79.23%; top:42.30%; width:13.51%; height:13.09%;}
-  .team-slot-9{left:7.57%; top:68.15%; width:13.51%; height:13.33%;}
-  .team-slot-10{left:31.43%; top:68.15%; width:13.59%; height:13.33%;}
-  .team-slot-11{left:55.37%; top:68.15%; width:13.90%; height:13.33%;}
-  .team-slot-12{left:79.23%; top:68.15%; width:13.51%; height:13.33%;}
   /* ---- Mobile variant: teams-banner-mobile.webp (1024x1536) rearranges the same 12 chalkboard
-     cards into a 3-column x 4-row portrait grid instead of 4x3, so every slot's position
-     changes -- swapped in below 640px via the <picture> source, same technique as the other
-     mobile banners. Reading order (and therefore the rosterId each slot maps to) is unchanged:
-     slot-1..12 still go left-to-right, top-to-bottom. ---- */
+     cards into a 3-column x 4-row portrait grid instead of 4x3 -- swapped in below 640px via the
+     <picture> source. Reading order (and therefore the rosterId each slot maps to) is unchanged:
+     slots still go left-to-right, top-to-bottom, so the grid just changes its track counts. ---- */
   @media (max-width:640px){
     .teams-media{aspect-ratio:1024/1536;}
-    .team-slot-1{left:9.38%; top:15.49%; width:19.34%; height:9.51%;}
-    .team-slot-2{left:40.53%; top:15.49%; width:18.95%; height:9.51%;}
-    .team-slot-3{left:71.39%; top:15.49%; width:19.14%; height:9.51%;}
-    .team-slot-4{left:9.38%; top:34.31%; width:19.34%; height:9.51%;}
-    .team-slot-5{left:40.53%; top:34.31%; width:18.95%; height:9.51%;}
-    .team-slot-6{left:71.39%; top:34.31%; width:19.14%; height:9.51%;}
-    .team-slot-7{left:9.38%; top:53.32%; width:19.34%; height:9.70%;}
-    .team-slot-8{left:40.53%; top:53.32%; width:18.95%; height:9.70%;}
-    .team-slot-9{left:71.39%; top:53.32%; width:19.14%; height:9.70%;}
-    .team-slot-10{left:9.38%; top:72.66%; width:19.34%; height:9.96%;}
-    .team-slot-11{left:40.53%; top:72.66%; width:18.95%; height:9.96%;}
-    .team-slot-12{left:71.39%; top:72.66%; width:19.14%; height:9.96%;}
+    .teams-overlay{
+      left:3.52%; top:13.87%; width:92.87%; height:76.89%;
+      grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(4, 1fr);
+    }
+    .team-slot img{left:19.2%; top:6.5%; width:61.8%; height:50.5%;}
   }
 
   .team-detail{display:none; margin-top:20px;}
@@ -5409,10 +5403,13 @@ function renderTeams(){
   // order (left-to-right, top-to-bottom) that matches FALLBACK_TEAMS' rosterId order -- so each
   // slot looks its team up by rosterId (stable across seasons) rather than by array position,
   // which the live Sleeper fetch doesn't guarantee.
+  // Each .team-slot is now a full grid cell sized to the whole card (not just the avatar box),
+  // auto-placed by CSS Grid in DOM order -- so the click target matches the whole visible card,
+  // the same as the plain card grid this hero banner replaced.
   grid.innerHTML = [1,2,3,4,5,6,7,8,9,10,11,12].map(function(rosterId){
     const t = TEAMS.find(function(x){ return x.rosterId === rosterId; });
     if(!t) return '';
-    return '<div class="team-slot team-slot-' + rosterId + '" data-team="' + t.team.replace(/"/g,'&quot;') + '">' +
+    return '<div class="team-slot" data-team="' + t.team.replace(/"/g,'&quot;') + '">' +
       '<img src="' + t.avatar + '" alt="' + t.team.replace(/"/g,'&quot;') + '" onerror="this.style.visibility=\'hidden\'"/>' +
     '</div>';
   }).join("");
