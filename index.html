@@ -1431,13 +1431,17 @@
   .nutcast-title-badge{display:inline-block; filter:drop-shadow(0 0 6px rgba(242,181,66,0.5));}
   .nutcast-loading{color:var(--chalk-dim); font-size:13px;}
 
-  /* ---- Home hero variant: nutcast-banner-desk.webp (2056x765) bakes in the whole on-air
-     desk scene and show title, leaving one empty desk-plate box for the live episode player,
-     positioned as a percentage of the banner the same way the GOTW hero and rivalry cards are.
-     Only the home panel (#nutcastHomePanel) gets this treatment -- the archive panel below
-     keeps its plain card layout since it lists every episode, not just the latest one. The
-     box is short relative to its width (a wide banner crop), so .nutcast-stage scrolls its
-     own content instead of forcing it to shrink past legibility on narrow phone widths. ---- */
+  /* ---- Home hero variant: nutcast-banner-desk.webp (2056x765, desktop) and
+     nutcast-banner-mobile.webp (1024x1536, swapped in below 640px via <picture>) each bake in
+     the same on-air desk scene and show title, leaving one empty desk-plate box for the live
+     episode player, positioned as a percentage of whichever banner is showing -- same
+     technique as the GOTW hero and rivalry cards. Only the home panel (#nutcastHomePanel)
+     gets this treatment -- the archive panel below keeps its plain card layout since it lists
+     every episode, not just the latest one. The desktop box is short relative to its width,
+     so the desktop rules below trim the player down (week-tag and transcript dropped, teaser
+     clamped) and .nutcast-stage scrolls as a safety net if content still runs long; the mobile
+     box (in the @media block further down) is much bigger relative to its own image, so it
+     keeps the full player untrimmed. ---- */
   .nutcast-hero-panel{position:relative; overflow:hidden; padding:0; container-type:inline-size;}
   .nutcast-media{position:relative; width:100%; aspect-ratio:2056/765; overflow:hidden; background:#0a0f16;}
   .nutcast-header-img{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;}
@@ -1520,27 +1524,25 @@
   @media (max-width:640px){
     .nutcast-player{padding:16px;}
     .nutcast-play-btn{width:100%; justify-content:center;}
-    /* The hero box (measured off the banner art) is only ~39px tall at phone widths --
-       physically too short for even a one-line player once you're honest about tap targets,
-       so below this breakpoint the player drops out of the image overlay entirely and back
-       into normal document flow as a plain card under the (now uncropped) banner image,
-       instead of trying to cram it into a box that's shrunk past usable. */
-    .nutcast-media{aspect-ratio:unset; height:auto; overflow:visible;}
-    .nutcast-header-img{position:static; width:100%; height:auto;}
-    .nutcast-stage{
-      position:static; width:100%; height:auto; max-height:none; overflow:visible;
-      padding:16px; box-sizing:border-box;
-      background:var(--surface-2); border:1px solid var(--line); border-top:none;
-      border-radius:0 0 var(--radius) var(--radius);
-    }
-    .nutcast-stage .nutcast-player-top{gap:14px;}
-    .nutcast-stage .nutcast-play-btn{width:100%; justify-content:center; padding:12px 20px; font-size:14px;}
-    .nutcast-stage .nutcast-episode-title{font-size:15px; text-shadow:none;}
-    .nutcast-stage .nutcast-teaser{font-size:12.5px; text-shadow:none; -webkit-line-clamp:unset;}
-    .nutcast-stage .nutcast-audio{height:32px;}
-    .nutcast-stage .nutcast-archive-link{font-size:12px;}
-    .nutcast-stage .nutcast-empty{text-shadow:none;}
-    .nutcast-stage .nutcast-loading{text-shadow:none;}
+    /* Below this breakpoint the <picture> source swaps to nutcast-banner-mobile.webp -- a
+       portrait (1024x1536) crop of the same set with a much bigger empty desk-plate box,
+       so the overlay treatment stays in place rather than dropping to a plain card. Position
+       and aspect-ratio are remeasured against that image; they're unrelated to the desktop
+       box's numbers above. */
+    .nutcast-media{aspect-ratio:1024/1536;}
+    .nutcast-stage{left:5.4%; top:45.1%; width:88.9%; height:49%; padding:2.6cqw 4cqw;}
+    .nutcast-stage .nutcast-player-top{gap:1.8cqw;}
+    .nutcast-stage .nutcast-play-btn{width:100%; justify-content:center; padding:2.2cqw 5cqw; font-size:clamp(13px, 3.8cqw, 16px);}
+    /* The mobile box has real room, so unlike the compact desktop view, week tag and
+       transcript stay -- nothing needs to be dropped to fit. */
+    .nutcast-stage .nutcast-week-tag{display:inline-block; font-size:clamp(9px, 2.6cqw, 11px); padding:2px 9px; margin-bottom:0.8cqw;}
+    .nutcast-stage .nutcast-episode-title{font-size:clamp(14px, 4.2cqw, 18px); margin-bottom:3px;}
+    .nutcast-stage .nutcast-teaser{font-size:clamp(11px, 3.2cqw, 13px); line-height:1.4; -webkit-line-clamp:3;}
+    .nutcast-stage .nutcast-audio{margin-top:1.6cqw; height:32px;}
+    .nutcast-stage .nutcast-archive-link{font-size:clamp(10px, 3cqw, 12px); margin-top:1.4cqw;}
+    .nutcast-stage .nutcast-transcript-toggle{display:block; font-size:clamp(10px, 3cqw, 12px); margin-top:1.4cqw;}
+    .nutcast-stage .nutcast-transcript{font-size:clamp(10px, 3cqw, 12px); margin-top:1.4cqw;}
+    .nutcast-stage .nutcast-transcript.open{display:block;}
   }
 
   /* ---------- RECAP ---------- */
@@ -1720,7 +1722,10 @@
     <div class="panel nutcast-panel nutcast-hero-panel" id="nutcastHomePanel">
       <h2 class="panel-title sr-only"><span class="nutcast-title-badge">🎙️</span> The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show</h2>
       <div class="nutcast-media">
-        <img class="nutcast-header-img" src="nutcast-banner-desk.webp" alt="The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show, live from the on-air desk">
+        <picture>
+          <source media="(max-width:640px)" srcset="nutcast-banner-mobile.webp">
+          <img class="nutcast-header-img" src="nutcast-banner-desk.webp" alt="The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show, live from the on-air desk">
+        </picture>
         <div class="nutcast-stage" id="nutcastHomeBody"><p class="nutcast-loading">Loading this week's episode&hellip;</p></div>
       </div>
     </div>
