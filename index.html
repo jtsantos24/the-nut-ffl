@@ -1430,6 +1430,51 @@
   }
   .nutcast-title-badge{display:inline-block; filter:drop-shadow(0 0 6px rgba(242,181,66,0.5));}
   .nutcast-loading{color:var(--chalk-dim); font-size:13px;}
+
+  /* ---- Home hero variant: nutcast-banner-desk.webp (2056x765) bakes in the whole on-air
+     desk scene and show title, leaving one empty desk-plate box for the live episode player,
+     positioned as a percentage of the banner the same way the GOTW hero and rivalry cards are.
+     Only the home panel (#nutcastHomePanel) gets this treatment -- the archive panel below
+     keeps its plain card layout since it lists every episode, not just the latest one. The
+     box is short relative to its width (a wide banner crop), so .nutcast-stage scrolls its
+     own content instead of forcing it to shrink past legibility on narrow phone widths. ---- */
+  .nutcast-hero-panel{position:relative; overflow:hidden; padding:0; container-type:inline-size;}
+  .nutcast-media{position:relative; width:100%; aspect-ratio:2056/765; overflow:hidden; background:#0a0f16;}
+  .nutcast-header-img{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;}
+  .nutcast-stage{
+    position:absolute; left:10.8%; top:52.7%; width:78.8%; height:33.1%;
+    overflow-y:auto; overflow-x:hidden; padding:1.2cqw 2.2cqw; box-sizing:border-box;
+    display:flex; flex-direction:column; justify-content:flex-start;
+  }
+  /* flex-start (not center) is deliberate: a centered flex box that overflows clips content
+     above the visible scroll area with no way to scroll up to it. Top-aligned keeps
+     everything reachable -- any overflow only ever falls below the fold, scrollable into view. */
+  .nutcast-stage::-webkit-scrollbar{width:5px;}
+  .nutcast-stage::-webkit-scrollbar-thumb{background:rgba(242,181,66,0.4); border-radius:3px;}
+  .nutcast-stage .nutcast-player{background:none; border:none; padding:0;}
+  .nutcast-stage .nutcast-player-top{gap:1.6cqw;}
+  .nutcast-stage .nutcast-play-btn{padding:1cqw 2.4cqw; font-size:clamp(10px, 2.2cqw, 14px); gap:0.8cqw; width:auto;}
+  /* Week tag is dropped here (not just hidden) -- it's redundant with the episode title, which
+     already reads "Week N: ...", and the row it saves is what makes the compact box fit. */
+  .nutcast-stage .nutcast-week-tag{display:none;}
+  .nutcast-stage .nutcast-episode-title{font-size:clamp(11px, 2.2cqw, 17px); margin-bottom:1px; text-shadow:0 1px 3px rgba(0,0,0,0.8);}
+  .nutcast-stage .nutcast-teaser{
+    font-size:clamp(9px, 1.6cqw, 12px); line-height:1.3; text-shadow:0 1px 3px rgba(0,0,0,0.8);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .nutcast-stage .nutcast-audio{margin-top:0.6cqw; height:22px;}
+  .nutcast-stage .nutcast-archive-link{font-size:clamp(9px, 1.5cqw, 11px); margin-top:0.5cqw;}
+  /* The transcript toggle/panel are dropped from this compact hero view entirely (not just
+     hidden-but-present) -- there's no room for the full transcript here, and it's one click
+     away in the archive tab, which keeps its own full-size, untouched transcript UI. */
+  .nutcast-stage .nutcast-transcript-toggle,
+  .nutcast-stage .nutcast-transcript{display:none;}
+  .nutcast-stage .nutcast-empty{
+    background:rgba(0,0,0,0.25); border:1px dashed rgba(255,255,255,0.3);
+    font-size:clamp(10px,2cqw,13px); padding:1.4cqw 2cqw; text-shadow:0 1px 3px rgba(0,0,0,0.8);
+  }
+  .nutcast-stage .nutcast-loading{font-size:clamp(10px,2cqw,13px); text-shadow:0 1px 3px rgba(0,0,0,0.8);}
+
   .nutcast-player{
     background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
     padding:20px 22px;
@@ -1475,6 +1520,27 @@
   @media (max-width:640px){
     .nutcast-player{padding:16px;}
     .nutcast-play-btn{width:100%; justify-content:center;}
+    /* The hero box (measured off the banner art) is only ~39px tall at phone widths --
+       physically too short for even a one-line player once you're honest about tap targets,
+       so below this breakpoint the player drops out of the image overlay entirely and back
+       into normal document flow as a plain card under the (now uncropped) banner image,
+       instead of trying to cram it into a box that's shrunk past usable. */
+    .nutcast-media{aspect-ratio:unset; height:auto; overflow:visible;}
+    .nutcast-header-img{position:static; width:100%; height:auto;}
+    .nutcast-stage{
+      position:static; width:100%; height:auto; max-height:none; overflow:visible;
+      padding:16px; box-sizing:border-box;
+      background:var(--surface-2); border:1px solid var(--line); border-top:none;
+      border-radius:0 0 var(--radius) var(--radius);
+    }
+    .nutcast-stage .nutcast-player-top{gap:14px;}
+    .nutcast-stage .nutcast-play-btn{width:100%; justify-content:center; padding:12px 20px; font-size:14px;}
+    .nutcast-stage .nutcast-episode-title{font-size:15px; text-shadow:none;}
+    .nutcast-stage .nutcast-teaser{font-size:12.5px; text-shadow:none; -webkit-line-clamp:unset;}
+    .nutcast-stage .nutcast-audio{height:32px;}
+    .nutcast-stage .nutcast-archive-link{font-size:12px;}
+    .nutcast-stage .nutcast-empty{text-shadow:none;}
+    .nutcast-stage .nutcast-loading{text-shadow:none;}
   }
 
   /* ---------- RECAP ---------- */
@@ -1651,9 +1717,12 @@
 <div class="wrap">
 
   <div class="section active" id="section-home">
-    <div class="panel nutcast-panel" id="nutcastHomePanel">
-      <h2 class="panel-title"><span class="nutcast-title-badge">🎙️</span> The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show</h2>
-      <div id="nutcastHomeBody"><p class="nutcast-loading">Loading this week's episode&hellip;</p></div>
+    <div class="panel nutcast-panel nutcast-hero-panel" id="nutcastHomePanel">
+      <h2 class="panel-title sr-only"><span class="nutcast-title-badge">🎙️</span> The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show</h2>
+      <div class="nutcast-media">
+        <img class="nutcast-header-img" src="nutcast-banner-desk.webp" alt="The Nutcast &mdash; Duke &ldquo;The Nutcracker&rdquo; Callahan Weekly Recap Show, live from the on-air desk">
+        <div class="nutcast-stage" id="nutcastHomeBody"><p class="nutcast-loading">Loading this week's episode&hellip;</p></div>
+      </div>
     </div>
     <div class="panel">
       <h2 class="panel-title">Key Dates &amp; League Info</h2>
