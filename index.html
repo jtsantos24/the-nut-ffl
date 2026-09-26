@@ -1176,6 +1176,16 @@
      .matchup-team-name, .matchup-team-record and .matchup-vs below are also used by the separate
      Weekly Recap cards (renderRecap) -- left completely untouched so this redesign doesn't affect
      that section. */
+  .matchups-hero-panel{position:relative;}
+  @media (min-width:641px){
+    /* Everything in this panel (header banner + row cards) scales off the panel's own width via
+       aspect-ratio and cqw-based font sizing, so letting the panel itself break out wider than the
+       site's normal 1080px reading column is what makes the whole cartoon scoreboard render larger
+       on desktop -- no other section is affected. */
+    .matchups-hero-panel{
+      left:50%; width:min(96vw, 1400px); max-width:none; transform:translateX(-50%);
+    }
+  }
   .matchups-header-media{
     position:relative; width:100%; aspect-ratio:1536/214; overflow:hidden;
     border-radius:var(--radius); margin-bottom:16px; background:#04122c; container-type:inline-size;
