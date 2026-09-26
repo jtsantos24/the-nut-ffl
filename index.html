@@ -451,7 +451,11 @@
      existing JS renders -- .cd-colon is hidden here and, being display:none, is skipped entirely
      by grid auto-placement, so the 4 real .cd-box elements land cleanly into the 4 grid columns
      that line up with the art's 4 plaques. ---- */
-  .keydates-hero-panel{position:relative; overflow:hidden; padding:0;}
+  /* Double-class selector so this reliably wins over the base .panel{padding:24px 26px} rule
+     regardless of source order (equal-specificity single-class selectors would otherwise let
+     whichever is declared later in the stylesheet win, which is what let the padding leak back
+     in and show as a navy gap around the banner art). */
+  .panel.keydates-hero-panel{position:relative; overflow:hidden; padding:0;}
   .keydates-media{position:relative; width:100%; aspect-ratio:2166/726; overflow:hidden; background:#001e42;}
   .keydates-header-img{position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:cover;}
   .keydates-overlay{position:absolute; inset:0;}
