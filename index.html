@@ -1163,12 +1163,73 @@
 
   .footer-note{font-size:12px; color:var(--chalk-faint); text-align:center; margin-top:14px;}
 
-  /* ---------- MATCHUPS ---------- */
-  .matchup-card{
-    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
-    padding:18px 20px; margin-bottom:13px; position:relative; box-shadow:var(--shadow-soft);
+  /* ---------- MATCHUPS ----------
+     Hero redesign: matchup-header.webp (1536x214, the "WEEK ___ MATCHUPS" title/stadium banner,
+     shown once above the list) and matchup-row.webp (1536x130, one blue-vs-red neon scoreboard
+     row, cropped from the same source and reused as the background for every matchup card,
+     however many there are that week) -- same overlay technique as the other hero banners, just
+     applied to a repeatable per-item background instead of a single fixed image. Only the week
+     number and the team logo/name/record/score overlays are dynamic; "VS" and the neon frame are
+     baked into matchup-row.webp. Avg-vs-them and all-time head-to-head text don't have a baked-in
+     slot in the art, so they move to a plain caption line below the row image instead of being
+     stacked under the name (unchanged data, just repositioned). NOTE: .matchup-side,
+     .matchup-team-name, .matchup-team-record and .matchup-vs below are also used by the separate
+     Weekly Recap cards (renderRecap) -- left completely untouched so this redesign doesn't affect
+     that section. */
+  .matchups-header-media{
+    position:relative; width:100%; aspect-ratio:1536/214; overflow:hidden;
+    border-radius:var(--radius); margin-bottom:16px; background:#04122c; container-type:inline-size;
   }
-  .matchup-top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+  .matchups-header-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
+  .matchups-week-num{
+    position:absolute; left:42.12%; top:34.11%; width:9.11%; height:35.05%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Teko', sans-serif; font-weight:700; color:var(--gold-bright);
+    font-size:clamp(16px, 11cqw, 34px); text-shadow:0 0 10px rgba(242,181,66,0.6);
+  }
+
+  .matchup-card{position:relative; margin-bottom:16px;}
+  .matchup-card.is-gotw .mu-row-media{box-shadow:0 0 0 2px var(--gold), 0 0 26px -6px rgba(242,181,66,0.55); border-radius:8px;}
+  .gotw-badge{
+    position:absolute; top:-11px; left:18px; z-index:2; background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;
+    font-size:10px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;
+    padding:4px 11px; border-radius:999px; box-shadow:0 4px 10px -2px rgba(242,181,66,0.5);
+  }
+  .mu-row-media{position:relative; width:100%; aspect-ratio:1536/130; overflow:hidden; container-type:inline-size; background:#0a1730;}
+  .mu-row-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
+  .mu-logo{position:absolute; top:17.7%; height:66.2%; border-radius:6px; object-fit:cover; background:#00121c;}
+  .mu-logo-l{left:5.2%; width:6.3%;}
+  .mu-logo-r{left:88.5%; width:6.3%;}
+  .mu-name{
+    position:absolute; top:20%; height:30%; display:flex; align-items:center;
+    font-weight:700; font-size:clamp(9px, 4.6cqw, 16px); line-height:1.1;
+    overflow:hidden; padding:0 1.2%;
+  }
+  /* The visible text sits in a nested block-level span so long names truncate with an
+     ellipsis instead of silently clipping a character -- text-overflow:ellipsis only
+     reliably applies to a block's own text, not a flex container's direct text content. */
+  .mu-name > span{display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .mu-name-l{left:13.3%; width:21%; color:#a9deff; justify-content:flex-start;}
+  .mu-name-l > span{text-align:left;}
+  .mu-name-r{left:65.7%; width:21%; color:#ffb3b3; justify-content:flex-end;}
+  .mu-name-r > span{text-align:right;}
+  .mu-record{
+    position:absolute; top:59.2%; height:28.5%; display:flex; align-items:center; justify-content:center;
+    font-family:'Teko', sans-serif; font-size:clamp(9px, 3.8cqw, 15px); color:var(--chalk-dim);
+  }
+  .mu-record-l{left:13.5%; width:10.6%;}
+  .mu-record-r{left:75.9%; width:10.6%;}
+  .mu-score{
+    position:absolute; top:29.2%; height:42.3%; display:flex; align-items:center; justify-content:center;
+    font-family:'Teko', sans-serif; font-size:clamp(16px, 10cqw, 34px); color:var(--gold);
+  }
+  .mu-score-l{left:37.3%; width:7.4%;}
+  .mu-score-r{left:55.3%; width:7.4%;}
+  .mu-score.leading{color:var(--gold-bright); text-shadow:0 0 10px rgba(242,181,66,0.5);}
+  .mu-score.trailing{color:var(--chalk-dim);}
+
+  .matchup-extra{margin-top:8px; padding:0 2px;}
+  .matchup-avg-row{display:flex; justify-content:space-between; gap:10px;}
   .matchup-side{display:flex; align-items:center; gap:10px; flex:1; min-width:180px;}
   .matchup-side.right{justify-content:flex-end; text-align:right;}
   .matchup-side img{width:38px; height:38px; border-radius:8px; object-fit:cover; flex-shrink:0; border:1px solid var(--line-soft);}
@@ -1180,12 +1241,12 @@
   .matchup-score.trailing{color:var(--chalk-dim);}
   .matchup-mid{display:flex; flex-direction:column; align-items:center; gap:2px;}
   .matchup-vs{font-family:'Teko', sans-serif; font-size:16px; color:var(--chalk-faint);}
-  .matchup-h2h{margin-top:12px; padding-top:12px; border-top:1px solid var(--line-soft); font-size:11px; color:var(--chalk-dim); text-align:center;}
-  .matchup-card.is-gotw{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold), 0 0 26px -8px rgba(242,181,66,0.4); position:relative;}
-  .gotw-badge{
-    position:absolute; top:-11px; left:18px; background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;
-    font-size:10px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;
-    padding:4px 11px; border-radius:999px; box-shadow:0 4px 10px -2px rgba(242,181,66,0.5);
+  .matchup-h2h{margin-top:6px; font-size:11px; color:var(--chalk-dim); text-align:center;}
+  @media (max-width:640px){
+    /* The name boxes baked into matchup-row.webp are a fixed 21% of the row's width, so on a
+       narrow phone screen they shrink to ~65-70px -- pull the font down further than the desktop
+       clamp allows so more of a long team name is legible before it ellipsizes. */
+    .mu-name{font-size:clamp(7px, 3.4cqw, 11px);}
   }
 
   /* ---------- PLAYOFF BRACKETS ---------- */
@@ -1854,8 +1915,12 @@
         </div>
       </div>
     </div>
-    <div class="panel">
-      <h2 class="panel-title" id="matchupsTitle">This Week's Matchups</h2>
+    <div class="panel matchups-hero-panel">
+      <h2 class="panel-title sr-only" id="matchupsTitle">This Week's Matchups</h2>
+      <div class="matchups-header-media">
+        <img class="matchups-header-img" src="matchup-header.webp" alt="Week Matchups &mdash; The Nut Fantasy Football League">
+        <div class="matchups-week-num" id="matchupsWeekNum"></div>
+      </div>
       <div class="status-banner" id="matchupsStatus">Loading live matchups from Sleeper&hellip;</div>
       <div id="matchupsGrid"></div>
     </div>
@@ -2794,6 +2859,7 @@ let CURRENT_NFL_WEEK = null; // in-progress week; excluded from all-time stats u
 function renderMatchups(week, pairsWithScores, usedLive){
   LAST_MATCHUPS = {week: week, pairs: pairsWithScores, usedLive: usedLive};
   document.getElementById("matchupsTitle").textContent = "Week " + week + " Matchups";
+  document.getElementById("matchupsWeekNum").textContent = week;
   document.getElementById("matchupsStatus").textContent = usedLive
     ? "Live from Sleeper."
     : "Showing the Week 1 schedule (live Sleeper fetch was blocked by the browser).";
@@ -2821,27 +2887,27 @@ function renderMatchups(week, pairsWithScores, usedLive){
         h2hHtml = '<div class="matchup-h2h">All-time: first meeting</div>';
       }
     }
+    // Neither the "avg vs them" line nor the all-time head-to-head line has a baked-in slot in
+    // matchup-row.webp (it only has room for name/record/score) -- they're shown as a plain
+    // caption underneath the hero row image instead, same data as before, just repositioned.
+    let extraHtml = "";
+    if(aAvgHtml || bAvgHtml) extraHtml += '<div class="matchup-avg-row">' + aAvgHtml + bAvgHtml + '</div>';
+    extraHtml += h2hHtml;
 
     return '<div class="matchup-card' + (isGotw ? ' is-gotw' : '') + '">' +
       (isGotw ? '<div class="gotw-badge">\u2605 Game of the Week</div>' : '') +
-      '<div class="matchup-top-row">' +
-        '<div class="matchup-side">' +
-          '<img src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
-          '<div><div class="matchup-team-name">' + (a.team||'Team '+m.a) + '</div>' +
-          '<div class="matchup-team-record">' + (a.wins||0) + '-' + (a.losses||0) + '</div>' + aAvgHtml + '</div>' +
-        '</div>' +
-        '<div class="matchup-mid">' +
-          '<div class="matchup-score ' + (aLead ? 'leading' : (bLead ? 'trailing' : '')) + '">' + aScore + '</div>' +
-          '<div class="matchup-vs">VS</div>' +
-          '<div class="matchup-score ' + (bLead ? 'leading' : (aLead ? 'trailing' : '')) + '">' + bScore + '</div>' +
-        '</div>' +
-        '<div class="matchup-side right">' +
-          '<div><div class="matchup-team-name">' + (b.team||'Team '+m.b) + '</div>' +
-          '<div class="matchup-team-record">' + (b.wins||0) + '-' + (b.losses||0) + '</div>' + bAvgHtml + '</div>' +
-          '<img src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
-        '</div>' +
+      '<div class="mu-row-media">' +
+        '<img class="mu-row-bg" src="matchup-row.webp" alt="">' +
+        '<img class="mu-logo mu-logo-l" src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div class="mu-name mu-name-l"><span>' + (a.team||'Team '+m.a) + '</span></div>' +
+        '<div class="mu-record mu-record-l">' + (a.wins||0) + '-' + (a.losses||0) + '</div>' +
+        '<div class="mu-score mu-score-l ' + (aLead ? 'leading' : (bLead ? 'trailing' : '')) + '">' + aScore + '</div>' +
+        '<div class="mu-score mu-score-r ' + (bLead ? 'leading' : (aLead ? 'trailing' : '')) + '">' + bScore + '</div>' +
+        '<div class="mu-record mu-record-r">' + (b.wins||0) + '-' + (b.losses||0) + '</div>' +
+        '<div class="mu-name mu-name-r"><span>' + (b.team||'Team '+m.b) + '</span></div>' +
+        '<img class="mu-logo mu-logo-r" src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
       '</div>' +
-      h2hHtml +
+      (extraHtml ? '<div class="matchup-extra">' + extraHtml + '</div>' : '') +
     '</div>';
   }).join("");
 
