@@ -1779,15 +1779,24 @@
     margin-top:8px; padding:0 2px; font-size:13px; color:var(--chalk-dim); line-height:1.65;
   }
   .recap-summary .recap-flourish{color:var(--gold-dark); font-style:italic;}
+  /* ---- Mobile variant: recap-header-mobile.webp / recap-row-mobile.webp (1024x300 /
+     1024x204) redraw the same banner in portrait, swapped in below 640px via the <picture>
+     sources on both the header image and each card's row background -- same technique as the
+     Nutcast/Key Dates/Teams mobile banners. The portrait row layout drops the small stat box
+     next to FINAL entirely (just avatar, name, FINAL, name, avatar), so .recap-score has nowhere
+     to go here either -- it's hidden below, same reasoning as .recap-record above. The score
+     isn't lost, though: it's still in the prose line in .recap-summary underneath. ---- */
   @media (max-width:640px){
-    /* Same fix as .mu-name in the Matchups redesign: the name/score boxes baked into
-       recap-row.webp are a fixed percentage of the row's width, so on a narrow phone screen they
-       shrink to a sliver -- pull the fonts down further than the desktop clamp allows. */
-    .recap-name{font-size:clamp(7px, 3.4cqw, 11px);}
-    /* A score like "100.0" is 5 characters -- at the desktop clamp's 15px floor it overflows this
-       narrow stat box and gets center-clipped by .recap-score's overflow:hidden, so pull it down
-       further here too. */
-    .recap-score{font-size:clamp(7px, 3.2cqw, 8px);}
+    .recap-header-media{aspect-ratio:1024/300;}
+    .recap-week-num{left:43.46%; top:49.67%; width:12.7%; height:24%;}
+    .recap-row-media{aspect-ratio:1024/204;}
+    .recap-logo{top:14.71%; height:68.63%;}
+    .recap-logo-l{left:5.47%; width:9.38%;}
+    .recap-logo-r{left:85.55%; width:8.79%;}
+    .recap-name{top:14.71%; height:68.63%; font-size:clamp(7px, 3.4cqw, 11px);}
+    .recap-name-l{left:18.85%; width:21.39%;}
+    .recap-name-r{left:59.96%; width:21.19%;}
+    .recap-score{display:none;}
   }
 
   /* ---------- SORTABLE STANDINGS ---------- */
@@ -2003,7 +2012,10 @@
     <div class="panel recap-hero-panel">
       <h2 class="panel-title sr-only" id="recapTitle">Weekly Recap</h2>
       <div class="recap-header-media">
-        <img class="recap-header-img" src="recap-header.webp" alt="Week Recap &mdash; The Nut Fantasy Football League">
+        <picture>
+          <source media="(max-width:640px)" srcset="recap-header-mobile.webp">
+          <img class="recap-header-img" src="recap-header.webp" alt="Week Recap &mdash; The Nut Fantasy Football League">
+        </picture>
         <div class="recap-week-num" id="recapWeekNum"></div>
       </div>
       <div class="status-banner" id="recapStatus">Loading last week's results&hellip;</div>
@@ -3130,7 +3142,7 @@ function renderRecap(week, pairs, usedLive){
 
     return '<div class="recap-card">' +
       '<div class="recap-row-media">' +
-        '<img class="recap-row-bg" src="recap-row.webp" alt="">' +
+        '<picture><source media="(max-width:640px)" srcset="recap-row-mobile.webp"><img class="recap-row-bg" src="recap-row.webp" alt=""></picture>' +
         '<img class="recap-logo recap-logo-l' + (bWin ? ' loser' : '') + '" src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
         '<div class="recap-name recap-name-l"><span class="' + (aWin ? 'recap-winner-name' : '') + '">' + (a.team||'Team '+m.a) + '</span></div>' +
         '<div class="recap-record recap-record-l">' + (a.wins||0) + '-' + (a.losses||0) + '</div>' +
