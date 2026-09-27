@@ -1711,22 +1711,83 @@
   }
 
   /* ---------- RECAP ---------- */
-  .recap-card{
-    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius);
-    padding:18px 20px; margin-bottom:13px;
+  /* Same reusable-per-item hero-banner technique as the Matchups redesign: recap-row.webp is ONE
+     cropped row (avatar/name/record/score boxes plus a summary strip baked in below them), reused
+     as the background for however many recap cards render that week. "FINAL" and the neon frame
+     are baked into the art; only the week number and the dynamic logo/name/record/score/summary
+     content are overlaid. The old .recap-card/.recap-top-row/.recap-mid/.recap-final-tag/
+     .recap-margin rules this replaces were exclusive to this section (unlike .matchup-side etc,
+     which Matchups still uses), so nothing else depends on them. */
+  .recap-hero-panel{position:relative;}
+  .recap-header-media{
+    position:relative; width:100%; aspect-ratio:1536/204; overflow:hidden;
+    border-radius:var(--radius); margin-bottom:16px; background:#04122c; container-type:inline-size;
   }
-  .recap-top-row{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;}
-  .recap-card .matchup-side.loser{opacity:0.5;}
-  .recap-card .matchup-side.loser img{filter:grayscale(50%);}
+  .recap-header-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
+  .recap-week-num{
+    position:absolute; left:43.49%; top:35.29%; width:12.83%; height:34.31%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Teko', sans-serif; font-weight:700; color:var(--gold-bright);
+    font-size:clamp(16px, 9cqw, 30px); text-shadow:0 0 10px rgba(242,181,66,0.6);
+  }
+
+  .recap-card{position:relative; margin-bottom:16px;}
+  .recap-row-media{position:relative; width:100%; aspect-ratio:1536/136; overflow:hidden; container-type:inline-size; background:#0a1730;}
+  .recap-row-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
+  .recap-logo{position:absolute; top:6.62%; height:48.5%; border-radius:6px; object-fit:cover; background:#00121c;}
+  .recap-logo-l{left:3.65%; width:5.53%;}
+  .recap-logo-r{left:90.82%; width:5.53%;}
+  .recap-logo.loser{filter:grayscale(60%); opacity:0.6;}
+  .recap-name{
+    position:absolute; top:6.6%; height:26%; display:flex; align-items:center;
+    font-weight:700; font-size:clamp(9px, 4.4cqw, 15px); line-height:1.1;
+    overflow:hidden; padding:0 1.2%;
+  }
+  /* Nested block-level span so a long team name truncates with an ellipsis instead of clipping a
+     character -- same fix as the Matchups redesign's .mu-name (text-overflow:ellipsis doesn't
+     reliably apply to a flex container's direct text content). */
+  .recap-name > span{display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .recap-name-l{left:9.83%; width:21.35%; color:#a9deff;}
+  .recap-name-l > span{text-align:left;}
+  .recap-name-r{left:68.82%; width:21.35%; color:#ffb3b3;}
+  .recap-name-r > span{text-align:right;}
   .recap-winner-name{color:var(--gold-bright);}
-  .recap-mid{display:flex; flex-direction:column; align-items:center; gap:2px;}
-  .recap-final-tag{font-size:10px; letter-spacing:1.2px; color:var(--chalk-faint); text-transform:uppercase;}
+  .recap-record{
+    position:absolute; top:34.56%; height:21%; display:flex; align-items:center; justify-content:center;
+    font-family:'Teko', sans-serif; font-size:clamp(9px, 3.6cqw, 14px); color:var(--chalk-dim);
+  }
+  .recap-record-l{left:9.9%; width:9.77%;}
+  .recap-record-r{left:80.34%; width:9.77%;}
+  .recap-score{
+    position:absolute; top:13.24%; height:43%; display:flex; align-items:center; justify-content:center;
+    font-family:'Teko', sans-serif; font-size:clamp(15px, 9cqw, 32px); color:var(--gold);
+    overflow:hidden; white-space:nowrap;
+  }
+  .recap-score-l{left:36.85%; width:8.46%;}
+  .recap-score-r{left:54.62%; width:8.59%;}
+  .recap-score.leading{color:var(--gold-bright); text-shadow:0 0 10px rgba(242,181,66,0.5);}
+  .recap-score.trailing{color:var(--chalk-dim);}
+  /* The recap paragraph is real multi-sentence prose, not a short label, so unlike the other
+     overlays it does NOT sit inside the fixed-aspect-ratio row image: cqw-scaled text there
+     shrinks to the row's own height, which is only ~28px at mobile widths -- nowhere near enough
+     for a readable sentence. It renders as an ordinary block below the row instead (same idea as
+     the Matchups redesign's .matchup-extra caption), sized independently of the art so it stays
+     legible at every viewport width. The row's own decorative summary-strip background is left
+     unused/purely decorative. */
   .recap-summary{
-    margin-top:14px; padding-top:14px; border-top:1px solid var(--line-soft);
-    font-size:13px; color:var(--chalk-dim); line-height:1.65;
+    margin-top:8px; padding:0 2px; font-size:13px; color:var(--chalk-dim); line-height:1.65;
   }
   .recap-summary .recap-flourish{color:var(--gold-dark); font-style:italic;}
-  .recap-margin{font-size:11px; color:var(--chalk-dim); margin-top:2px;}
+  @media (max-width:640px){
+    /* Same fix as .mu-name in the Matchups redesign: the name/record boxes baked into
+       recap-row.webp are a fixed percentage of the row's width, so on a narrow phone screen they
+       shrink to a sliver -- pull the fonts down further than the desktop clamp allows. */
+    .recap-name{font-size:clamp(7px, 3.4cqw, 11px);}
+    .recap-record{font-size:clamp(7px, 2.8cqw, 10px);}
+    /* A score like "100.0" is 5 characters -- at the desktop clamp's 15px floor it overflows the
+       narrow score box and collides with its neighbor, so pull it down further here too. */
+    .recap-score{font-size:clamp(7px, 4.3cqw, 12px);}
+  }
 
   /* ---------- SORTABLE STANDINGS ---------- */
   th.sortable{cursor:pointer; user-select:none;}
@@ -1938,8 +1999,12 @@
       <div class="status-banner" id="matchupsStatus">Loading live matchups from Sleeper&hellip;</div>
       <div id="matchupsGrid"></div>
     </div>
-    <div class="panel">
-      <h2 class="panel-title" id="recapTitle">Weekly Recap</h2>
+    <div class="panel recap-hero-panel">
+      <h2 class="panel-title sr-only" id="recapTitle">Weekly Recap</h2>
+      <div class="recap-header-media">
+        <img class="recap-header-img" src="recap-header.webp" alt="Week Recap &mdash; The Nut Fantasy Football League">
+        <div class="recap-week-num" id="recapWeekNum"></div>
+      </div>
       <div class="status-banner" id="recapStatus">Loading last week's results&hellip;</div>
       <div id="recapGrid"></div>
     </div>
@@ -3005,6 +3070,7 @@ function buildRecapSummary(a, b, aPts, bPts, aTop, bTop, idx, flourish){
 
 function renderRecap(week, pairs, usedLive){
   document.getElementById("recapTitle").textContent = week > 0 ? ("Week " + week + " Recap") : "Weekly Recap";
+  document.getElementById("recapWeekNum").textContent = week > 0 ? week : "";
 
   const grid = document.getElementById("recapGrid");
   const statusEl = document.getElementById("recapStatus");
@@ -3062,22 +3128,16 @@ function renderRecap(week, pairs, usedLive){
     const summary = buildRecapSummary(a, b, aPts, bPts, aTop, bTop, idx, flourish);
 
     return '<div class="recap-card">' +
-      '<div class="recap-top-row">' +
-      '<div class="matchup-side' + (bWin ? ' loser' : '') + '">' +
-        '<img src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
-        '<div><div class="matchup-team-name' + (aWin ? ' recap-winner-name' : '') + '">' + (a.team||'Team '+m.a) + '</div>' +
-        '<div class="matchup-team-record">' + aPts.toFixed(1) + ' pts</div></div>' +
-      '</div>' +
-      '<div class="recap-mid">' +
-        '<div class="recap-final-tag">Final</div>' +
-        '<div class="matchup-vs">' + aPts.toFixed(1) + ' &ndash; ' + bPts.toFixed(1) + '</div>' +
-        '<div class="recap-margin">' + (margin === "0.0" ? "Tie" : "by " + margin) + '</div>' +
-      '</div>' +
-      '<div class="matchup-side right' + (aWin ? ' loser' : '') + '">' +
-        '<div><div class="matchup-team-name' + (bWin ? ' recap-winner-name' : '') + '">' + (b.team||'Team '+m.b) + '</div>' +
-        '<div class="matchup-team-record">' + bPts.toFixed(1) + ' pts</div></div>' +
-        '<img src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
-      '</div>' +
+      '<div class="recap-row-media">' +
+        '<img class="recap-row-bg" src="recap-row.webp" alt="">' +
+        '<img class="recap-logo recap-logo-l' + (bWin ? ' loser' : '') + '" src="' + (a.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
+        '<div class="recap-name recap-name-l"><span class="' + (aWin ? 'recap-winner-name' : '') + '">' + (a.team||'Team '+m.a) + '</span></div>' +
+        '<div class="recap-record recap-record-l">' + (a.wins||0) + '-' + (a.losses||0) + '</div>' +
+        '<div class="recap-score recap-score-l ' + (aWin ? 'leading' : (bWin ? 'trailing' : '')) + '">' + aPts.toFixed(1) + '</div>' +
+        '<div class="recap-score recap-score-r ' + (bWin ? 'leading' : (aWin ? 'trailing' : '')) + '">' + bPts.toFixed(1) + '</div>' +
+        '<div class="recap-record recap-record-r">' + (b.wins||0) + '-' + (b.losses||0) + '</div>' +
+        '<div class="recap-name recap-name-r"><span class="' + (bWin ? 'recap-winner-name' : '') + '">' + (b.team||'Team '+m.b) + '</span></div>' +
+        '<img class="recap-logo recap-logo-r' + (aWin ? ' loser' : '') + '" src="' + (b.avatar||'') + '" alt="" onerror="this.style.visibility=\'hidden\'"/>' +
       '</div>' +
       '<div class="recap-summary">' + summary + '</div>' +
     '</div>';
