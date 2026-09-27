@@ -1712,34 +1712,38 @@
 
   /* ---------- RECAP ---------- */
   /* Same reusable-per-item hero-banner technique as the Matchups redesign: recap-row.webp is ONE
-     cropped row (avatar/name/record/score boxes plus a summary strip baked in below them), reused
-     as the background for however many recap cards render that week. "FINAL" and the neon frame
-     are baked into the art; only the week number and the dynamic logo/name/record/score/summary
-     content are overlaid. The old .recap-card/.recap-top-row/.recap-mid/.recap-final-tag/
-     .recap-margin rules this replaces were exclusive to this section (unlike .matchup-side etc,
-     which Matchups still uses), so nothing else depends on them. */
+     cropped row (helmet/name/record/score boxes), reused as the background for however many recap
+     cards render that week. "FINAL" and the neon frame are baked into the art; only the week
+     number and the dynamic logo/name/record/score content are overlaid. This version's row art
+     (1672x129, 5 sample rows) has no baked-in summary strip like the first draft did, which suits
+     the .recap-summary-below-the-image layout already in place. The old .recap-card/.recap-top-row/
+     .recap-mid/.recap-final-tag/.recap-margin rules this replaces were exclusive to this section
+     (unlike .matchup-side etc, which Matchups still uses), so nothing else depends on them. */
   .recap-hero-panel{position:relative;}
   .recap-header-media{
-    position:relative; width:100%; aspect-ratio:1536/204; overflow:hidden;
+    position:relative; width:100%; aspect-ratio:1672/235; overflow:hidden;
     border-radius:var(--radius); margin-bottom:16px; background:#04122c; container-type:inline-size;
   }
   .recap-header-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
   .recap-week-num{
-    position:absolute; left:43.49%; top:35.29%; width:12.83%; height:34.31%;
+    position:absolute; left:43.24%; top:43.83%; width:12.86%; height:24.68%;
     display:flex; align-items:center; justify-content:center;
     font-family:'Teko', sans-serif; font-weight:700; color:var(--gold-bright);
-    font-size:clamp(16px, 9cqw, 30px); text-shadow:0 0 10px rgba(242,181,66,0.6);
+    font-size:clamp(16px, 7cqw, 26px); text-shadow:0 0 10px rgba(242,181,66,0.6);
   }
 
   .recap-card{position:relative; margin-bottom:16px;}
-  .recap-row-media{position:relative; width:100%; aspect-ratio:1536/136; overflow:hidden; container-type:inline-size; background:#0a1730;}
+  .recap-row-media{position:relative; width:100%; aspect-ratio:1672/129; overflow:hidden; container-type:inline-size; background:#0a1730;}
   .recap-row-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;}
-  .recap-logo{position:absolute; top:6.62%; height:48.5%; border-radius:6px; object-fit:cover; background:#00121c;}
-  .recap-logo-l{left:3.65%; width:5.53%;}
-  .recap-logo-r{left:90.82%; width:5.53%;}
+  /* The art's own helmet icon is a fixed decorative placeholder (same on every row); the real
+     team avatar is overlaid on top of it in the same slot, matching every other avatar-slot
+     treatment on the site (Teams, Matchups). */
+  .recap-logo{position:absolute; top:6.2%; height:82.17%; border-radius:50%; object-fit:cover; background:#00121c;}
+  .recap-logo-l{left:2.27%; width:6.88%;}
+  .recap-logo-r{left:90.85%; width:6.88%;}
   .recap-logo.loser{filter:grayscale(60%); opacity:0.6;}
   .recap-name{
-    position:absolute; top:6.6%; height:26%; display:flex; align-items:center;
+    position:absolute; top:6.6%; height:36%; display:flex; align-items:center;
     font-weight:700; font-size:clamp(9px, 4.4cqw, 15px); line-height:1.1;
     overflow:hidden; padding:0 1.2%;
   }
@@ -1747,24 +1751,30 @@
      character -- same fix as the Matchups redesign's .mu-name (text-overflow:ellipsis doesn't
      reliably apply to a flex container's direct text content). */
   .recap-name > span{display:block; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-  .recap-name-l{left:9.83%; width:21.35%; color:#a9deff;}
+  .recap-name-l{left:9.75%; width:24.46%; color:#a9deff;}
   .recap-name-l > span{text-align:left;}
-  .recap-name-r{left:68.82%; width:21.35%; color:#ffb3b3;}
+  .recap-name-r{left:65.73%; width:24.46%; color:#ffb3b3;}
   .recap-name-r > span{text-align:right;}
   .recap-winner-name{color:var(--gold-bright);}
   .recap-record{
-    position:absolute; top:34.56%; height:21%; display:flex; align-items:center; justify-content:center;
+    position:absolute; top:47.29%; height:34.88%; display:flex; align-items:center; justify-content:center;
     font-family:'Teko', sans-serif; font-size:clamp(9px, 3.6cqw, 14px); color:var(--chalk-dim);
   }
-  .recap-record-l{left:9.9%; width:9.77%;}
-  .recap-record-r{left:80.34%; width:9.77%;}
+  .recap-record-l{left:9.75%; width:12.8%;}
+  .recap-record-r{left:76.2%; width:14%;}
+  /* This row art has a decorative second pill next to the record box on each side (a plain empty
+     bar with no obvious purpose -- left over from the template) that an early measurement pass
+     mistook for the score box, since it's a similarly-shaped bar in roughly the same area. The
+     real score sits in the taller hexagonal box further in, flanking the baked-in FINAL badge --
+     confirmed with a zoomed grid overlay against the source art. The decorative pill is left
+     unused/empty, same as the v1 art's unused summary strip. */
   .recap-score{
-    position:absolute; top:13.24%; height:43%; display:flex; align-items:center; justify-content:center;
+    position:absolute; top:31.78%; display:flex; align-items:center; justify-content:center;
     font-family:'Teko', sans-serif; font-size:clamp(15px, 9cqw, 32px); color:var(--gold);
     overflow:hidden; white-space:nowrap;
   }
-  .recap-score-l{left:36.85%; width:8.46%;}
-  .recap-score-r{left:54.62%; width:8.59%;}
+  .recap-score-l{left:37.32%; width:7.12%; height:55.04%;}
+  .recap-score-r{left:55.08%; width:7.78%; height:56.59%;}
   .recap-score.leading{color:var(--gold-bright); text-shadow:0 0 10px rgba(242,181,66,0.5);}
   .recap-score.trailing{color:var(--chalk-dim);}
   /* The recap paragraph is real multi-sentence prose, not a short label, so unlike the other
@@ -1784,9 +1794,10 @@
        shrink to a sliver -- pull the fonts down further than the desktop clamp allows. */
     .recap-name{font-size:clamp(7px, 3.4cqw, 11px);}
     .recap-record{font-size:clamp(7px, 2.8cqw, 10px);}
-    /* A score like "100.0" is 5 characters -- at the desktop clamp's 15px floor it overflows the
-       narrow score box and collides with its neighbor, so pull it down further here too. */
-    .recap-score{font-size:clamp(7px, 4.3cqw, 12px);}
+    /* This art's score hexagon is narrower than v1's score box, so a value like "100.0" (5
+       characters) needs a smaller ceiling here than the other mobile overrides above, or it
+       overflows the box and gets center-clipped by .recap-score's overflow:hidden. */
+    .recap-score{font-size:clamp(7px, 3.2cqw, 8px);}
   }
 
   /* ---------- SORTABLE STANDINGS ---------- */
