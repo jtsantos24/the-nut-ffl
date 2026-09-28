@@ -1512,6 +1512,7 @@
     width:100%; box-sizing:border-box; background:var(--surface-3); border:1px solid var(--line); color:var(--chalk); font:inherit; font-size:13.5px;
     padding:9px 11px; border-radius:var(--radius-sm); resize:vertical;
   }
+  .proposal-new-form textarea{font-size:14.5px; line-height:1.55; min-height:150px;}
   .proposal-new-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:14px;}
   .proposal-new-actions button{font:inherit; font-size:13px; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid var(--line); background:var(--surface-3); color:var(--chalk-dim);}
   .proposal-new-actions button.primary{background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304; border-color:var(--gold-dark); font-weight:700;}
@@ -1523,8 +1524,8 @@
   .proposal-title{font-size:16px; font-weight:700; color:var(--chalk); margin:0;}
   .proposal-meta{display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--chalk-faint); flex-shrink:0; white-space:nowrap;}
   .proposal-meta img{width:20px; height:20px; border-radius:5px; object-fit:cover; border:1px solid var(--line-soft);}
-  .proposal-body{font-size:13px; color:var(--chalk-dim); line-height:1.6; margin:0 0 10px; white-space:pre-wrap;}
-  .proposal-body.is-clamped{display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+  .proposal-body{font-size:14.5px; color:var(--chalk); line-height:1.65; margin:0 0 12px; white-space:pre-wrap;}
+  .proposal-body.is-clamped{display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden;}
   .proposal-expand{font-size:11.5px; color:var(--gold-dark); cursor:pointer; text-decoration:underline; text-underline-offset:2px; border:none; background:none; padding:0; font-family:inherit; margin-bottom:12px; display:inline-block;}
 
   .proposal-votebar{display:flex; height:10px; border-radius:999px; overflow:hidden; background:var(--surface-3); margin-bottom:10px;}
@@ -2197,7 +2198,7 @@
         <label for="proposalTitleInput">Title</label>
         <input type="text" id="proposalTitleInput" maxlength="120" placeholder="e.g. Move the trade deadline to Week 11"/>
         <label for="proposalBodyInput">Details</label>
-        <textarea id="proposalBodyInput" maxlength="2000" rows="4" placeholder="Explain the proposal so everyone can vote informed&hellip;"></textarea>
+        <textarea id="proposalBodyInput" maxlength="2000" rows="7" placeholder="Explain the proposal so everyone can vote informed&hellip;"></textarea>
         <div class="proposal-new-actions">
           <button type="button" id="proposalCancelBtn">Cancel</button>
           <button type="button" id="proposalSubmitBtn" class="primary">Post Proposal</button>
@@ -8853,7 +8854,7 @@ function buildProposalCardHtml(p, identityTeam){
   const bodyText = p.body || "";
   const bodyHtml = !bodyText ? '' :
     '<p class="proposal-body is-clamped" id="' + bodyId + '">' + throneEscAttr(bodyText) + '</p>' +
-    (bodyText.length > 220 ? '<button type="button" class="proposal-expand" data-expand-target="' + bodyId + '">Read more</button>' : '');
+    (bodyText.length > 350 ? '<button type="button" class="proposal-expand" data-expand-target="' + bodyId + '">Read more</button>' : '');
 
   const actionsHtml = !identityTeam ? '' :
     '<div class="proposal-vote-actions">' +
