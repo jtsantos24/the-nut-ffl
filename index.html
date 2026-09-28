@@ -909,6 +909,9 @@
   .alltime-summary .num.bl-pos{color:var(--green);}
   .alltime-summary .num.bl-neg{color:var(--red);}
   .alltime-summary .lbl{font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--chalk-faint); margin-top:3px;}
+  .alltime-rank{font-size:11px; color:var(--gold-dark); font-weight:600; margin-top:2px;}
+  .season-finish{color:var(--chalk-dim);}
+  .season-finish.is-best{color:var(--gold-bright); font-weight:700;}
   .titles-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
   .title-badge{background:var(--gold-soft); color:var(--gold-bright); border:1px solid rgba(242,181,66,0.35); border-radius:999px; padding:4px 11px; font-size:12px; font-weight:600;}
   .runnerup-badge{background:rgba(139,147,168,0.1); color:var(--chalk-dim); border:1px solid var(--line); border-radius:999px; padding:4px 11px; font-size:12px;}
@@ -6289,6 +6292,50 @@ function renderTrophyCase(ownerId){
   }
 }
 
+// 1st/2nd/3rd/4th... -- standard English ordinal suffix. League size is fixed at 12 today,
+// but this doesn't assume that; it just formats whatever rank number it's given.
+function ordinalSuffix(n){
+  const rem100 = n % 100;
+  if(rem100 >= 11 && rem100 <= 13) return n + "th";
+  switch(n % 10){
+    case 1: return n + "st";
+    case 2: return n + "nd";
+    case 3: return n + "rd";
+    default: return n + "th";
+  }
+}
+
+// Ranks every owner's points for a single season, highest first, purely by reading
+// CAREER_STATS -- there are no rank numbers stored anywhere. That means the per-season
+// "Finish" column below updates itself automatically the moment a season's fpts figures
+// are corrected or a new season is appended to CAREER_STATS; nothing else needs touching.
+// Only owners who actually have an entry for that season count toward "of N", so a team
+// that's new to the league doesn't skew earlier seasons' totals.
+function seasonPointsRank(season, ownerId){
+  const rows = [];
+  Object.keys(CAREER_STATS).forEach(function(oid){
+    const s = CAREER_STATS[oid].seasons.find(function(x){ return x.season === season; });
+    if(s) rows.push({ownerId: oid, fpts: s.fpts});
+  });
+  rows.sort(function(a, b){ return b.fpts - a.fpts; });
+  const idx = rows.findIndex(function(r){ return r.ownerId === ownerId; });
+  return idx === -1 ? null : {rank: idx + 1, of: rows.length};
+}
+
+// Same self-updating idea as seasonPointsRank, but ranking every owner's career point total
+// (every recorded season's fpts summed together) against everyone else's, for the "Career
+// points" all-time rank shown in the summary tile. Teams with no recorded seasons yet (fpts
+// total of 0) aren't ranked at all, so a brand-new team doesn't show up as "last place".
+function careerPointsRank(ownerId){
+  const rows = Object.keys(CAREER_STATS).map(function(oid){
+    const total = CAREER_STATS[oid].seasons.reduce(function(sum, s){ return sum + s.fpts; }, 0);
+    return {ownerId: oid, total: total};
+  }).filter(function(r){ return r.total > 0; });
+  rows.sort(function(a, b){ return b.total - a.total; });
+  const idx = rows.findIndex(function(r){ return r.ownerId === ownerId; });
+  return idx === -1 ? null : {rank: idx + 1, of: rows.length};
+}
+
 function renderAllTime(ownerId){
   const el = document.getElementById("tdAllTime");
   const record = CAREER_STATS[ownerId];
@@ -6312,8 +6359,17 @@ function renderAllTime(ownerId){
     record.runnerUps.map(function(y){ return '<span class="runnerup-badge">' + y + ' Runner-up</span>'; }).join("");
 
   const rows = record.seasons.slice().reverse().map(function(s){
-    return '<tr><td>' + s.season + '</td><td>' + s.wins + '-' + s.losses + '</td><td>' + s.fpts.toFixed(1) + '</td></tr>';
+    const finish = seasonPointsRank(s.season, ownerId);
+    const finishLabel = finish ? ordinalSuffix(finish.rank) + ' of ' + finish.of : '—';
+    const finishCls = "season-finish" + (finish && finish.rank === 1 ? " is-best" : "");
+    return '<tr><td>' + s.season + '</td><td>' + s.wins + '-' + s.losses + '</td><td>' + s.fpts.toFixed(1) + '</td>' +
+      '<td class="' + finishCls + '">' + finishLabel + '</td></tr>';
   }).join("");
+
+  const careerRank = careerPointsRank(ownerId);
+  const careerRankHtml = careerRank
+    ? '<div class="alltime-rank">#' + careerRank.rank + ' of ' + careerRank.of + ' all-time</div>'
+    : '';
 
   el.innerHTML =
     '<div class="alltime-title">All-time record</div>' +
@@ -6321,10 +6377,10 @@ function renderAllTime(ownerId){
       '<div><div class="num">' + totals.wins + '-' + totals.losses + '</div><div class="lbl">Career record</div></div>' +
       '<div><div class="num">' + winPct + '%</div><div class="lbl">Win rate</div></div>' +
       '<div><div class="num">' + record.seasons.length + '</div><div class="lbl">Seasons</div></div>' +
-      '<div><div class="num">' + totals.fpts.toFixed(0) + '</div><div class="lbl">Career points</div></div>' +
+      '<div><div class="num">' + totals.fpts.toFixed(0) + '</div><div class="lbl">Career points</div>' + careerRankHtml + '</div>' +
     '</div>' +
     (badges ? '<div class="titles-row">' + badges + '</div>' : '') +
-    '<table class="season-history"><thead><tr><th>Season</th><th>Record</th><th>Points</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    '<table class="season-history"><thead><tr><th>Season</th><th>Record</th><th>Points</th><th>Finish</th></tr></thead><tbody>' + rows + '</tbody></table>';
 }
 
 function renderPlayoffHistory(ownerId){
