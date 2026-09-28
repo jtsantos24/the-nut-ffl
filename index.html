@@ -1495,6 +1495,88 @@
     .faab-ledger-cards{display:block;}
   }
 
+  /* ---------- LEAGUE PROPOSALS & VOTING ---------- */
+  .proposal-new-btn{
+    display:block; width:100%; text-align:center; font:inherit; font-size:13px; font-weight:700; letter-spacing:0.3px;
+    padding:12px; border-radius:var(--radius-sm); cursor:pointer; margin-bottom:16px;
+    border:1px solid var(--gold-dark); background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304;
+    transition:transform 0.15s, box-shadow 0.15s;
+  }
+  .proposal-new-btn:hover{transform:translateY(-2px); box-shadow:0 8px 18px -6px rgba(242,181,66,0.5);}
+  .proposal-new-form{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; margin-bottom:18px;
+  }
+  .proposal-new-form label{display:block; font-size:10.5px; letter-spacing:0.8px; text-transform:uppercase; color:var(--chalk-faint); margin:12px 0 6px;}
+  .proposal-new-form label:first-child{margin-top:0;}
+  .proposal-new-form input[type="text"], .proposal-new-form textarea{
+    width:100%; box-sizing:border-box; background:var(--surface-3); border:1px solid var(--line); color:var(--chalk); font:inherit; font-size:13.5px;
+    padding:9px 11px; border-radius:var(--radius-sm); resize:vertical;
+  }
+  .proposal-new-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:14px;}
+  .proposal-new-actions button{font:inherit; font-size:13px; padding:9px 16px; border-radius:8px; cursor:pointer; border:1px solid var(--line); background:var(--surface-3); color:var(--chalk-dim);}
+  .proposal-new-actions button.primary{background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304; border-color:var(--gold-dark); font-weight:700;}
+
+  .proposal-card{
+    background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; margin-bottom:14px; box-shadow:var(--shadow-soft);
+  }
+  .proposal-card-head{display:flex; align-items:flex-start; justify-content:space-between; gap:10px 16px; margin-bottom:8px; flex-wrap:wrap;}
+  .proposal-title{font-size:16px; font-weight:700; color:var(--chalk); margin:0;}
+  .proposal-meta{display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--chalk-faint); flex-shrink:0; white-space:nowrap;}
+  .proposal-meta img{width:20px; height:20px; border-radius:5px; object-fit:cover; border:1px solid var(--line-soft);}
+  .proposal-body{font-size:13px; color:var(--chalk-dim); line-height:1.6; margin:0 0 10px; white-space:pre-wrap;}
+  .proposal-body.is-clamped{display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+  .proposal-expand{font-size:11.5px; color:var(--gold-dark); cursor:pointer; text-decoration:underline; text-underline-offset:2px; border:none; background:none; padding:0; font-family:inherit; margin-bottom:12px; display:inline-block;}
+
+  .proposal-votebar{display:flex; height:10px; border-radius:999px; overflow:hidden; background:var(--surface-3); margin-bottom:10px;}
+  .proposal-votebar .yes{background:var(--green);}
+  .proposal-votebar .no{background:var(--red);}
+  .proposal-votebar .abstain{background:var(--chalk-faint);}
+  .proposal-vote-tally{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--chalk-dim); margin-bottom:14px;}
+  .proposal-vote-tally span.yes-dot::before{content:''; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--green); margin-right:5px;}
+  .proposal-vote-tally span.no-dot::before{content:''; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--red); margin-right:5px;}
+  .proposal-vote-tally span.abstain-dot::before{content:''; display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--chalk-faint); margin-right:5px;}
+
+  .proposal-vote-actions{display:flex; gap:8px; flex-wrap:wrap; padding-top:12px; border-top:1px solid var(--line-soft);}
+  .proposal-vote-btn{
+    font:inherit; font-size:12px; font-weight:700; letter-spacing:0.3px; padding:8px 16px; border-radius:999px; cursor:pointer;
+    border:1px solid var(--line); background:var(--surface-3); color:var(--chalk-dim); transition:transform 0.15s, box-shadow 0.15s;
+  }
+  .proposal-vote-btn:hover{transform:translateY(-2px);}
+  .proposal-vote-btn.yes.is-active{background:rgba(52,211,153,0.16); border-color:var(--green); color:var(--green);}
+  .proposal-vote-btn.no.is-active{background:var(--red-soft); border-color:var(--red); color:var(--red);}
+  .proposal-vote-btn.abstain.is-active{background:var(--surface-3); border-color:var(--chalk-faint); color:var(--chalk);}
+  .proposal-empty{text-align:center; padding:40px 20px; color:var(--chalk-dim);}
+  .proposal-empty .icon{font-size:34px; margin-bottom:10px;}
+
+  /* ---------- LEAGUE CHAT ---------- */
+  .chat-messages{
+    display:flex; flex-direction:column; gap:10px; max-height:520px; overflow-y:auto; padding:4px 2px 12px;
+    margin-bottom:14px; border-bottom:1px solid var(--line-soft);
+  }
+  .chat-msg{display:flex; gap:10px; align-items:flex-start;}
+  .chat-msg img{width:30px; height:30px; border-radius:8px; object-fit:cover; border:1px solid var(--line-soft); flex-shrink:0; margin-top:2px;}
+  .chat-msg-body{background:var(--surface-2); border:1px solid var(--line-soft); border-radius:var(--radius-sm); padding:8px 12px; min-width:0;}
+  .chat-msg.is-me .chat-msg-body{background:var(--gold-soft); border-color:rgba(242,181,66,0.3);}
+  .chat-msg-head{display:flex; align-items:baseline; gap:8px; margin-bottom:2px; flex-wrap:wrap;}
+  .chat-msg-team{font-size:12px; font-weight:700; color:var(--gold-dark);}
+  .chat-msg-time{font-size:10px; color:var(--chalk-faint);}
+  .chat-msg-text{font-size:13.5px; color:var(--chalk); line-height:1.5; word-break:break-word; white-space:pre-wrap;}
+  .chat-empty{text-align:center; padding:40px 20px; color:var(--chalk-dim);}
+  .chat-empty .icon{font-size:34px; margin-bottom:10px;}
+  .chat-composer{display:flex; gap:10px;}
+  .chat-composer input{
+    flex:1; box-sizing:border-box; background:var(--surface-3); border:1px solid var(--line); color:var(--chalk); font:inherit; font-size:13.5px;
+    padding:10px 13px; border-radius:999px;
+  }
+  .chat-composer button{
+    font:inherit; font-size:13px; font-weight:700; padding:10px 20px; border-radius:999px; cursor:pointer; border:1px solid var(--gold-dark);
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold-dark)); color:#1A1304; flex-shrink:0;
+  }
+  .chat-composer button:disabled{opacity:0.5; cursor:not-allowed;}
+  @media (max-width:640px){
+    .chat-messages{max-height:400px;}
+  }
+
   /* ---------- GAME OF THE WEEK HERO ---------- */
   .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
 
@@ -1906,6 +1988,8 @@
           <button data-section="power">Power Ranking Lines</button>
           <button data-section="schedule">Schedule / Matchups</button>
           <button data-section="rivalry">Rivalry Week</button>
+          <button data-section="proposals">Proposals &amp; Voting</button>
+          <button data-section="chat">League Chat</button>
         </div>
       </div>
     </div>
@@ -2091,6 +2175,60 @@
       <h2 class="panel-title">Schedule</h2>
       <p class="panel-sub" id="scheduleStatus">Loading the full season schedule from Sleeper&hellip;</p>
       <div id="scheduleList"></div>
+    </div>
+  </div>
+
+  <div class="section" id="section-proposals">
+    <div class="panel" id="proposalsPanel">
+      <h2 class="panel-title">📋 Proposals &amp; Voting</h2>
+      <p class="panel-sub">Float a rule change, trade veto, format tweak, or anything else the league should decide on. Every proposal and vote tally is visible to everyone.</p>
+      <div class="betting-sync-status" id="proposalsSyncStatus"></div>
+      <div class="betting-toolbar">
+        <div class="betting-identity">
+          <label for="proposalsIdentitySelect">Posting as</label>
+          <select id="proposalsIdentitySelect"><option value="">Loading teams&hellip;</option></select>
+        </div>
+      </div>
+      <div id="proposalsNoIdentity" class="betting-noident">Pick your team above to submit a proposal or cast a vote.</div>
+      <div id="proposalsMemberSetupNote" class="betting-noident" style="display:none;">This team hasn't been set up for the board yet &mdash; ask your commissioner to run the one-time setup step, then refresh.</div>
+
+      <button type="button" class="proposal-new-btn" id="proposalsNewBtn" style="display:none;">+ New Proposal</button>
+      <div class="proposal-new-form" id="proposalsNewForm" style="display:none;">
+        <label for="proposalTitleInput">Title</label>
+        <input type="text" id="proposalTitleInput" maxlength="120" placeholder="e.g. Move the trade deadline to Week 11"/>
+        <label for="proposalBodyInput">Details</label>
+        <textarea id="proposalBodyInput" maxlength="2000" rows="4" placeholder="Explain the proposal so everyone can vote informed&hellip;"></textarea>
+        <div class="proposal-new-actions">
+          <button type="button" id="proposalCancelBtn">Cancel</button>
+          <button type="button" id="proposalSubmitBtn" class="primary">Post Proposal</button>
+        </div>
+      </div>
+
+      <div id="proposalsList"></div>
+      <p class="const-note" style="margin-top:14px;" id="proposalsConstNote"></p>
+    </div>
+  </div>
+
+  <div class="section" id="section-chat">
+    <div class="panel" id="chatPanel">
+      <h2 class="panel-title">💬 League Chat</h2>
+      <p class="panel-sub">A shared, live chat for the whole league &mdash; talk trash, coordinate trades, or just say hi.</p>
+      <div class="betting-sync-status" id="chatSyncStatus"></div>
+      <div class="betting-toolbar">
+        <div class="betting-identity">
+          <label for="chatIdentitySelect">Chatting as</label>
+          <select id="chatIdentitySelect"><option value="">Loading teams&hellip;</option></select>
+        </div>
+      </div>
+      <div id="chatNoIdentity" class="betting-noident">Pick your team above to start chatting.</div>
+      <div id="chatMemberSetupNote" class="betting-noident" style="display:none;">This team hasn't been set up for the board yet &mdash; ask your commissioner to run the one-time setup step, then refresh.</div>
+
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-composer" id="chatComposer" style="display:none;">
+        <input type="text" id="chatInput" maxlength="500" placeholder="Say something to the league&hellip;" autocomplete="off"/>
+        <button type="button" id="chatSendBtn" class="primary">Send</button>
+      </div>
+      <p class="const-note" style="margin-top:14px;" id="chatConstNote"></p>
     </div>
   </div>
 
@@ -2486,6 +2624,7 @@ window.FIREBASE_CONFIG = {
     window.__FAAB_FB = {
       db: db,
       collection: fsMod.collection,
+      collectionGroup: fsMod.collectionGroup,
       doc: fsMod.doc,
       addDoc: fsMod.addDoc,
       setDoc: fsMod.setDoc,
@@ -8501,6 +8640,572 @@ function initFaabBettingSystem(){
   renderBettingPanel(); // render immediately in whatever state we're in so the panel isn't blank
 }
 
+// ---------- LEAGUE PROPOSALS & VOTING + LEAGUE CHAT ("The Board") ----------
+// Rides on the exact same Firebase project, LOCAL/FIREBASE dual-mode pattern, and per-team
+// passcode identity already built for FAAB Betting Lines above -- this is NOT a separate
+// backend or a separate identity. The same "who am I" team selection (FAAB_LOCAL_IDENTITY)
+// and the same cached passcode hash (faabCachedPasscodeHash/faabRememberPasscodeHash --
+// entered once anywhere on the site, remembered on that device) are reused as-is. A team
+// that's already been seeded for FAAB betting (faabSeedMembers()) is automatically seeded
+// for the board too, since it's the same faab_members collection.
+//
+// New Firestore collections (additive -- see the setup guide addendum for the security rules):
+//   proposals/{proposalId}                 -- one doc per proposal, immutable once created
+//   proposals/{proposalId}/votes/{ownerId}  -- one doc per team per proposal; doc ID = ownerId
+//                                               naturally enforces one vote per team, and a
+//                                               team can change its vote by voting again
+//   chat_messages/{messageId}               -- one doc per chat message, immutable once sent
+const BOARD_LOCAL_KEY = "nutLeagueBoardBook_v1"; // LOCAL-mode fallback only
+let BOARD_PROPOSALS = []; // Firebase mode: raw proposal docs (votes tracked separately below)
+                            // Local mode: each proposal object also carries its own .votes map
+let BOARD_VOTES_BY_PROPOSAL = {}; // Firebase mode only: proposalId -> {ownerId: {choice,team,votedAt}}
+let BOARD_CHAT = [];
+let BOARD_PENDING_ACTION = null;
+let BOARD_TOAST_TIMER = null;
+const BOARD_TITLE_MAX = 120;
+const BOARD_BODY_MAX = 2000;
+const BOARD_CHAT_MAX = 500;
+
+function boardLoadLocalBook(){
+  try{
+    const raw = localStorage.getItem(BOARD_LOCAL_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    BOARD_PROPOSALS = (parsed && Array.isArray(parsed.proposals)) ? parsed.proposals : [];
+    BOARD_CHAT = (parsed && Array.isArray(parsed.chat)) ? parsed.chat : [];
+  }catch(e){ BOARD_PROPOSALS = []; BOARD_CHAT = []; }
+}
+function boardSaveLocalBook(){
+  try{ localStorage.setItem(BOARD_LOCAL_KEY, JSON.stringify({proposals: BOARD_PROPOSALS, chat: BOARD_CHAT})); }catch(e){}
+}
+
+function boardVotesFor(proposalId){
+  if(FAAB_FIREBASE_ENABLED) return BOARD_VOTES_BY_PROPOSAL[proposalId] || {};
+  const p = BOARD_PROPOSALS.find(function(pr){ return pr.id === proposalId; });
+  return (p && p.votes) || {};
+}
+
+function boardChoiceLabel(c){ return c === "yes" ? "Yes" : c === "no" ? "No" : "Abstain"; }
+
+function boardFormatTimeAgo(iso){
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return "";
+  const diffMs = Date.now() - d.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if(mins < 1) return "just now";
+  if(mins < 60) return mins + "m ago";
+  const hours = Math.floor(mins / 60);
+  if(hours < 24) return hours + "h ago";
+  const days = Math.floor(hours / 24);
+  if(days < 7) return days + "d ago";
+  return d.toLocaleDateString(undefined, {month: "short", day: "numeric"});
+}
+
+function boardIdentityTeam(){
+  return FAAB_LOCAL_IDENTITY ? (TEAMS.find(function(t){ return t.ownerId === FAAB_LOCAL_IDENTITY; }) || null) : null;
+}
+
+function boardSetIdentity(ownerId){
+  FAAB_LOCAL_IDENTITY = ownerId || null;
+  try{ localStorage.setItem(FAAB_IDENTITY_KEY, FAAB_LOCAL_IDENTITY || ""); }catch(e){}
+  renderProposalsPanel();
+  renderChatPanel();
+}
+
+function populateBoardIdentitySelect(sel){
+  if(!sel) return;
+  const sorted = TEAMS.slice().sort(function(a, b){ return a.team.localeCompare(b.team); });
+  let optsHtml = '<option value="">Select your team&hellip;</option>';
+  sorted.forEach(function(t){
+    optsHtml += '<option value="' + throneEscAttr(t.ownerId) + '">' + throneEscAttr(t.team) + '</option>';
+  });
+  sel.innerHTML = optsHtml;
+  sel.value = FAAB_LOCAL_IDENTITY || "";
+  if(sel.dataset.wired !== "1"){
+    sel.dataset.wired = "1";
+    sel.addEventListener("change", function(){ boardSetIdentity(sel.value || null); });
+  }
+}
+
+// ---- shared passcode-entry modal + toast (independent DOM/state from the betting modal,
+// same visual language) ----
+function boardModalEl(){
+  let el = document.getElementById("boardModalBackdrop");
+  if(!el){
+    el = document.createElement("div");
+    el.className = "betting-modal-backdrop";
+    el.id = "boardModalBackdrop";
+    el.innerHTML = '<div class="betting-modal">' +
+      '<h3>Enter your passcode</h3>' +
+      '<p>Ask your commissioner if you don\'t have your team\'s passcode. It\'s remembered on this device afterward, and works the same as your FAAB Betting Lines passcode.</p>' +
+      '<label for="boardModalPasscode" class="betting-passcode-label">Passcode</label>' +
+      '<input type="password" id="boardModalPasscode" autocomplete="off" class="betting-passcode-input"/>' +
+      '<div class="betting-passcode-error" id="boardModalPasscodeError" style="display:none;"></div>' +
+      '<div class="betting-modal-actions">' +
+        '<button type="button" class="cancel" id="boardModalCancel">Cancel</button>' +
+        '<button type="button" class="confirm" id="boardModalConfirm">Continue</button>' +
+      '</div>' +
+    '</div>';
+    document.body.appendChild(el);
+    el.addEventListener("click", function(e){ if(e.target === el) hideBoardModal(); });
+    document.getElementById("boardModalCancel").addEventListener("click", hideBoardModal);
+    document.getElementById("boardModalConfirm").addEventListener("click", function(){
+      const ctx = BOARD_PENDING_ACTION;
+      if(!ctx) return;
+      const pcInput = document.getElementById("boardModalPasscode");
+      const raw = pcInput ? pcInput.value : "";
+      if(!raw){
+        const err = document.getElementById("boardModalPasscodeError");
+        err.textContent = "Enter your team's passcode.";
+        err.style.display = "block";
+        return;
+      }
+      hideBoardModal();
+      faabHashPasscode(raw).then(function(hash){
+        ctx.onHash(hash);
+      }).catch(function(){
+        showBoardToast("Your browser can't verify a passcode on this connection.");
+      });
+    });
+    const pcInputEl = document.getElementById("boardModalPasscode");
+    if(pcInputEl){
+      pcInputEl.addEventListener("keydown", function(e){
+        if(e.key === "Enter") document.getElementById("boardModalConfirm").click();
+      });
+    }
+  }
+  return el;
+}
+function hideBoardModal(){
+  const el = document.getElementById("boardModalBackdrop");
+  if(el) el.classList.remove("show");
+  BOARD_PENDING_ACTION = null;
+}
+function showBoardPasscodePrompt(onHash){
+  BOARD_PENDING_ACTION = {onHash: onHash};
+  const el = boardModalEl();
+  document.getElementById("boardModalPasscodeError").style.display = "none";
+  const pcInput = document.getElementById("boardModalPasscode");
+  if(pcInput) pcInput.value = "";
+  el.classList.add("show");
+  if(pcInput) setTimeout(function(){ pcInput.focus(); }, 50);
+}
+function boardToastEl(){
+  let el = document.getElementById("boardToast");
+  if(!el){
+    el = document.createElement("div");
+    el.className = "betting-toast";
+    el.id = "boardToast";
+    document.body.appendChild(el);
+  }
+  return el;
+}
+function showBoardToast(msg){
+  const el = boardToastEl();
+  el.textContent = msg;
+  el.classList.add("show");
+  if(BOARD_TOAST_TIMER) clearTimeout(BOARD_TOAST_TIMER);
+  BOARD_TOAST_TIMER = setTimeout(function(){ el.classList.remove("show"); }, 2600);
+}
+
+// The real gate is Firestore's own security rules (comparing this hash against the stored
+// hash on faab_members), exactly like FAAB betting -- runFn receives the hash to attach to
+// the write (or null in LOCAL mode, where there's no passcode at all).
+function boardRunGated(ownerId, runFn){
+  if(!FAAB_FIREBASE_ENABLED){ runFn(null); return; }
+  const cached = faabCachedPasscodeHash(ownerId);
+  if(cached){ runFn(cached); return; }
+  showBoardPasscodePrompt(function(hash){ runFn(hash); });
+}
+
+function boardMemberBlocked(identityTeam){
+  return !!(FAAB_FIREBASE_ENABLED && identityTeam && !FAAB_MEMBERS[identityTeam.ownerId]);
+}
+
+// ---- Proposals ----
+function buildProposalCardHtml(p, identityTeam){
+  const votes = boardVotesFor(p.id);
+  const authorTeam = TEAMS.find(function(t){ return t.ownerId === p.ownerId; });
+  let yes = 0, no = 0, abstain = 0;
+  Object.keys(votes).forEach(function(oid){
+    const v = votes[oid];
+    if(v.choice === "yes") yes++; else if(v.choice === "no") no++; else if(v.choice === "abstain") abstain++;
+  });
+  const total = yes + no + abstain;
+  const totalTeams = TEAMS.length;
+  const pct = function(n){ return total > 0 ? (n / total * 100) : 0; };
+  const myVote = identityTeam ? (votes[identityTeam.ownerId] || null) : null;
+
+  const barHtml = total === 0 ? '' :
+    '<div class="proposal-votebar">' +
+      (yes > 0 ? '<div class="yes" style="width:' + pct(yes) + '%"></div>' : '') +
+      (no > 0 ? '<div class="no" style="width:' + pct(no) + '%"></div>' : '') +
+      (abstain > 0 ? '<div class="abstain" style="width:' + pct(abstain) + '%"></div>' : '') +
+    '</div>';
+
+  const tallyHtml = '<div class="proposal-vote-tally">' +
+    '<span class="yes-dot">' + yes + ' Yes</span>' +
+    '<span class="no-dot">' + no + ' No</span>' +
+    '<span class="abstain-dot">' + abstain + ' Abstain</span>' +
+    '<span>' + total + ' of ' + totalTeams + ' teams voted</span>' +
+  '</div>';
+
+  const bodyId = "proposalBody_" + p.id;
+  const bodyText = p.body || "";
+  const bodyHtml = !bodyText ? '' :
+    '<p class="proposal-body is-clamped" id="' + bodyId + '">' + throneEscAttr(bodyText) + '</p>' +
+    (bodyText.length > 220 ? '<button type="button" class="proposal-expand" data-expand-target="' + bodyId + '">Read more</button>' : '');
+
+  const actionsHtml = !identityTeam ? '' :
+    '<div class="proposal-vote-actions">' +
+      '<button type="button" class="proposal-vote-btn yes' + (myVote && myVote.choice === "yes" ? ' is-active' : '') + '" data-vote="yes">👍 Yes</button>' +
+      '<button type="button" class="proposal-vote-btn no' + (myVote && myVote.choice === "no" ? ' is-active' : '') + '" data-vote="no">👎 No</button>' +
+      '<button type="button" class="proposal-vote-btn abstain' + (myVote && myVote.choice === "abstain" ? ' is-active' : '') + '" data-vote="abstain">🤷 Abstain</button>' +
+    '</div>';
+
+  return '<div class="proposal-card" data-proposal-id="' + throneEscAttr(p.id) + '">' +
+    '<div class="proposal-card-head">' +
+      '<h3 class="proposal-title">' + throneEscAttr(p.title) + '</h3>' +
+      '<div class="proposal-meta">' +
+        (authorTeam ? '<img src="' + throneEscAttr(authorTeam.avatar) + '" alt="">' : '') +
+        '<span>' + throneEscAttr(p.team) + ' &middot; ' + boardFormatTimeAgo(p.createdAt) + '</span>' +
+      '</div>' +
+    '</div>' +
+    bodyHtml +
+    barHtml +
+    tallyHtml +
+    actionsHtml +
+  '</div>';
+}
+
+function wireProposalCard(cardEl, identityTeam){
+  const proposalId = cardEl.dataset.proposalId;
+  const expandBtn = cardEl.querySelector(".proposal-expand");
+  if(expandBtn){
+    expandBtn.addEventListener("click", function(){
+      const body = document.getElementById(expandBtn.dataset.expandTarget);
+      if(body) body.classList.remove("is-clamped");
+      expandBtn.style.display = "none";
+    });
+  }
+  cardEl.querySelectorAll(".proposal-vote-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      if(!identityTeam) return;
+      if(boardMemberBlocked(identityTeam)){
+        showBoardToast("This team hasn't been set up for the board yet — ask your commissioner.");
+        return;
+      }
+      boardCastVote(proposalId, btn.dataset.vote);
+    });
+  });
+}
+
+function boardCastVote(proposalId, choice){
+  const identityTeam = boardIdentityTeam();
+  if(!identityTeam){ showBoardToast("Pick your team first."); return; }
+  boardRunGated(identityTeam.ownerId, function(hash){
+    const voteDoc = {choice: choice, team: identityTeam.team, votedAt: new Date().toISOString()};
+    if(!FAAB_FIREBASE_ENABLED){
+      const p = BOARD_PROPOSALS.find(function(pr){ return pr.id === proposalId; });
+      if(!p) return;
+      if(!p.votes) p.votes = {};
+      p.votes[identityTeam.ownerId] = voteDoc;
+      boardSaveLocalBook();
+      showBoardToast("Vote recorded: " + boardChoiceLabel(choice) + ".");
+      renderProposalsPanel();
+      return;
+    }
+    if(!hash){ showBoardToast("Enter your passcode first."); return; }
+    voteDoc.passcodeHash = hash;
+    FAAB_FB.setDoc(FAAB_FB.doc(FAAB_FB.db, "proposals", proposalId, "votes", identityTeam.ownerId), voteDoc).then(function(){
+      faabRememberPasscodeHash(identityTeam.ownerId, hash);
+      showBoardToast("Vote recorded: " + boardChoiceLabel(choice) + ".");
+    }).catch(function(err){
+      if(err && err.code === "permission-denied"){
+        faabForgetPasscodeHash(identityTeam.ownerId);
+        showBoardToast("Incorrect passcode — vote not recorded.");
+      } else {
+        showBoardToast("Couldn't reach the shared board — check your connection and try again.");
+      }
+    });
+  });
+}
+
+function showProposalForm(){
+  const form = document.getElementById("proposalsNewForm");
+  const btn = document.getElementById("proposalsNewBtn");
+  if(form) form.style.display = "block";
+  if(btn) btn.style.display = "none";
+  const t = document.getElementById("proposalTitleInput");
+  if(t) setTimeout(function(){ t.focus(); }, 30);
+}
+function hideProposalForm(){
+  const form = document.getElementById("proposalsNewForm");
+  const btn = document.getElementById("proposalsNewBtn");
+  if(form) form.style.display = "none";
+  if(btn) btn.style.display = boardIdentityTeam() ? "block" : "none";
+  const t = document.getElementById("proposalTitleInput");
+  const b = document.getElementById("proposalBodyInput");
+  if(t) t.value = "";
+  if(b) b.value = "";
+}
+
+function boardSubmitProposal(){
+  const identityTeam = boardIdentityTeam();
+  if(!identityTeam){ showBoardToast("Pick your team first."); return; }
+  if(boardMemberBlocked(identityTeam)){
+    showBoardToast("This team hasn't been set up for the board yet — ask your commissioner.");
+    return;
+  }
+  const titleInput = document.getElementById("proposalTitleInput");
+  const bodyInput = document.getElementById("proposalBodyInput");
+  const title = (titleInput.value || "").trim();
+  const body = (bodyInput.value || "").trim();
+  if(!title){ showBoardToast("Give your proposal a title."); return; }
+  if(title.length > BOARD_TITLE_MAX){ showBoardToast("Title's too long (max " + BOARD_TITLE_MAX + " characters)."); return; }
+  if(body.length > BOARD_BODY_MAX){ showBoardToast("Description's too long (max " + BOARD_BODY_MAX + " characters)."); return; }
+
+  const submitBtn = document.getElementById("proposalSubmitBtn");
+  if(submitBtn) submitBtn.disabled = true;
+  boardRunGated(identityTeam.ownerId, function(hash){
+    const proposal = {
+      ownerId: identityTeam.ownerId, team: identityTeam.team,
+      title: title, body: body, createdAt: new Date().toISOString(), status: "open"
+    };
+    if(!FAAB_FIREBASE_ENABLED){
+      proposal.id = "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      proposal.votes = {};
+      BOARD_PROPOSALS.unshift(proposal);
+      boardSaveLocalBook();
+      if(submitBtn) submitBtn.disabled = false;
+      hideProposalForm();
+      showBoardToast("Proposal posted.");
+      renderProposalsPanel();
+      return;
+    }
+    if(!hash){ if(submitBtn) submitBtn.disabled = false; showBoardToast("Enter your passcode first."); return; }
+    proposal.passcodeHash = hash;
+    FAAB_FB.addDoc(FAAB_FB.collection(FAAB_FB.db, "proposals"), proposal).then(function(){
+      faabRememberPasscodeHash(identityTeam.ownerId, hash);
+      if(submitBtn) submitBtn.disabled = false;
+      hideProposalForm();
+      showBoardToast("Proposal posted.");
+    }).catch(function(err){
+      if(submitBtn) submitBtn.disabled = false;
+      if(err && err.code === "permission-denied"){
+        faabForgetPasscodeHash(identityTeam.ownerId);
+        showBoardToast("Incorrect passcode — proposal not posted.");
+      } else {
+        showBoardToast("Couldn't reach the shared board — check your connection and try again.");
+      }
+    });
+  });
+}
+
+function wireProposalsStaticUI(){
+  const newBtn = document.getElementById("proposalsNewBtn");
+  const cancelBtn = document.getElementById("proposalCancelBtn");
+  const submitBtn = document.getElementById("proposalSubmitBtn");
+  if(newBtn) newBtn.addEventListener("click", showProposalForm);
+  if(cancelBtn) cancelBtn.addEventListener("click", hideProposalForm);
+  if(submitBtn) submitBtn.addEventListener("click", boardSubmitProposal);
+}
+
+function renderProposalsPanel(){
+  const panel = document.getElementById("proposalsPanel");
+  if(!panel || !Array.isArray(TEAMS) || TEAMS.length < 2) return;
+
+  const syncEl = document.getElementById("proposalsSyncStatus");
+  if(syncEl){
+    if(FAAB_FIREBASE_ENABLED === true){
+      syncEl.innerHTML = '<span class="betting-sync-badge live">🔥 Live sync &mdash; every proposal and vote is shared with the whole league</span>';
+    } else if(FAAB_FIREBASE_ENABLED === false){
+      syncEl.innerHTML = '<span class="betting-sync-badge local">📍 This browser only &mdash; not synced across devices</span>';
+    } else {
+      syncEl.innerHTML = '<span class="betting-sync-badge">Connecting&hellip;</span>';
+    }
+  }
+
+  populateBoardIdentitySelect(document.getElementById("proposalsIdentitySelect"));
+  const identityTeam = boardIdentityTeam();
+
+  const noIdent = document.getElementById("proposalsNoIdentity");
+  const memberNote = document.getElementById("proposalsMemberSetupNote");
+  const newBtn = document.getElementById("proposalsNewBtn");
+  const formOpen = document.getElementById("proposalsNewForm") && document.getElementById("proposalsNewForm").style.display !== "none";
+  if(noIdent) noIdent.style.display = identityTeam ? "none" : "block";
+  if(memberNote) memberNote.style.display = boardMemberBlocked(identityTeam) ? "block" : "none";
+  if(newBtn) newBtn.style.display = (identityTeam && !formOpen) ? "block" : "none";
+
+  const constNote = document.getElementById("proposalsConstNote");
+  if(constNote){
+    constNote.innerHTML = FAAB_FIREBASE_ENABLED
+      ? "Anyone can read every proposal and its live vote tally. Posting a proposal or casting a vote uses the same team passcode as FAAB Betting Lines &mdash; enter it once on this device and it's remembered. Proposals can't be edited or deleted once posted; you can change your own vote any time."
+      : "This browser only &mdash; proposals and votes here won't be seen by anyone else until FAAB sync is turned on for the whole league.";
+  }
+
+  const list = document.getElementById("proposalsList");
+  if(!list) return;
+  const sorted = BOARD_PROPOSALS.slice().sort(function(a, b){ return new Date(b.createdAt) - new Date(a.createdAt); });
+  if(sorted.length === 0){
+    list.innerHTML = '<div class="proposal-empty"><div class="icon">📋</div>No proposals yet' + (identityTeam ? ' &mdash; be the first to post one.' : '.') + '</div>';
+    return;
+  }
+  list.innerHTML = sorted.map(function(p){ return buildProposalCardHtml(p, identityTeam); }).join("");
+  list.querySelectorAll(".proposal-card").forEach(function(cardEl){ wireProposalCard(cardEl, identityTeam); });
+}
+
+// ---- Chat ----
+function buildChatMsgHtml(m, identityTeam){
+  const t = TEAMS.find(function(tt){ return tt.ownerId === m.ownerId; });
+  const isMe = !!(identityTeam && m.ownerId === identityTeam.ownerId);
+  return '<div class="chat-msg' + (isMe ? ' is-me' : '') + '">' +
+    (t ? '<img src="' + throneEscAttr(t.avatar) + '" alt="">' : '') +
+    '<div class="chat-msg-body">' +
+      '<div class="chat-msg-head"><span class="chat-msg-team">' + throneEscAttr(m.team) + '</span><span class="chat-msg-time">' + boardFormatTimeAgo(m.sentAt) + '</span></div>' +
+      '<div class="chat-msg-text">' + throneEscAttr(m.text) + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function boardSendChat(){
+  const identityTeam = boardIdentityTeam();
+  if(!identityTeam){ showBoardToast("Pick your team first."); return; }
+  if(boardMemberBlocked(identityTeam)){
+    showBoardToast("This team hasn't been set up for the board yet — ask your commissioner.");
+    return;
+  }
+  const input = document.getElementById("chatInput");
+  const text = (input.value || "").trim();
+  if(!text) return;
+  if(text.length > BOARD_CHAT_MAX){ showBoardToast("Message's too long (max " + BOARD_CHAT_MAX + " characters)."); return; }
+
+  const sendBtn = document.getElementById("chatSendBtn");
+  if(sendBtn) sendBtn.disabled = true;
+  boardRunGated(identityTeam.ownerId, function(hash){
+    const msg = {ownerId: identityTeam.ownerId, team: identityTeam.team, text: text, sentAt: new Date().toISOString()};
+    if(!FAAB_FIREBASE_ENABLED){
+      msg.id = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      BOARD_CHAT.push(msg);
+      boardSaveLocalBook();
+      input.value = "";
+      if(sendBtn) sendBtn.disabled = false;
+      renderChatPanel();
+      return;
+    }
+    if(!hash){ if(sendBtn) sendBtn.disabled = false; showBoardToast("Enter your passcode first."); return; }
+    msg.passcodeHash = hash;
+    FAAB_FB.addDoc(FAAB_FB.collection(FAAB_FB.db, "chat_messages"), msg).then(function(){
+      faabRememberPasscodeHash(identityTeam.ownerId, hash);
+      input.value = "";
+      if(sendBtn) sendBtn.disabled = false;
+    }).catch(function(err){
+      if(sendBtn) sendBtn.disabled = false;
+      if(err && err.code === "permission-denied"){
+        faabForgetPasscodeHash(identityTeam.ownerId);
+        showBoardToast("Incorrect passcode — message not sent.");
+      } else {
+        showBoardToast("Couldn't reach the shared chat — check your connection and try again.");
+      }
+    });
+  });
+}
+
+function wireChatStaticUI(){
+  const sendBtn = document.getElementById("chatSendBtn");
+  const input = document.getElementById("chatInput");
+  if(sendBtn) sendBtn.addEventListener("click", boardSendChat);
+  if(input) input.addEventListener("keydown", function(e){ if(e.key === "Enter") boardSendChat(); });
+}
+
+function renderChatPanel(){
+  const panel = document.getElementById("chatPanel");
+  if(!panel || !Array.isArray(TEAMS) || TEAMS.length < 2) return;
+
+  const syncEl = document.getElementById("chatSyncStatus");
+  if(syncEl){
+    if(FAAB_FIREBASE_ENABLED === true){
+      syncEl.innerHTML = '<span class="betting-sync-badge live">🔥 Live sync &mdash; everyone in the league sees these messages</span>';
+    } else if(FAAB_FIREBASE_ENABLED === false){
+      syncEl.innerHTML = '<span class="betting-sync-badge local">📍 This browser only &mdash; not synced across devices</span>';
+    } else {
+      syncEl.innerHTML = '<span class="betting-sync-badge">Connecting&hellip;</span>';
+    }
+  }
+
+  populateBoardIdentitySelect(document.getElementById("chatIdentitySelect"));
+  const identityTeam = boardIdentityTeam();
+
+  const noIdent = document.getElementById("chatNoIdentity");
+  const memberNote = document.getElementById("chatMemberSetupNote");
+  const composer = document.getElementById("chatComposer");
+  if(noIdent) noIdent.style.display = identityTeam ? "none" : "block";
+  if(memberNote) memberNote.style.display = boardMemberBlocked(identityTeam) ? "block" : "none";
+  if(composer) composer.style.display = identityTeam ? "flex" : "none";
+
+  const constNote = document.getElementById("chatConstNote");
+  if(constNote){
+    constNote.innerHTML = FAAB_FIREBASE_ENABLED
+      ? "Uses the same team passcode as FAAB Betting Lines. Messages are permanent and visible to the whole league &mdash; there's no delete."
+      : "This browser only &mdash; messages here won't be seen by anyone else until FAAB sync is turned on for the whole league.";
+  }
+
+  const box = document.getElementById("chatMessages");
+  if(!box) return;
+  const wasNearBottom = (box.scrollHeight - box.scrollTop - box.clientHeight) < 60 || !box.dataset.scrolled;
+  const sorted = BOARD_CHAT.slice().sort(function(a, b){ return new Date(a.sentAt) - new Date(b.sentAt); });
+  if(sorted.length === 0){
+    box.innerHTML = '<div class="chat-empty"><div class="icon">💬</div>No messages yet' + (identityTeam ? ' &mdash; say something.' : '.') + '</div>';
+  } else {
+    box.innerHTML = sorted.map(function(m){ return buildChatMsgHtml(m, identityTeam); }).join("");
+  }
+  if(wasNearBottom) box.scrollTop = box.scrollHeight;
+  box.dataset.scrolled = "1";
+}
+
+// Mirrors initFaabBettingSystem()'s own bootstrap: both independently listen for the same
+// "faab-firebase-ready"/"faab-firebase-unavailable" events (fired once, from the module
+// script at the top of the file). initFaabBettingSystem() is called first (see bottom of
+// file), so by the time this module's handlers run, FAAB_FIREBASE_ENABLED/FAAB_FB are
+// already resolved -- this never sets that flag itself, only reads it.
+function initLeagueBoardSystem(){
+  boardLoadLocalBook();
+  wireProposalsStaticUI();
+  wireChatStaticUI();
+
+  function attachFirebaseListeners(){
+    BOARD_PROPOSALS = [];
+    BOARD_CHAT = [];
+    FAAB_FB.onSnapshot(FAAB_FB.collection(FAAB_FB.db, "proposals"), function(snap){
+      BOARD_PROPOSALS = snap.docs.map(function(d){ return Object.assign({id: d.id}, d.data()); });
+      renderProposalsPanel();
+    }, function(){ showBoardToast("Board sync connection issue — retrying…"); });
+    FAAB_FB.onSnapshot(FAAB_FB.collectionGroup(FAAB_FB.db, "votes"), function(snap){
+      const byProposal = {};
+      snap.docs.forEach(function(d){
+        const proposalRef = d.ref.parent && d.ref.parent.parent;
+        const proposalId = proposalRef ? proposalRef.id : null;
+        if(!proposalId) return;
+        if(!byProposal[proposalId]) byProposal[proposalId] = {};
+        byProposal[proposalId][d.id] = d.data();
+      });
+      BOARD_VOTES_BY_PROPOSAL = byProposal;
+      renderProposalsPanel();
+    });
+    FAAB_FB.onSnapshot(FAAB_FB.collection(FAAB_FB.db, "chat_messages"), function(snap){
+      BOARD_CHAT = snap.docs.map(function(d){ return Object.assign({id: d.id}, d.data()); });
+      renderChatPanel();
+    }, function(){ showBoardToast("Chat sync connection issue — retrying…"); });
+    renderProposalsPanel();
+    renderChatPanel();
+  }
+
+  window.addEventListener("faab-firebase-ready", attachFirebaseListeners, {once: true});
+  window.addEventListener("faab-firebase-unavailable", function(){ renderProposalsPanel(); renderChatPanel(); }, {once: true});
+  setTimeout(function(){ renderProposalsPanel(); renderChatPanel(); }, 4200);
+  renderProposalsPanel();
+  renderChatPanel();
+}
+
 // ---------- LEAGUE NEWS / BANK / AUDIO RECAP (hand-maintained ticker content) ----------
 // This is a static site with no backend, so these three categories can't be auto-detected --
 // edit this block directly (and redeploy) to push a new item into the live ticker.
@@ -9472,6 +10177,7 @@ loadTransactionStats();
 loadCurrentSeasonChampionStatus();
 loadPlayoffBrackets();
 initFaabBettingSystem();
+initLeagueBoardSystem();
 loadFaabBudgets();
 loadRecapManifest();
 startTicker();
