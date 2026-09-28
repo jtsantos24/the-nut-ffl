@@ -6521,13 +6521,13 @@ document.querySelectorAll(".nav-dropdown").forEach(function(dropdown){
   if(!toggle) return;
 
   dropdown.addEventListener("mouseenter", function(){
-    if(window.innerWidth > 700) openNavDropdown(dropdown);
+    if(window.innerWidth > 700){ openNavDropdown(dropdown); dropdown.dataset.openedBy = "hover"; }
   });
   dropdown.addEventListener("mouseleave", function(){
     if(window.innerWidth > 700) scheduleCloseNavDropdown(dropdown);
   });
   toggle.addEventListener("focus", function(){
-    if(window.innerWidth > 700) openNavDropdown(dropdown);
+    if(window.innerWidth > 700){ openNavDropdown(dropdown); dropdown.dataset.openedBy = "hover"; }
   });
   dropdown.addEventListener("focusout", function(e){
     if(window.innerWidth > 700 && !dropdown.contains(e.relatedTarget)) scheduleCloseNavDropdown(dropdown);
@@ -6535,12 +6535,21 @@ document.querySelectorAll(".nav-dropdown").forEach(function(dropdown){
 
   // Click/tap toggle -- the only trigger on mobile, and a fallback for desktop
   // pointers that don't hover cleanly (trackpad taps, touch-capable laptops).
+  //
+  // On desktop, hovering the toggle already opens the menu (above) before any click
+  // fires. Without the openedBy check, clicking the toggle right after that hover would
+  // see "already open" and immediately close it again -- from the visitor's side, they
+  // click a nav item and the menu just flickers shut with nothing navigating, as if
+  // clicking any header menu did nothing. So a click only closes a menu that a *click*
+  // opened; a click landing on a hover-opened menu leaves it open and just marks it as
+  // now click-owned, so a genuine second click still closes it as expected.
   toggle.addEventListener("click", function(e){
     e.stopPropagation();
-    if(dropdown.classList.contains("open")){
+    if(dropdown.classList.contains("open") && dropdown.dataset.openedBy === "click"){
       closeAllNavDropdowns();
     } else {
       openNavDropdown(dropdown);
+      dropdown.dataset.openedBy = "click";
     }
   });
 });
