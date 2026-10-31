@@ -4261,10 +4261,13 @@ const RIVALRY_CUSTOM_CARDS = [
 ];
 
 // Regular-season-only head-to-head stats for one rivalry pair (playoff meetings, if any,
-// are excluded -- same scope as the "Series" line on the generic rivalry cards).
-function computeRivalryBoxStats(rosterA, rosterB){
+// are excluded -- same scope as the "Series" line on the generic rivalry cards). minSeason,
+// when given, drops any meeting before that season -- used to keep a new manager's own 2026
+// meetings on screen while still hiding meetings that actually belong to the prior manager
+// of that roster slot (see RIVALRY_NEW_MANAGER_OWNERS).
+function computeRivalryBoxStats(rosterA, rosterB, minSeason){
   if(RIVALRY_HISTORY === null || RIVALRY_HISTORY === "error") return null;
-  const meetings = findMeetings(RIVALRY_HISTORY, rosterA, rosterB);
+  const meetings = findMeetings(RIVALRY_HISTORY, rosterA, rosterB, minSeason);
   if(meetings.length === 0) return {meetings: 0};
   let winsA=0, winsB=0, ties=0, sumA=0, sumB=0, maxA=-Infinity, maxB=-Infinity, minA=Infinity, minB=Infinity;
   meetings.forEach(function(m){
@@ -4286,10 +4289,12 @@ function renderRivalryCustomCard(cfg){
   const ta = TEAMS.find(function(t){ return t.ownerId === cfg.ownerA; }) || {};
   const tb = TEAMS.find(function(t){ return t.ownerId === cfg.ownerB; }) || {};
   // If either side's roster slot changed hands this season, any pre-2026 meeting data
-  // belongs to the previous manager -- show placeholders rather than someone else's history.
+  // belongs to the previous manager, not this one -- but this manager's OWN 2026 meeting(s)
+  // are real and should still show up once they've happened, so only pre-2026 history is
+  // dropped, not the whole stat line.
   const isNewManagerPair = RIVALRY_NEW_MANAGER_OWNERS.indexOf(cfg.ownerA) !== -1 || RIVALRY_NEW_MANAGER_OWNERS.indexOf(cfg.ownerB) !== -1;
-  const stats = (!isNewManagerPair && ta.rosterId !== undefined && tb.rosterId !== undefined)
-    ? computeRivalryBoxStats(ta.rosterId, tb.rosterId) : null;
+  const stats = (ta.rosterId !== undefined && tb.rosterId !== undefined)
+    ? computeRivalryBoxStats(ta.rosterId, tb.rosterId, isNewManagerPair ? 2026 : null) : null;
 
   function valueFor(box){
     const mine = box.side === "a" ? (stats && stats.a) : (stats && stats.b);
@@ -4367,10 +4372,6 @@ function renderRivalry(){
 function renderRivalryHistoryLine(ta, tb){
   if(ta.rosterId === undefined || tb.rosterId === undefined) return "";
 
-  if(RIVALRY_NEW_MANAGER_OWNERS.indexOf(ta.ownerId) !== -1 || RIVALRY_NEW_MANAGER_OWNERS.indexOf(tb.ownerId) !== -1){
-    return '<div class="rivalry-history"><span class="rh-note">New rivalry &mdash; first meeting is this season.</span></div>';
-  }
-
   if(RIVALRY_HISTORY === null){
     return '<div class="rivalry-history"><span class="rh-note">Loading head-to-head history&hellip;</span></div>';
   }
@@ -4378,9 +4379,16 @@ function renderRivalryHistoryLine(ta, tb){
     return '<div class="rivalry-history"><span class="rh-note">Head-to-head history unavailable right now.</span></div>';
   }
 
-  const meetings = findMeetings(RIVALRY_HISTORY, ta.rosterId, tb.rosterId);
+  // If either side's roster slot changed hands this season, pre-2026 meetings belong to the
+  // previous manager -- drop those, but keep this manager's own 2026 meeting(s) once they've
+  // actually happened, rather than freezing the card on "first meeting is this season" for
+  // the rest of the year.
+  const isNewManagerPair = RIVALRY_NEW_MANAGER_OWNERS.indexOf(ta.ownerId) !== -1 || RIVALRY_NEW_MANAGER_OWNERS.indexOf(tb.ownerId) !== -1;
+  const meetings = findMeetings(RIVALRY_HISTORY, ta.rosterId, tb.rosterId, isNewManagerPair ? 2026 : null);
   if(meetings.length === 0){
-    return '<div class="rivalry-history"><span class="rh-note">No meetings on record yet.</span></div>';
+    return isNewManagerPair
+      ? '<div class="rivalry-history"><span class="rh-note">New rivalry &mdash; first meeting is this season.</span></div>'
+      : '<div class="rivalry-history"><span class="rh-note">No meetings on record yet.</span></div>';
   }
 
   let winsA = 0, winsB = 0, ties = 0;
@@ -4407,11 +4415,12 @@ function renderRivalryHistoryLine(ta, tb){
   '</div>';
 }
 
-function findMeetings(allWeeksData, rosterA, rosterB){
+function findMeetings(allWeeksData, rosterA, rosterB, minSeason){
   const meetings = [];
   allWeeksData.forEach(function(entry){
     if(!Array.isArray(entry.data)) return;
     if(entry.week > 14) return; // rivalry series counts regular-season meetings only
+    if(minSeason && parseInt(entry.season, 10) < minSeason) return;
     const a = entry.data.find(function(m){ return m.roster_id === rosterA; });
     const b = entry.data.find(function(m){ return m.roster_id === rosterB; });
     if(a && b && a.matchup_id !== undefined && a.matchup_id !== null && a.matchup_id === b.matchup_id){
